@@ -10,14 +10,12 @@ Rectangle {
     property int margin: 10
 
     radius: 10
-    color: Common.background
+    color: Common.primary
 
     Text {
         id: name
 
-        anchors {
-            margins: parent.margin
-        }
+        anchors.margins: parent.margin
         width: parent.width
 
         color: "white"

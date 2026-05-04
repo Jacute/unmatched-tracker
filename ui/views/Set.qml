@@ -14,29 +14,30 @@ Rectangle {
 
     readonly property int headerFontPixelSize: width / 20
 
-    color: Common.background
+    color: Common.primary
 
     Header {
+        id: hdr
         text: "Наборы персонажей"
         fontSize: parent.headerFontPixelSize
+        color: Common.secondary
     }
 
     // grid of addons
     GridView {
         id: rootGrid
+
+        readonly property int gridSpacing: 15
         
         anchors {
-            top: parent.top
-            bottom: parent.bottom
-            left: parent.left
+            top: hdr.bottom
             right: parent.right
-            topMargin: root.height * 0.06
-            leftMargin: root.width * 0.05
-            rightMargin: root.width * 0.05
-            bottomMargin: root.height * 0.05
+            left: parent.left
+            bottom: parent.bottom
+            margins: parent.height * 0.02
         }
     
-        cellWidth: (width - (leftMargin + rightMargin)) * 0.5
+        cellWidth: width * 0.5
         cellHeight: cellWidth * 1.4
         
         clip: true
@@ -61,16 +62,17 @@ Rectangle {
         ]
 
         delegate: Item {
+            id: item
             required property var modelData
 
-            width: rootGrid.cellWidth
-            height: rootGrid.cellHeight
+            width: rootGrid.cellWidth - rootGrid.gridSpacing
+            height: rootGrid.cellHeight - rootGrid.gridSpacing
 
             Card {
                 cardName: parent.modelData.name
                 cardImg: parent.modelData.img
-                width: rootGrid.cellWidth
-                height: rootGrid.cellHeight
+                width: item.width
+                height: item.height
                 color: root.color
                 fontSize: parent.height * 0.05
                 margin: parent.height * 0.05
