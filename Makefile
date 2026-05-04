@@ -1,22 +1,25 @@
-QT_HOST_PATH := /home/jacute/qt6/qt/qthostbuild/qtbase
-QT_ANDROID_PATH := /home/jacute/qt/qtandroid/build
+QT_HOST_PATH ?= $(error QT_HOST_PATH not set in environment)
+QT_ANDROID_PATH ?= $(error QT_ANDROID_PATH not set in environment)
 QT_CMAKE := $(QT_ANDROID_PATH)/bin/qt-cmake
 
-ANDROID_SDK := /home/jacute/Android/Sdk
+ANDROID_SDK ?= $(error ANDROID_SDK not set in environment)
 ANDROID_NDK := $(ANDROID_SDK)/ndk/27.2.12479018
 
 BUILD_ANDROID_DIR := build-android
+CMAKE_INSTALL := $(BUILD_ANDROID_DIR)/cmake_install.cmake
 
-.PHONY: build build-android install
+.PHONY: alls build-android install
 
 all: build-android
 
-build-android:
+$(CMAKE_INSTALL):
 	$(QT_CMAKE) \
     -DANDROID_SDK_ROOT=$(ANDROID_SDK) \
     -DANDROID_NDK_ROOT=$(ANDROID_NDK) \
     -S . -B $(BUILD_ANDROID_DIR) \
     -GNinja
+
+build-android: $(CMAKE_INSTALL)
 	cmake --build $(BUILD_ANDROID_DIR) --target apk
 
 install:
