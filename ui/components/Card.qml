@@ -30,8 +30,9 @@ Rectangle {
 
         id: img
 
-        y: parent.fontSize * 2
-        height: isHovered ? parent.height * 0.82 : parent.height * 0.8
+        anchors.top: name.bottom
+        // TODO: refactor this by layouts
+        height: isHovered ? (parent.height - name.height - parent.margin * 2) : (parent.height - name.height - parent.margin * 2) * 0.98
         anchors.margins: parent.margin
 
         fillMode: Image.PreserveAspectFit
