@@ -1,7 +1,7 @@
-import QtQuick
+import QtQuick 2.15
 import QtQuick.Effects
 
-import "../common"
+import Tracker
 
 Rectangle {
     property alias cardName: name.text
@@ -18,7 +18,7 @@ Rectangle {
         anchors.margins: parent.margin
         width: parent.width
 
-        color: "white"
+        color: Common.textSecondary
         
         font.pixelSize: parent.fontSize
         horizontalAlignment: Text.AlignHCenter
@@ -46,32 +46,16 @@ Rectangle {
         }
     }
 
-    MultiEffect {
-        property bool isHovered: mouseArea.containsMouse
-
-        source: img
-        anchors.fill: img
-        shadowBlur: 1.0
-        shadowEnabled: true
-        shadowColor: isHovered ? Common.shadow2 : Common.shadow1
-        shadowVerticalOffset: parent.height * 0.06
-        shadowHorizontalOffset: parent.width * 0.05
-
-        Behavior on shadowColor {
-            ColorAnimation { duration: 150 }
-        }
-    }
-
     MouseArea {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
         
-        onEntered: {
-            console.log("Mouse entered")
-        }
-        onExited: {
-            console.log("Mouse exited")
-        }
+        // onEntered: {
+        //     console.log("Mouse entered")
+        // }
+        // onExited: {
+        //     console.log("Mouse exited")
+        // }
     }
 }

@@ -1,14 +1,16 @@
-import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
+import QtQuick 2.15
+import QtQuick.Controls 2.15
+import QtQuick.Layouts 2.15
 
-import "../common"
+import Tracker
+import "../components"
 
 Rectangle {
     id: root
     
     property alias text: pageName.text
     readonly property int headerFontPixelSize: parent.width / 20
+    signal menuClicked
 
     height: parent.height * 0.05
     width: parent.width
@@ -18,7 +20,7 @@ Rectangle {
     anchors.top: parent.top
 
     Button {
-        id: menu
+        id: menuBtn
         height: parent.height
         width: parent.width * 0.15
 
@@ -55,7 +57,7 @@ Rectangle {
         }
 
         onClicked: {
-            console.log("menu opened")
+            root.menuClicked()
         }
     }
 

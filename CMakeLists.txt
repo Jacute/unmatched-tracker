@@ -10,7 +10,6 @@ set(SRC_DIR src)
 set(QML_DIR ui)
 set(ASSETS_DIR ${QML_DIR}/assets)
 
-
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
 
 qt_standard_project_setup()
@@ -23,10 +22,14 @@ set(plain_qml_files
     ${QML_DIR}/Main.qml
     ${QML_DIR}/views/Set.qml
     ${QML_DIR}/components/Card.qml
+    ${QML_DIR}/components/Header.qml
+    ${QML_DIR}/components/Menu.qml
 )
+
 set(qml_singletons
-    ${QML_DIR}/common/Common.qml
+    ${QML_DIR}/Tracker/Common.qml
 )
+
 set(rsc_files
     ${ASSETS_DIR}/img/set/battle_of_legends1/cover_ru.jpg
     ${ASSETS_DIR}/img/set/battle_of_legends2/cover_eng.jpg
@@ -36,17 +39,14 @@ set(rsc_files
 
 set_source_files_properties(${qml_singletons}
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
+
 qt_add_qml_module(tracker
     URI Tracker
     QML_FILES ${plain_qml_files} ${qml_singletons}
     RESOURCES ${rsc_files}
 )
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-# If you are developing for iOS or macOS you should consider setting an
-# explicit, fixed bundle identifier manually though.
 set_target_properties(tracker PROPERTIES
-#    MACOSX_BUNDLE_GUI_IDENTIFIER com.example.unmatched-tracker
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE

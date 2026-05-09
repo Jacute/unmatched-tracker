@@ -1,22 +1,31 @@
 pragma ComponentBehavior: Bound
 
-import QtQuick
-import QtQuick.Window
-import QtQuick.Controls
+import QtQuick 2.15
+import QtQuick.Window 2.15
+import QtQuick.Controls 2.15
 
-import "../common"
+import Tracker
 import "../components"
 
 Rectangle {
-    readonly property string setImgPrefix: qsTr("../%1/set").arg(Common.imgPrefix)
+    readonly property string setImgPrefix: Common.imgPrefix + "/set"
     readonly property bool isMobile: Qt.platform.os === "android" || Qt.platform.os === "ios"
 
     id: root
     color: Common.primary
 
+    Menu {
+        id: menu
+        width: parent.width * 0.7
+        height: parent.height
+    }
     Header {
         id: hdr
         text: "Наборы персонажей"
+        onMenuClicked: {
+            // console.log("menu opened")
+            menu.open()
+        }
     }
 
     // grid of addons
@@ -95,7 +104,6 @@ Rectangle {
                         cardName: parent.modelData.name
                         cardImg: parent.modelData.img
                         fontSize: height * 0.05
-                        // color: "red"
                     }
                 }
             }
