@@ -4,43 +4,76 @@ import QtQuick.Controls 2.15
 import Tracker
 
 Drawer {
-    readonly property int fontSize: parent.height * 0.015
+    readonly property int fontSize: parent.height * 0.02
+    readonly property string menuColor: "#2c3e50"
 
     id: root
     edge: Qt.LeftEdge
 
+    topPadding: 0
+    bottomPadding: 0
+    leftPadding: 0
+    rightPadding: 0
+
     background: Rectangle {
-        color: "#2c3e50"
+        color: root.menuColor
         gradient: Gradient {
             GradientStop { position: 0; color: "#2c3e50" }
             GradientStop { position: 1; color: "#44495e" }
         }
     }
 
+    Image {
+        id: menuLogo
+        width: parent.width
+        source: qsTr("%1/ui/menu_logo.jpg").arg(Common.imgPrefix)
+        fillMode: Image.PreserveAspectFit
+    }
+
     Column {
-        anchors.fill: parent
-        anchors.margins: parent.height * 0.01
+        anchors {
+            top: menuLogo.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            margins: parent.height * 0.01
+        }
         spacing: parent.height * 0.02
 
-        Text {
-            text: "Меню"
-            font.pixelSize: root.fontSize * 1.2
-            color: Common.textColor
-            anchors.horizontalCenter: parent.horizontalCenter
-        }
+        Rectangle {
+            width: parent.width
+            height: parent.height * 0.11
+            color: "transparent"
+            
+            Button {
+                id: selectBtn
+                width: parent.width
+                height: parent.height * 0.9
+                anchors {
+                    top: parent.top
+                }
 
-        Button {
-            anchors.horizontalCenter: parent.horizontalCenter
+                background: Rectangle {
+                    color: "transparent"
+                }
 
-            background: Rectangle {
-                radius: 10
-                color: Common.secondary
+                contentItem: Text {
+                    text: "Наборы персонажей"
+                    font.pixelSize: root.fontSize
+                    color: Common.textSecondary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
             }
 
-            contentItem: Text {
-                text: "Наборы персонажей"
-                font.pixelSize: root.fontSize
-                color: Common.textSecondary
+            Rectangle {
+                anchors {
+                    top: selectBtn.bottom
+                }
+                width: parent.width
+                height: parent.height * 0.05
+                color: Common.primary
+                radius: 5
             }
         }
     }

@@ -35,6 +35,7 @@ set(rsc_files
     ${ASSETS_DIR}/img/set/battle_of_legends2/cover_eng.jpg
     ${ASSETS_DIR}/img/set/cobble_fog/cover_ru.jpg
     ${ASSETS_DIR}/img/set/robingood_vs_bigfoot/cover_ru.jpg
+    ${ASSETS_DIR}/img/ui/menu_logo.jpg
 )
 
 set_source_files_properties(${qml_singletons}
