@@ -77,20 +77,19 @@ Rectangle {
                 ctx.globalAlpha = 1.0
 
                 // =========================
-                // 2) Icon in center
+                // 2) Rotated text
                 // =========================
-                var iconSize = radius * (0.8 - 0.05 * parent.heroes.length)
+                ctx.translate(x, y)
 
-                var x = cx + radius * 0.5 * Math.cos(mid) - iconSize / 2
-                var y = cy + radius * 0.5 * Math.sin(mid) - iconSize / 2
+                ctx.rotate(mid)
 
-                ctx.drawImage(
-                    imgSrc,
-                    x,
-                    y,
-                    iconSize,
-                    iconSize
-                )
+                ctx.textAlign = "center"
+                ctx.textBaseline = "middle"
+
+                ctx.fillStyle = "white"
+                ctx.font = "bold 16px sans-serif"
+
+                ctx.fillText(parent.heroes[i].name, 0, 0)
 
                 ctx.restore()
 

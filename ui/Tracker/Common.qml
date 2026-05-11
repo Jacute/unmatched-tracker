@@ -22,6 +22,7 @@ QtObject {
     // prefix for root
     readonly property string assetsPrefix: "../assets"
     readonly property string imgPrefix: assetsPrefix + "/img"
+    readonly property string heroAvatarFormat: imgPrefix + "/set/%1/heroes/%2/avatar.webp"
     readonly property string fontsPrefix: assetsPrefix + "/fonts"
 
     // pages

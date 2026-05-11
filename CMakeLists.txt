@@ -32,13 +32,11 @@ set(qml_singletons
     ${QML_DIR}/Tracker/Common.qml
 )
 
-set(rsc_files
-    ${ASSETS_DIR}/img/set/battle_of_legends1/cover_ru.jpg
-    ${ASSETS_DIR}/img/set/battle_of_legends2/cover_eng.jpg
-    ${ASSETS_DIR}/img/set/cobble_fog/cover_ru.jpg
-    ${ASSETS_DIR}/img/set/robingood_vs_bigfoot/cover_ru.jpg
-    ${ASSETS_DIR}/img/ui/menu_logo.jpg
-    ${ASSETS_DIR}/fonts/BebasNeue-Regular.ttf
+file(GLOB_RECURSE rsc_files CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+    "ui/assets/img/*.jpg"
+    "ui/assets/img/*.png"
+    "ui/assets/img/*.webp"
+    "ui/assets/fonts/*.ttf"
 )
 
 set_source_files_properties(${qml_singletons}
