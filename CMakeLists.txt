@@ -37,6 +37,10 @@ file(GLOB_RECURSE rsc_files CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DI
     "ui/assets/img/*.png"
     "ui/assets/img/*.webp"
     "ui/assets/fonts/*.ttf"
+<<<<<<< HEAD
+=======
+    "ui/*.js"
+>>>>>>> 3ea12aa (ui: add wheel text to component RandomWheel)
 )
 
 set_source_files_properties(${qml_singletons}
