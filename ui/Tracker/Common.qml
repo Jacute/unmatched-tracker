@@ -22,4 +22,9 @@ QtObject {
     // prefix for root
     readonly property string assetsPrefix: "../assets"
     readonly property string imgPrefix: assetsPrefix + "/img"
+    readonly property string fontsPrefix: assetsPrefix + "/fonts"
+
+    // pages
+    readonly property string pageSet: "set"
+    readonly property string pageRandom: "random"
 }

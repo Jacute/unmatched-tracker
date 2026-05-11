@@ -14,46 +14,25 @@ Rectangle {
     id: root
     color: Common.primary
 
-    Menu {
-        id: menu
-        width: parent.width * 0.7
-        height: parent.height
-    }
-    Header {
-        id: hdr
-        text: "Наборы персонажей"
-        onMenuClicked: {
-            // console.log("menu opened")
-            menu.open()
-        }
-    }
-
     // grid of addons
     ScrollView {
-        readonly property int viewSpacing: 15
-
         id: view
         anchors {
-            top: hdr.bottom
-            right: parent.right
-            left: parent.left
-            bottom: parent.bottom
+            fill: parent
         }
         clip: true
         contentWidth: availableWidth
         ScrollBar.vertical.policy: ScrollBar.AlwaysOff
         ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
-        Flow {
-            id: flow
-            anchors.centerIn: parent
-            width: parent.width - parent.height * 0.03
-            spacing: view.viewSpacing
-
-            topPadding: height * 0.01
-            bottomPadding: topPadding
-            leftPadding: 0
-            rightPadding: 0
+        Grid {
+            id: grid
+            width: parent.width - parent.height * 0.02
+            
+            padding: height * 0.01
+            columnSpacing: 15
+            rowSpacing: 5
+            columns: 2
 
             Repeater {
                 model: [
@@ -95,7 +74,7 @@ Rectangle {
                     id: item
                     required property var modelData
 
-                    width: (flow.width - flow.spacing) / 2
+                    width: (grid.width - grid.columnSpacing) / 2
                     height: width * 1.4
 
                     Card {

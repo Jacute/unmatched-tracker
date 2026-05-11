@@ -36,6 +36,7 @@ set(rsc_files
     ${ASSETS_DIR}/img/set/cobble_fog/cover_ru.jpg
     ${ASSETS_DIR}/img/set/robingood_vs_bigfoot/cover_ru.jpg
     ${ASSETS_DIR}/img/ui/menu_logo.jpg
+    ${ASSETS_DIR}/fonts/BebasNeue-Regular.ttf
 )
 
 set_source_files_properties(${qml_singletons}
@@ -55,7 +56,11 @@ set_target_properties(tracker PROPERTIES
 )
 
 set_property(TARGET tracker PROPERTY
-    QT_ANDROID_PACKAGE_NAME "com.jacute.unmatched_tracker")
+    QT_ANDROID_PACKAGE_NAME "com.jacute.unmatched_tracker"
+)
+target_compile_definitions(tracker PRIVATE
+    PACKAGE_NAME="${PACKAGE_NAME}"
+)
 
 target_link_libraries(tracker
     PRIVATE Qt6::Quick
