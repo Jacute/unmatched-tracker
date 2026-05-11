@@ -1,12 +1,14 @@
 import QtQuick
 
 import Tracker
+import "../components"
 
 Rectangle {
     id: root
     color: Common.primary
 
-    Text {
-        text: "random"
+    RandomWheel {
+        anchors.centerIn: parent
+        width: parent.width / 2
     }
 }
