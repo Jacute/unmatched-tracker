@@ -21,6 +21,7 @@ qt_add_executable(tracker
 set(plain_qml_files
     ${QML_DIR}/Main.qml
     ${QML_DIR}/views/Set.qml
+    ${QML_DIR}/views/Random.qml
     ${QML_DIR}/components/Card.qml
     ${QML_DIR}/components/Header.qml
     ${QML_DIR}/components/Menu.qml

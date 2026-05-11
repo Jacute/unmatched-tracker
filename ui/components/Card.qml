@@ -1,5 +1,4 @@
 import QtQuick 2.15
-import QtQuick.Effects
 
 import Tracker
 
@@ -50,12 +49,5 @@ Rectangle {
         id: mouseArea
         anchors.fill: parent
         hoverEnabled: true
-        
-        // onEntered: {
-        //     console.log("Mouse entered")
-        // }
-        // onExited: {
-        //     console.log("Mouse exited")
-        // }
     }
 }

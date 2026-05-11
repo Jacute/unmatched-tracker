@@ -1,13 +1,13 @@
 pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Controls
-import QtQuick.Layouts
 
 import Tracker
 
 Drawer {
     readonly property int fontSize: parent.height * 0.02
     readonly property string menuColor: "#2c3e50"
+    signal changePage(string pageName)
 
     id: root
     edge: Qt.LeftEdge
@@ -46,10 +46,12 @@ Drawer {
             id: repeater
             model: [
                 {
-                    text: "Наборы персонажей"
+                    text: "Наборы персонажей",
+                    page: Common.pageSet
                 },
                 {
-                    text: "Рандомайзер"
+                    text: "Рандомайзер",
+                    page: Common.pageRandom
                 }
             ]
 
@@ -88,6 +90,10 @@ Drawer {
                         color: Common.textSecondary
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
+                    }
+
+                    onClicked: {
+                        root.changePage(btnWrapper.modelData.page);
                     }
                 }
 

@@ -23,7 +23,7 @@ void loadResources(QGuiApplication &app) {
         qDebug() << "Font not added, error code: " << fontId;
         return;
     }
-    qDebug() << "Font " << " added, error code: " << fontId;
+    qDebug() << "Font " << defaultFontPath << " added";
     QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId);
     if (!fontFamilies.isEmpty()) {
         QFont defaultFont(fontFamilies.first());
