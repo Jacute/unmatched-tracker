@@ -4,17 +4,8 @@ import Tracker
 import "./RandomWheel.js" as Wheel
 
 Rectangle {
-    id: root
-    radius: width / 2
-    color: "transparent"
-
-    property real startX: 0
-    property real startY: 0
-    property real startTime: 0
-    property real endX: 0
-    property real endY: 0
-    property real endTime: 0
-
+    property real rotateSpeed: 0
+    property real wheelAngle: 0
     property var heroes: [
         {
             name: "Дракула",
@@ -37,6 +28,11 @@ Rectangle {
             img: qsTr(Common.heroAvatarFormat).arg("battle_of_legends1").arg("medusa")
         },
     ]
+    property string cursor: Common.imgPrefix + "/ui/wheel_cursor.png"
+
+    id: root
+    radius: width / 2
+    color: "transparent"
     
     Canvas {
         id: canvas
@@ -44,11 +40,11 @@ Rectangle {
         anchors.centerIn: parent
 
         onPaint: {
-            Wheel.draw(canvas, root.heroes);
+            Wheel.draw(canvas, root, cursorImg);
         }
 
         Component.onCompleted: {
-            for (var i = 0; i < parent.heroes.length; i++) {
+            for (let i = 0; i < parent.heroes.length; i++) {
                 loadImage(parent.heroes[i].img)
             }
         }
@@ -59,51 +55,77 @@ Rectangle {
     }
 
     MouseArea {
+        property real startX: 0
+        property real startY: 0
+        property real startTime: 0
+        property real endX: 0
+        property real endY: 0
+        property real endTime: 0
+        
+        id: swipeArea
         anchors.fill: parent
 
         onPressed: (mouse) => {
-            root.startX = mouse.x
-            root.startY = mouse.y
-            root.startTime = Date.now()
-            // Сброс конечных данных
-            root.endX = 0
-            root.endY = 0
-            root.endTime = 0
+            startX = mouse.x
+            startY = mouse.y
+            startTime = Date.now()
+
+            endX = 0
+            endY = 0
+            endTime = 0
         }
 
         onReleased: (mouse) => {
-            root.endX = mouse.x
-            root.endY = mouse.y
-            root.endTime = Date.now()
+            if (root.rotateSpeed != 0) return
 
-            // Расчёт скорости
-            let deltaX = root.endX - root.startX
-            let deltaY = root.endY - root.startY
-            let deltaTime = (root.endTime - root.startTime) / 1000 // в секундах
+            endX = mouse.x
+            endY = mouse.y
+            endTime = Date.now()
+
+            let deltaX = endX - swipeArea.startX
+            let deltaY = endY - startY
+            let deltaTime = (endTime - startTime) / 1000 // in seconds
 
             if (deltaTime <= 0 || (deltaX === 0 && deltaY === 0)) return
 
-            // Расстояние в пикселях
+            // Distance in pixels
             let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-            let speed = distance / deltaTime // пикселей/сек
-
-            // Определение направления свайпа
-            let direction = ""
-            if (Math.abs(deltaX) > Math.abs(deltaY)) {
-                direction = deltaX > 0 ? "right" : "left"
-            } else {
-                direction = deltaY > 0 ? "down" : "up"
+            root.rotateSpeed = distance / deltaTime
+            if (deltaX < 0 || deltaY < 0) {
+                root.rotateSpeed *= -1
             }
 
-            console.log(`Swipe: ${direction}, speed: ${speed.toFixed(2)} px/s, distance: ${distance.toFixed(2)} px, time: ${(deltaTime*1000).toFixed(0)} ms`)
+            console.log(`Speed: ${root.rotateSpeed.toFixed(2)} px/s, distance: ${distance.toFixed(2)} px, time: ${(deltaTime*1000).toFixed(0)} ms`)
+            ticker.start()
+        }
 
-            root.processSwipe(direction, speed, distance)
+        Timer {
+            id: ticker
+            interval: 16
+            running: false
+            repeat: true
+
+            onTriggered: {
+                const terminator = 0.2
+                if (root.rotateSpeed > terminator || root.rotateSpeed < -terminator) {
+                    root.wheelAngle += (root.rotateSpeed * 0.016 / 180) * Math.PI // angle/tick
+                    root.wheelAngle %= Math.PI * 2
+                    root.rotateSpeed *= 0.98   // friction
+
+                    canvas.requestPaint()
+                } else {
+                    root.rotateSpeed = 0
+                    let hero = Wheel.getWinHero(root)
+                    console.log(hero.name + " wins")
+                    ticker.stop()
+                }
+            }
         }
     }
 
-    function processSwipe(direction, speed, distance) {
-        if (speed > 500) {
-            console.log("Fast swipe detected!")
-        }
+    Image {
+        id: cursorImg
+        source: root.cursor
+        visible: false
     }
 }

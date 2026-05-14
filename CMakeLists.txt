@@ -13,6 +13,8 @@ set(ASSETS_DIR ${QML_DIR}/assets)
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
 
 qt_standard_project_setup()
+qt_policy(SET QTP0001 NEW)
+qt_policy(SET QTP0004 NEW)
 
 qt_add_executable(tracker
     ${SRC_DIR}/main.cpp
@@ -37,10 +39,7 @@ file(GLOB_RECURSE rsc_files CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DI
     "ui/assets/img/*.png"
     "ui/assets/img/*.webp"
     "ui/assets/fonts/*.ttf"
-<<<<<<< HEAD
-=======
     "ui/*.js"
->>>>>>> 3ea12aa (ui: add wheel text to component RandomWheel)
 )
 
 set_source_files_properties(${qml_singletons}

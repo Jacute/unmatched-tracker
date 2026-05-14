@@ -3,18 +3,8 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-const QString defaultFontPath = ":/Tracker/ui/assets/fonts/BebasNeue-Regular.ttf";
-const QString mainPath = "qrc:/Tracker/ui/Main.qml";
-
-void addImportPathes(QQmlApplicationEngine &engine) {
-    engine.addImportPath("qrc:/");
-    engine.addImportPath("qrc:/Tracker/ui");
-    engine.addImportPath("qrc:/Tracker/ui/Tracker");
-    engine.addImportPath("qrc:/Tracker/ui/components");
-    engine.addImportPath("qrc:/Tracker/ui/views");
-    qDebug() << "Import paths added";
-    qDebug() << "Import paths:" << engine.importPathList();
-}
+const QString defaultFontPath = ":/qt/qml/Tracker/ui/assets/fonts/BebasNeue-Regular.ttf";
+const QString mainPath = "qrc:/qt/qml/Tracker/ui/Main.qml";
 
 void loadResources(QGuiApplication &app) {
     int fontId = QFontDatabase::addApplicationFont(defaultFontPath);
@@ -36,7 +26,6 @@ int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
     loadResources(app);
-    addImportPathes(engine);
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
                      [](const QUrl &url) {
@@ -46,7 +35,7 @@ int main(int argc, char *argv[]) {
 
     const QUrl url(mainPath);
     qDebug() << "Loading:" << url;
-    engine.load(url);
+    engine.load(mainPath);
 
     if (engine.rootObjects().isEmpty()) {
         qDebug() << "=== No root objects loaded ===";
