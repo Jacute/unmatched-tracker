@@ -78,10 +78,10 @@ function draw(canvas, root, cursor) {
     ctx.restore()
     ctx.drawImage(
         cursor,
-        cx - cursor.width / 32,
+        cx - cursor.width / 64,
         0,
-        cursor.width / 16,
-        cursor.height / 16
+        cursor.width / 32,
+        cursor.height / 32
     )
 }
 

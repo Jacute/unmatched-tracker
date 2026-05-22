@@ -1,7 +1,8 @@
-#include <QDebug>
 #include <QFontDatabase>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
+
+#include "components/render/imagerounded.h"
 
 const QString defaultFontPath = ":/qt/qml/Tracker/ui/assets/fonts/BebasNeue-Regular.ttf";
 const QString mainPath = "qrc:/qt/qml/Tracker/ui/Main.qml";
@@ -22,10 +23,15 @@ void loadResources(QGuiApplication &app) {
     }
 }
 
+void loadQMLComponents() {
+    qmlRegisterType<ImageRounded>("Render", 1, 0, "ImageRounded");
+}
+
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
     loadResources(app);
+    loadQMLComponents();
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
                      [](const QUrl &url) {

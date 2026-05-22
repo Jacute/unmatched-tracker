@@ -19,13 +19,17 @@ QtObject {
     readonly property color error: "#F38BA8"
     readonly property color warning: "#F9E2AF"
     
-    // prefix for root
-    readonly property string assetsPrefix: "../assets"
+    // file path
+    readonly property string assetsPrefix: "qrc:/qt/qml/Tracker/ui/assets"
     readonly property string imgPrefix: assetsPrefix + "/img"
     readonly property string heroAvatarFormat: imgPrefix + "/set/%1/heroes/%2/avatar.webp"
     readonly property string fontsPrefix: assetsPrefix + "/fonts"
+    readonly property string avatarPlug: "qrc:/qt/qml/Tracker/ui/assets/img/ui/avatar_plug.png"
 
     // pages
     readonly property string pageSet: "set"
     readonly property string pageRandom: "random"
+
+    readonly property int defaultFontSize: 14
+    readonly property int defaultRadius: 10
 }

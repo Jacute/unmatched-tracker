@@ -18,6 +18,8 @@ qt_policy(SET QTP0004 NEW)
 
 qt_add_executable(tracker
     ${SRC_DIR}/main.cpp
+    ${SRC_DIR}/log.cpp
+    ${SRC_DIR}/components/render/imagerounded.cpp
 )
 
 set(plain_qml_files
@@ -28,6 +30,8 @@ set(plain_qml_files
     ${QML_DIR}/components/Header.qml
     ${QML_DIR}/components/Menu.qml
     ${QML_DIR}/components/RandomWheel.qml
+    ${QML_DIR}/components/VS.qml
+    ${QML_DIR}/components/GameMap.qml
 )
 
 set(qml_singletons

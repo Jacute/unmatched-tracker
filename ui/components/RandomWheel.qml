@@ -29,6 +29,7 @@ Rectangle {
         },
     ]
     property string cursor: Common.imgPrefix + "/ui/wheel_cursor.png"
+    property var randomHero
 
     id: root
     radius: width / 2
@@ -116,7 +117,9 @@ Rectangle {
                 } else {
                     root.rotateSpeed = 0
                     let hero = Wheel.getWinHero(root)
-                    console.log(hero.name + " wins")
+                    root.randomHero = hero
+                    
+                    console.debug("[RandomWheel] " + hero.name + " wins")
                     ticker.stop()
                 }
             }
