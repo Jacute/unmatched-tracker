@@ -1,17 +1,18 @@
 import QtQuick
 
 Rectangle {
+    id: root
+
     property alias src: img.source
-    property real aspectRatio: 1.5
+    property real aspectRatio: 1.6
 
     implicitHeight: height
     implicitWidth: implicitHeight * aspectRatio
 
-    id: root
-
     Image {
         id: img
         anchors.fill: parent
-        fillMode: Image.PreserveAspectFit
+        fillMode: Image.PreserveAspectCrop
+        smooth: true
     }
 }
