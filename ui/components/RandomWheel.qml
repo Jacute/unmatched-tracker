@@ -6,28 +6,7 @@ import "./RandomWheel.js" as Wheel
 Rectangle {
     property real rotateSpeed: 0
     property real wheelAngle: 0
-    property var heroes: [
-        {
-            name: "Дракула",
-            img: qsTr(Common.heroAvatarFormat).arg("cobble_fog").arg("dracula")
-        },
-        {
-            name: "Шерлок Холмс",
-            img: qsTr(Common.heroAvatarFormat).arg("cobble_fog").arg("sherlock_holmes")
-        },
-        {
-            name: "Джекил и Хайд",
-            img: qsTr(Common.heroAvatarFormat).arg("cobble_fog").arg("jekyll_hyde")
-        },
-        {
-            name: "Невидимка",
-            img: qsTr(Common.heroAvatarFormat).arg("cobble_fog").arg("invisible_man")
-        },
-        {
-            name: "Медуза",
-            img: qsTr(Common.heroAvatarFormat).arg("battle_of_legends1").arg("medusa")
-        },
-    ]
+    property var heroes
     property string cursor: Common.imgPrefix + "/ui/wheel_cursor.png"
     property var randomHero
 
@@ -91,22 +70,35 @@ Rectangle {
 
             // Distance in pixels
             let distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-            root.rotateSpeed = distance / deltaTime
+            let rotateSpeed = distance / deltaTime
             if (deltaX < 0 || deltaY < 0) {
-                root.rotateSpeed *= -1
+                rotateSpeed *= -1
             }
 
-            console.log(`Speed: ${root.rotateSpeed.toFixed(2)} px/s, distance: ${distance.toFixed(2)} px, time: ${(deltaTime*1000).toFixed(0)} ms`)
+            if ((rotateSpeed > 0 && rotateSpeed < 50) ||
+                (rotateSpeed < 0 && rotateSpeed > -50)
+            ) {
+                console.debug(`Low speed: ${rotateSpeed.toFixed(2)}`)
+                // check for low speed swipe
+                return    
+            }
+
+            root.rotateSpeed = rotateSpeed
+            console.debug(`Speed: ${root.rotateSpeed.toFixed(2)} px/s, distance: ${distance.toFixed(2)} px, time: ${(deltaTime*1000).toFixed(0)} ms`)
             ticker.start()
         }
 
         Timer {
             id: ticker
-            interval: 16
+            interval: 1
             running: false
             repeat: true
 
             onTriggered: {
+                if (interval == 1) {
+                    interval = 16
+                }
+
                 const terminator = 0.2
                 if (root.rotateSpeed > terminator || root.rotateSpeed < -terminator) {
                     root.wheelAngle += (root.rotateSpeed * 0.016 / 180) * Math.PI // angle/tick
@@ -130,5 +122,9 @@ Rectangle {
         id: cursorImg
         source: root.cursor
         visible: false
+    }
+
+    function paint() {
+        canvas.requestPaint()
     }
 }

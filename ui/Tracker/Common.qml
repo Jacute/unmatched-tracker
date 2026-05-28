@@ -32,4 +32,36 @@ QtObject {
 
     readonly property int defaultFontSize: 14
     readonly property int defaultRadius: 10
+
+    readonly property var heroes: [
+        {
+            id: "dracula",
+            name: "Дракула",
+            img: qsTr(Common.heroAvatarFormat).arg("cobble_fog").arg("dracula")
+        },
+        {
+            id: "sherlock_holmes",
+            name: "Шерлок Холмс",
+            img: qsTr(Common.heroAvatarFormat).arg("cobble_fog").arg("sherlock_holmes")
+        },
+        {
+            id: "jekyll_hyde",
+            name: "Джекил и Хайд",
+            img: qsTr(Common.heroAvatarFormat).arg("cobble_fog").arg("jekyll_hyde")
+        },
+        {
+            id: "invisible_man",
+            name: "Невидимка",
+            img: qsTr(Common.heroAvatarFormat).arg("cobble_fog").arg("invisible_man")
+        },
+        {
+            id: "medusa",
+            name: "Медуза",
+            img: qsTr(Common.heroAvatarFormat).arg("battle_of_legends1").arg("medusa")
+        },
+    ]
+    readonly property var plugHero: ({
+        id: "Plug",
+        img: avatarPlug
+    })
 }

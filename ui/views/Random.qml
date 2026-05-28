@@ -9,13 +9,8 @@ Rectangle {
     id: root
     color: Qt.darker(Common.primary, 1.15)
 
-    property var hero1: ({
-        img: Common.avatarPlug
-    })
-
-    property var hero2: ({
-        img: Common.avatarPlug
-    })
+    property var hero1: Common.plugHero
+    property var hero2: Common.plugHero
 
     ColumnLayout {
         anchors.fill: parent
@@ -31,14 +26,33 @@ Rectangle {
             Layout.alignment: Qt.AlignHCenter
         }
 
-        GameMap {
-            src: Common.imgPrefix + "/set/cobble_fog/maps/baskerville.webp"
-
+        Rectangle {
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredHeight: root.height * 0.18
+            Layout.preferredWidth: gm.implicitWidth
+            color: "transparent"
+
+            GameMap {
+                id: gm
+                visible: false
+                anchors.fill: parent
+                src: Common.imgPrefix + "/set/cobble_fog/maps/baskerville.webp"
+            }
+
+            Btn {
+                id: rndMap
+                anchors.fill: parent
+                radius: 0
+                text: "Случайная карта"
+
+                onClicked: {
+                    gm.visible = true
+                    rndMap.visible = false
+                }
+            }
         }
 
-        Button {
+        Btn {
             id: saveBtn
 
             Layout.alignment: Qt.AlignHCenter
@@ -46,25 +60,6 @@ Rectangle {
             Layout.preferredHeight: root.height * 0.05
 
             text: "Сохранить результаты"
-
-            font.pixelSize: Common.defaultFontSize
-            font.bold: true
-
-            background: Rectangle {
-                radius: saveBtn.height
-                color: saveBtn.pressed
-                    ? Qt.darker(Common.secondary, 1.2)
-                    : Common.secondary
-
-                border.color: Qt.lighter(Common.secondary, 1.25)
-                border.width: 1
-
-                Behavior on color {
-                    ColorAnimation {
-                        duration: 120
-                    }
-                }
-            }
         }
 
         Rectangle {
@@ -80,22 +75,27 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignHCenter
+            heroes: Common.heroes
 
             onRandomHeroChanged: {
                 if (root.hero1.img === Common.avatarPlug) {
                     root.hero1 = randomHero
+                    rw.heroes = rw.heroes.filter(obj => obj.id != randomHero.id)
+                    rw.paint()
                     return
                 }
 
                 if (root.hero2.img === Common.avatarPlug) {
                     root.hero2 = randomHero
+                    rw.heroes = Common.heroes
+                    rw.paint()
                     return
                 }
 
                 root.hero1 = randomHero
-                root.hero2 = {
-                    img: Common.avatarPlug
-                }
+                rw.heroes = rw.heroes.filter(obj => obj.id != randomHero.id)
+                root.hero2 = Common.plugHero
+                rw.paint()
             }
         }
     }

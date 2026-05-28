@@ -32,6 +32,8 @@ set(plain_qml_files
     ${QML_DIR}/components/RandomWheel.qml
     ${QML_DIR}/components/VS.qml
     ${QML_DIR}/components/GameMap.qml
+    ${QML_DIR}/components/Notif.qml
+    ${QML_DIR}/components/Btn.qml
 )
 
 set(qml_singletons
