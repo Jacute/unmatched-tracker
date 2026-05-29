@@ -36,7 +36,6 @@ Rectangle {
                 id: gm
                 visible: false
                 anchors.fill: parent
-                src: Common.imgPrefix + "/set/cobble_fog/maps/baskerville.webp"
             }
 
             Btn {
@@ -46,6 +45,7 @@ Rectangle {
                 text: "Случайная карта"
 
                 onClicked: {
+                    gm.src = Common.maps[Math.floor(Math.random() * Common.maps.length)].img
                     gm.visible = true
                     rndMap.visible = false
                 }

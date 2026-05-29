@@ -22,7 +22,13 @@ QtObject {
     // file path
     readonly property string assetsPrefix: "qrc:/qt/qml/Tracker/ui/assets"
     readonly property string imgPrefix: assetsPrefix + "/img"
-    readonly property string heroAvatarFormat: imgPrefix + "/set/%1/heroes/%2/avatar.webp"
+    readonly property string setPrefix: imgPrefix + "/set"
+
+    // %1 - set name, %2 - hero name
+    readonly property string heroAvatarFormat: setPrefix + "/%1/heroes/%2/avatar.webp"
+    // %1 - set name, %2 - map name
+    readonly property string mapFormat: setPrefix + "/%1/maps/%2.webp"
+    
     readonly property string fontsPrefix: assetsPrefix + "/fonts"
     readonly property string avatarPlug: "qrc:/qt/qml/Tracker/ui/assets/img/ui/avatar_plug.png"
 
@@ -64,4 +70,41 @@ QtObject {
         id: "Plug",
         img: avatarPlug
     })
+    readonly property var maps: [
+        {
+            id: "marmoreal",
+            set_id: "battle_of_legends1",
+            name: "Мармореал",
+            set_name: "Битва легенд: Том 1",
+            img: qsTr(mapFormat).arg("battle_of_legends1").arg("marmoreal")
+        },
+        {
+            id: "sarpedon",
+            set_id: "battle_of_legends1",
+            name: "Сарпедон",
+            set_name: "Битва легенд: Том 1",
+            img: qsTr(mapFormat).arg("battle_of_legends1").arg("sarpedon")
+        },
+        {
+            id: "hanging_gardens",
+            set_id: "battle_of_legends2",
+            name: "Висячие Сады",
+            set_name: "Битва легенд: Том 2",
+            img: qsTr(mapFormat).arg("battle_of_legends2").arg("hanging_gardens")
+        },
+        {
+            id: "baskerville_manor",
+            set_id: "cobble_fog",
+            name: "Поместье Баскервиль",
+            set_name: "Туман над мостовой",
+            img: qsTr(mapFormat).arg("cobble_fog").arg("baskerville_manor")
+        },
+        {
+            id: "soho",
+            set_id: "cobble_fog",
+            name: "Сохо",
+            set_name: "Туман над мостовой",
+            img: qsTr(mapFormat).arg("cobble_fog").arg("soho")
+        },
+    ]
 }

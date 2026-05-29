@@ -50,23 +50,15 @@ Rectangle {
                     },
                     {
                         name: "Робингуд VS Бигфут",
-                        img: qsTr("%1/robingood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
+                        img: qsTr("%1/robin_hood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
                     },
                     {
                         name: "Робингуд VS Бигфут",
-                        img: qsTr("%1/robingood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
+                        img: qsTr("%1/robin_hood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
                     },
                     {
                         name: "Робингуд VS Бигфут",
-                        img: qsTr("%1/robingood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
-                    },
-                    {
-                        name: "Робингуд VS Бигфут",
-                        img: qsTr("%1/robingood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
-                    },
-                    {
-                        name: "Робингуд VS Бигфут",
-                        img: qsTr("%1/robingood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
+                        img: qsTr("%1/robin_hood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
                     },
                 ]
 
