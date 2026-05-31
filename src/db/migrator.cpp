@@ -1,4 +1,5 @@
 #include "db.h"
+#include "../log.h"
 
 #include <QFile>
 #include <QSqlQuery>
@@ -6,6 +7,8 @@
 
 Rc Database::executeSqlFile(const QString& path)
 {
+    const char op[] = "Database::executeSqlFile";
+
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "Cannot open SQL file:" << path;
@@ -23,10 +26,9 @@ Rc Database::executeSqlFile(const QString& path)
         q = q.trimmed();
         if (q.isEmpty())
             continue;
-
+        ldebug(op) << "Executing sql query " << q;
         if (!query.exec(q)) {
-            qWarning() << "SQL error:" << query.lastError().text();
-            qWarning() << "Query:" << q;
+            qWarning() << "sql error: " << query.lastError().text();
             return Rc::ErrCantExecQuery;
         }
     }
@@ -34,18 +36,21 @@ Rc Database::executeSqlFile(const QString& path)
     return Rc::Ok;
 }
 
-void Database::migrate(QVector<QString> migrationFiles) {
+void Database::migrate(const QVector<QString> &migrationFiles) {
+    const char op[] = "Database::migrate";
+
     int fails = 0;
     for (const auto &mf : migrationFiles) {
+        ldebug(op) << "Executing sql file " << mf;
         if (executeSqlFile(mf) != Rc::Ok) {
-            qWarning() << "can't execute sql file: " << mf;
+            lwarn(op) << "can't execute sql file: " << mf;
             fails++;
         }
     }
 
     if (fails != 0) {
-        qDebug() << "Migrations applied with " << fails << " fails";
+        ldebug(op) << "migrations applied with " << fails << " fails";
         return;
     }
-    qDebug() << "Migrations successfully applied";
+    ldebug(op) << "migrations successfully applied";
 };

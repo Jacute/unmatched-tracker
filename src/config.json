@@ -2,8 +2,8 @@
     "db": {
         "name": "tracker",
         "migrations": [
-            ":/qt/qml/Tracker/sql/001_init.up.sql",
-            ":/qt/qml/Tracker/sql/002_add_basic_sets.up.sql"
+            ":/qt/qml/Tracker/src/migrations/001_init.up.sql",
+            ":/qt/qml/Tracker/src/migrations/002_add_basic_sets.up.sql"
         ]
     }
 }

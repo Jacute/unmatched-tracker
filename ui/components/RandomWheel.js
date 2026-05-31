@@ -18,8 +18,9 @@ function draw(canvas, root, cursor) {
 
     for (var i = 0; i < root.heroes.length; i++) {
         const imgSrc = root.heroes[i].img_path
-        if (!canvas.isImageLoaded(imgSrc))
+        if (!imgSrc) {
             return
+        }
 
         const start = i * step
         const end = start + step

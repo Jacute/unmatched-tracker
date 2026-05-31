@@ -15,7 +15,7 @@ public:
     Rc open();
     void close();
 
-    void migrate(QVector<QString> migrationFiles);
+    void migrate(const QVector<QString> &migrationFiles);
 
     Rc getHeroes(QVector<models::Hero> &heroes);
     Rc getSets(QVector<models::GameSet> &sets);

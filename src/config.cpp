@@ -1,4 +1,5 @@
 #include "config.h"
+#include "log.h"
 
 #include <QFile>
 #include <QJsonDocument>
@@ -7,12 +8,15 @@
 #include <QJsonValue>
 
 Config::Config(const QString &path) {
+    const char op[] = "Config::Config";
+
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-        qWarning() << "Can't open file";
+        lwarn(op) << "Can't open file " << path;
         return;
     }
     QByteArray data = file.readAll();
+    ldebug(op) << "config data " << data;
     file.close();
     QJsonDocument doc = QJsonDocument::fromJson(data);
     

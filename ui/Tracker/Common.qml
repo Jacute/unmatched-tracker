@@ -67,8 +67,8 @@ QtObject {
         },
     ]
     readonly property var plugHero: ({
-        id: "Plug",
-        img: avatarPlug
+        name: "Plug",
+        img_path: avatarPlug
     })
     readonly property var maps: [
         {

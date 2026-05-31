@@ -25,8 +25,8 @@ Rectangle {
 
         VS {
             id: vs
-            src1: root.hero1.img
-            src2: root.hero2.img
+            src1: root.hero1.img_path
+            src2: root.hero2.img_path
             textColor: Common.textColor
 
             Layout.alignment: Qt.AlignHCenter
@@ -51,6 +51,11 @@ Rectangle {
                 text: "Случайная карта"
 
                 onClicked: {
+                    if (root.hero1.name === Common.plugHero.name ||
+                        root.hero2.name === Common.plugHero.name) {
+                        notif.show("First you should randomize two heroes");
+                        return
+                    }
                     gm.src = Common.maps[Math.floor(Math.random() * Common.maps.length)].img
                     gm.visible = true
                     rndMap.visible = false
@@ -106,5 +111,9 @@ Rectangle {
                 rw.paint()
             }
         }
+    }
+
+    Notif {
+        id: notif
     }
 }

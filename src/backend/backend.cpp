@@ -1,17 +1,21 @@
 #include "backend.h"
+#include "../log.h"
 
 
 Backend::Backend(Database &db, QObject *parent)
     : db_(db), QObject(parent) {};
 
 QVariantList Backend::getHeroes() {
-    QVector<models::Hero> heroes {
-        {1, "Dracula", "qrc:/qt/qml/Tracker/ui/assets/img/set/cobble_fog/heroes/dracula/avatar.webp", 1},
-        {2, "Sherlock Holmes", "qrc:/qt/qml/Tracker/ui/assets/img/set/cobble_fog/heroes/sherlock_holmes/avatar.webp", 1}
-    };
+    const char op[] = "Backend::getHeroes";
+
+    QVector<models::Hero> heroes;
+    Rc rc = db_.getHeroes(heroes);
+    if (rc != Rc::Ok) {
+        return QVariantList{};
+    }
+    ldebug(op) << "heroes got from db";
 
     QVariantList list;
-
     for (const auto &h : heroes) {
         QVariantMap obj;
         obj["id"] = h.id;
@@ -21,6 +25,5 @@ QVariantList Backend::getHeroes() {
 
         list.append(obj);
     }
-
     return list;
 }

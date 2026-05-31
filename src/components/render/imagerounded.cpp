@@ -17,7 +17,7 @@ void ImageRounded::setSrc(QString s) {
     if (s.startsWith("qrc:/")) {
         s.remove(0, 3);
     }
-    log(componentName) << "load image with source " << s;
+    ldebug(componentName) << "load image with source " << s;
     if (src_ == s) {
         return;
     }
@@ -25,7 +25,7 @@ void ImageRounded::setSrc(QString s) {
 
     QImage image(s);
     if (image.isNull()) {
-        log(componentName) << "image " << src_ << " cannon be imported";
+        ldebug(componentName) << "image " << src_ << " cannon be imported";
         return;
     }
     img_ = image;
@@ -37,7 +37,7 @@ void ImageRounded::setSrc(QString s) {
 void ImageRounded::paint(QPainter* painter) {
     painter->setRenderHint(QPainter::Antialiasing, true);
 
-    log(componentName) << "id=" << objectName() << "paint call";
+    ldebug(componentName) << "id=" << objectName() << "paint call";
 
     QRectF rect(0, 0, width(), height());
 

@@ -52,6 +52,7 @@ file(GLOB_RECURSE rsc_files CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DI
     "ui/assets/img/*.webp"
     "ui/assets/fonts/*.ttf"
     "ui/*.js"
+    "src/migrations/*.up.sql"
 )
 list(APPEND rsc_files
     "src/config.json"

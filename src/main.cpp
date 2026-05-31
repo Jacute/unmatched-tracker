@@ -1,6 +1,7 @@
 #include "components/render/imagerounded.h"
 #include "db/db.h"
 #include "config.h"
+#include "log.h"
 #include "backend/backend.h"
 
 #include <QFontDatabase>
@@ -13,18 +14,20 @@
 
 const QString rscPath = ":/qt/qml/Tracker";
 const QString uiPath = rscPath + "/ui";
-const QString defaultFontPath = rscPath + "/ui/assets/fonts/BebasNeue-Regular.ttf";
+const QString defaultFontPath = uiPath + "/assets/fonts/BebasNeue-Regular.ttf";
 const QString mainQmlPath = uiPath + "/Main.qml";
-const QString cfgPath = rscPath + "/config.json";
+const QString cfgPath = rscPath + "/src/config.json";
 
 void loadResources(QGuiApplication &app) {
+    const char op[] = "loadResources";
+
     int fontId = QFontDatabase::addApplicationFont(defaultFontPath);
     if (fontId == -1) {
-        qDebug() << "Font not added, error code: " << fontId;
+        lwarn(op) << "Font " << defaultFontPath << " not loaded, error code: " << fontId;
         return;
     }
 
-    qDebug() << "Font " << defaultFontPath << " added";
+    ldebug(op) << "Font " << defaultFontPath << " added";
     QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId);
     if (!fontFamilies.isEmpty()) {
         QFont defaultFont(fontFamilies.first());
@@ -38,6 +41,8 @@ void loadQMLComponents() {
 }
 
 int main(int argc, char *argv[]) {
+    const char op[] = "main";
+
     QGuiApplication app(argc, argv);
     QQmlApplicationEngine engine;
 
@@ -57,24 +62,24 @@ int main(int argc, char *argv[]) {
     Backend backend(db);
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
-                     [](const QUrl &url) {
-                         qDebug() << "=== OBJECT CREATION FAILED for:" << url;
+                     [&op](const QUrl &url) {
+                         ldebug(op) << "=== OBJECT CREATION FAILED for:" << url;
                          QCoreApplication::exit(-1);
                      });
     engine.rootContext()->setContextProperty("backend", &backend);
-    qDebug() << "Loading:" << mainQmlPath;
+    ldebug(op) << "Loading:" << mainQmlPath;
     engine.load(mainQmlPath);
 
     if (engine.rootObjects().isEmpty()) {
-        qDebug() << "=== No root objects loaded ===";
+        ldebug(op) << "=== No root objects loaded ===";
         return -1;
     }
 
-    qDebug() << "Application running successfully";
+    ldebug(op) << "Application running successfully";
 
     int rc = app.exec();
     if (rc != 0) {
-        qWarning() << "Application closed with error code: " << rc;
+        lwarn(op) << "Application closed with error code: " << rc;
     }
     db.close();
 }
