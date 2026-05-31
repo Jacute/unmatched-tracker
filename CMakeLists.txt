@@ -10,7 +10,7 @@ set(SRC_DIR src)
 set(QML_DIR ui)
 set(ASSETS_DIR ${QML_DIR}/assets)
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Sql)
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
@@ -19,6 +19,10 @@ qt_policy(SET QTP0004 NEW)
 qt_add_executable(tracker
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/log.cpp
+    ${SRC_DIR}/config.cpp
+    ${SRC_DIR}/db/db.cpp
+    ${SRC_DIR}/db/migrator.cpp
+    ${SRC_DIR}/backend/backend.cpp
     ${SRC_DIR}/components/render/imagerounded.cpp
 )
 
@@ -30,6 +34,8 @@ set(plain_qml_files
     ${QML_DIR}/components/Header.qml
     ${QML_DIR}/components/Menu.qml
     ${QML_DIR}/components/RandomWheel.qml
+    ${QML_DIR}/components/RandomFilter.qml
+    ${QML_DIR}/components/MultiSelectDropdown.qml
     ${QML_DIR}/components/VS.qml
     ${QML_DIR}/components/GameMap.qml
     ${QML_DIR}/components/Notif.qml
@@ -46,6 +52,9 @@ file(GLOB_RECURSE rsc_files CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DI
     "ui/assets/img/*.webp"
     "ui/assets/fonts/*.ttf"
     "ui/*.js"
+)
+list(APPEND rsc_files
+    "src/config.json"
 )
 
 set_source_files_properties(${qml_singletons}
@@ -72,7 +81,9 @@ target_compile_definitions(tracker PRIVATE
 )
 
 target_link_libraries(tracker
-    PRIVATE Qt6::Quick
+    PRIVATE
+        Qt6::Quick
+        Qt6::Sql
 )
 
 include(GNUInstallDirs)

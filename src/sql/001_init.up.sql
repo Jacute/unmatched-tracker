@@ -1,0 +1,18 @@
+CREATE TABLE sets IF NOT EXISTS (
+    id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE
+);
+
+CREATE TABLE heroes IF NOT EXISTS (
+    id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    set_id INT REFERENCES sets(id),
+    img_path VARCHAR(255)
+);
+
+CREATE TABLE maps IF NOT EXISTS (
+    id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL UNIQUE,
+    set_id INT REFERENCES sets(id),
+    img_path VARCHAR(255)
+);

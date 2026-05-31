@@ -17,6 +17,12 @@ Rectangle {
         anchors.margins: root.height * 0.02
         spacing: root.height * 0.02
 
+        RandomFilter {
+            Layout.fillWidth: true
+            Layout.preferredHeight: root.height * 0.05
+            color: "transparent"
+        }
+
         VS {
             id: vs
             src1: root.hero1.img
@@ -75,7 +81,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             Layout.alignment: Qt.AlignHCenter
-            heroes: Common.heroes
+            heroes: backend.getHeroes()
 
             onRandomHeroChanged: {
                 if (root.hero1.img === Common.avatarPlug) {
@@ -95,6 +101,8 @@ Rectangle {
                 root.hero1 = randomHero
                 rw.heroes = rw.heroes.filter(obj => obj.id != randomHero.id)
                 root.hero2 = Common.plugHero
+                gm.visible = false
+                rndMap.visible = true
                 rw.paint()
             }
         }

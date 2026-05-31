@@ -25,7 +25,7 @@ Rectangle {
 
         Component.onCompleted: {
             for (let i = 0; i < parent.heroes.length; i++) {
-                loadImage(parent.heroes[i].img)
+                loadImage(parent.heroes[i].img_path)
             }
         }
 

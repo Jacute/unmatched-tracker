@@ -17,7 +17,7 @@ function draw(canvas, root, cursor) {
     ctx.translate(-cx, -cy)
 
     for (var i = 0; i < root.heroes.length; i++) {
-        const imgSrc = root.heroes[i].img
+        const imgSrc = root.heroes[i].img_path
         if (!canvas.isImageLoaded(imgSrc))
             return
 
