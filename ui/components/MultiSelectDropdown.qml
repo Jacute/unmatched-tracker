@@ -6,11 +6,9 @@ import QtQuick.Layouts
 import Tracker
 
 Rectangle {
-    property var listdata: []
-    property var selected: []
+    property ListModel listdata
+    property int itemHeight: 40
     property string text
-
-    signal changed(var selected)
 
     id: root
     color: "transparent"
@@ -28,6 +26,7 @@ Rectangle {
     Popup {
         id: pp
         y: combo.height
+        height: root.itemHeight * 3
         width: combo.width
         padding: 5
         clip: true
@@ -35,30 +34,33 @@ Rectangle {
         background: Rectangle {
             color: Common.secondary
             radius: 5
+            border.width: 1
+            border.color: Qt.lighter(Common.secondary, 1.25)
         }
 
         ListView {
             id: list
-            width: parent.width
-            height: Math.min(contentHeight, 200)
-
+            anchors.fill: parent
+            clip: true
             model: root.listdata
 
             delegate: Item {
-                required property var modelData
+                required property int index
+                required property string name
+                required override property bool enabled
                 id: listItem
-                width: parent.width
-                height: 40
+                width: list.width
+                height: root.itemHeight
 
                 RowLayout {
                     anchors.fill: parent
 
                     CheckBox {
-                        checked: root.selected.includes(listItem.modelData)
+                        checked: listItem.enabled
                     }
 
                     Text {
-                        text: listItem.modelData
+                        text: listItem.name
                         color: Common.textColor
                         verticalAlignment: Text.AlignVCenter
                         horizontalAlignment: Text.AlignHCenter
@@ -71,20 +73,14 @@ Rectangle {
                     cursorShape: Qt.PointingHandCursor
 
                     onClicked: function(mouse) {
-                        const value = listItem.modelData
-
-                        if (root.selected.includes(value)) {
-                            root.selected = root.selected.filter(x => x !== value)
-                        } else {
-                            root.selected = root.selected.concat(value)
-                        }
-
-                        root.changed(root.selected)
-                    }
-                    
+                        root.listdata.setProperty(
+                            listItem.index,
+                            "enabled",
+                            !listItem.enabled
+                        )
+                    } 
                 }
             }
         }
-        height: list.contentHeight
     }
 }

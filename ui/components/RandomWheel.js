@@ -1,23 +1,19 @@
 const cursorAngle = -Math.PI / 2
 
-function draw(canvas, root, cursor) {
+function draw(canvas, root) {
+    console.debug("[RandomWheel] redraw")
     var ctx = canvas.getContext("2d")
     ctx.clearRect(0, 0, width, height)
 
     const cx = width / 2
     const cy = height / 2
     const radius = Math.min(width, height) / 2 - 25
+    const heroes = root.enabledHeroes
     // step is a value of one sector in degrees
-    const step = 2 * Math.PI / root.heroes.length
+    const step = 2 * Math.PI / heroes.length
 
-    ctx.save()
-    // rotate wheel
-    ctx.translate(cx, cy)
-    ctx.rotate(root.wheelAngle)
-    ctx.translate(-cx, -cy)
-
-    for (var i = 0; i < root.heroes.length; i++) {
-        const imgSrc = root.heroes[i].img_path
+    for (var i = 0; i < heroes.length; i++) {
+        const imgSrc = heroes[i].img_path
         if (!imgSrc) {
             return
         }
@@ -28,14 +24,14 @@ function draw(canvas, root, cursor) {
 
         ctx.save()
 
-        // --- sector ---
+        // 1) Sector
         ctx.beginPath()
         ctx.moveTo(cx, cy)
         ctx.arc(cx, cy, radius, start, end)
         ctx.closePath()
         ctx.clip()
 
-        // 1) Background
+        // 2) Background
         ctx.globalAlpha = 0.25
 
         const imgX = cx - radius * 1.2;
@@ -50,7 +46,7 @@ function draw(canvas, root, cursor) {
 
         ctx.globalAlpha = 1.0
 
-        // 2) Rotated text
+        // 3) Rotated text
         ctx.translate(cx, cy)
         ctx.rotate(mid)
 
@@ -60,11 +56,11 @@ function draw(canvas, root, cursor) {
         ctx.fillStyle = "white"
         ctx.font = "bold 16px sans-serif"
 
-        ctx.fillText(root.heroes[i].name, radius * 0.6, 0)
+        ctx.fillText(heroes[i].name, radius * 0.6, 0)
 
         ctx.restore()
 
-        // sector border
+        // 4) Sector border
         ctx.beginPath()
         ctx.moveTo(cx, cy)
         ctx.arc(cx, cy, radius, start, end)
@@ -74,26 +70,16 @@ function draw(canvas, root, cursor) {
         ctx.lineWidth = 2
         ctx.stroke()
     }
-
-    // draw wheel cursor
-    ctx.restore()
-    ctx.drawImage(
-        cursor,
-        cx - cursor.width / 64,
-        0,
-        cursor.width / 32,
-        cursor.height / 32
-    )
 }
 
 // checkWin checks that cursor is pointing at the image
 function getWinHero(
-    root
+    wheelAngle, heroes
 ) {
-    const angle = cursorAngle - root.wheelAngle
-    const step = 2 * Math.PI / root.heroes.length
+    const angle = cursorAngle - wheelAngle
+    const step = 2 * Math.PI / heroes.length
     let index = Math.floor((angle % (2 * Math.PI)) / step)
-    if (index < 0) index = root.heroes.length + index
+    if (index < 0) index = heroes.length + index
     
-    return root.heroes[index]
+    return heroes[index]
 }

@@ -13,7 +13,7 @@ public:
     explicit Backend(Database &db, QObject *parent = nullptr);
 
     Q_INVOKABLE QVariantList getHeroes();
-    // Q_INVOKABLE QVector<models::GameMap> getMaps();
+    Q_INVOKABLE QVariantList getMaps();
     // Q_INVOKABLE QVector<models::GameSet> getSets();
 
 private:

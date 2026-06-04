@@ -3,6 +3,7 @@ import QtQuick 2.15
 
 QtObject {
     readonly property color primary: "#202030"      // Тёмный фон
+    readonly property color bgColor: Qt.darker(primary, 1.15)
     readonly property color secondary: "#313244"    // Карточки, панели
     
     readonly property color shadow2: "#181825"
@@ -36,7 +37,7 @@ QtObject {
     readonly property string pageSet: "set"
     readonly property string pageRandom: "random"
 
-    readonly property int defaultFontSize: 14
+    readonly property int defaultFontSize: 16
     readonly property int defaultRadius: 10
 
     readonly property var heroes: [

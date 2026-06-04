@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Timeline
 
 import Tracker
 import "./RandomWheel.js" as Wheel
@@ -7,31 +8,47 @@ Rectangle {
     property real rotateSpeed: 0
     property real wheelAngle: 0
     property var heroes
+    property var enabledHeroes: []
     property string cursor: Common.imgPrefix + "/ui/wheel_cursor.png"
     property var randomHero
 
     id: root
     radius: width / 2
     color: "transparent"
+
+    Component.onCompleted: {
+        heroesLoad()
+        for (let i = 0; i < enabledHeroes.length; i++) {
+            canvas.loadImage(enabledHeroes[i].img_path)
+        }
+        canvas.requestPaint()
+    }
     
     Canvas {
         id: canvas
         anchors.fill: parent
         anchors.centerIn: parent
 
+        transform: Rotation {
+            origin.x: canvas.width / 2
+            origin.y: canvas.height / 2
+            angle: root.wheelAngle * 180 / Math.PI
+        }
+
         onPaint: {
-            Wheel.draw(canvas, root, cursorImg);
+            Wheel.draw(canvas, root);
         }
 
-        Component.onCompleted: {
-            for (let i = 0; i < parent.heroes.length; i++) {
-                loadImage(parent.heroes[i].img_path)
-            }
-        }
+        onImageLoaded: requestPaint()
+    }
 
-        onImageLoaded: {
-            requestPaint()
-        }
+    Image {
+        id: cursor
+        source: root.cursor
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.top: parent.top
+        width: sourceSize.width / 32
+        height: sourceSize.height / 32
     }
 
     MouseArea {
@@ -85,35 +102,30 @@ Rectangle {
 
             root.rotateSpeed = rotateSpeed
             console.debug(`Speed: ${root.rotateSpeed.toFixed(2)} px/s, distance: ${distance.toFixed(2)} px, time: ${(deltaTime*1000).toFixed(0)} ms`)
-            ticker.start()
+            wheelAnimation.running = true
         }
+    }
 
-        Timer {
-            id: ticker
-            interval: 1
-            running: false
-            repeat: true
+    FrameAnimation {
+        id: wheelAnimation
+        running: false
 
-            onTriggered: {
-                if (interval == 1) {
-                    interval = 16
-                }
+        onTriggered: () => {
+            const terminator = 0.8
+            const dt = 1 / 60
+            if (Math.abs(root.rotateSpeed) > terminator) {
+                root.wheelAngle += (root.rotateSpeed * dt / 180) * Math.PI
+                root.wheelAngle %= Math.PI * 2
 
-                const terminator = 0.2
-                if (root.rotateSpeed > terminator || root.rotateSpeed < -terminator) {
-                    root.wheelAngle += (root.rotateSpeed * 0.016 / 180) * Math.PI // angle/tick
-                    root.wheelAngle %= Math.PI * 2
-                    root.rotateSpeed *= 0.98   // friction
+                root.rotateSpeed *= 0.98
+            } else {
+                root.rotateSpeed = 0
+                running = false
 
-                    canvas.requestPaint()
-                } else {
-                    root.rotateSpeed = 0
-                    let hero = Wheel.getWinHero(root)
-                    root.randomHero = hero
-                    
-                    console.debug("[RandomWheel] " + hero.name + " wins")
-                    ticker.stop()
-                }
+                root.randomHero = Wheel.getWinHero(
+                    root.wheelAngle,
+                    root.enabledHeroes
+                )
             }
         }
     }
@@ -124,7 +136,18 @@ Rectangle {
         visible: false
     }
 
+    onHeroesChanged: heroesLoad()
+
     function paint() {
         canvas.requestPaint()
+    }
+
+    function heroesLoad() {
+        root.enabledHeroes = []
+        for (let i = 0; i < heroes.count; ++i) {
+            const hero = heroes.get(i)
+            if (hero.enabled)
+                enabledHeroes.push(hero)
+        }
     }
 }

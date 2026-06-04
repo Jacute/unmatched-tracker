@@ -4,42 +4,39 @@ import QtQuick.Layouts
 import Tracker
 
 Rectangle {
-    property var heroes
+    property alias heroes: heroFilter.listdata
+    property alias maps: mapFilter.listdata
 
     id: root
     color: "transparent"
 
     RowLayout {
-        anchors.fill: parent
         anchors.centerIn: parent
         spacing: root.width * 0.01
+        height: root.height
 
-        Layout.maximumHeight: root.height
-        Layout.minimumHeight: root.height
-
-        MultiSelectDropdown {
-            id: mapFilter
-            text: "Map"
-            Layout.fillHeight: true
+        Rectangle {
+            Layout.preferredHeight: root.height * 0.8
             Layout.preferredWidth: root.width * 0.4
-            listdata: [
-                "Baskerville",
-                "Marmoreal"
-            ]
+            color: "transparent"
+
+            MultiSelectDropdown {
+                id: mapFilter
+                anchors.fill: parent
+                text: "Map"
+            }
         }
 
-        MultiSelectDropdown {
-            id: heroFilter
-            text: "Hero"
-            Layout.fillHeight: true
+        Rectangle {
+            Layout.preferredHeight: root.height * 0.8
             Layout.preferredWidth: root.width * 0.4
-            listdata: [
-                "Dracula",
-                "Sherlock Holmes",
-                "Medusa",
-                "Jekyll & Hyde",
-                "Invisible man"
-            ]
+            color: "transparent"
+
+            MultiSelectDropdown {
+                id: heroFilter
+                anchors.fill: parent
+                text: "Hero"
+            }
         }
     }
 

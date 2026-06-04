@@ -27,3 +27,26 @@ QVariantList Backend::getHeroes() {
     }
     return list;
 }
+
+QVariantList Backend::getMaps() {
+    const char op[] = "Backend::getMaps";
+
+    QVector<models::GameMap> maps;
+    Rc rc = db_.getMaps(maps);
+    if (rc != Rc::Ok) {
+        return QVariantList{};
+    }
+    ldebug(op) << "heroes got from db";
+
+    QVariantList list;
+    for (const auto &m : maps) {
+        QVariantMap obj;
+        obj["id"] = m.id;
+        obj["name"] = m.name;
+        obj["img_path"] = m.imgPath;
+        obj["set_id"] = m.setId;
+
+        list.append(obj);
+    }
+    return list;
+}

@@ -2,10 +2,6 @@ cmake_minimum_required(VERSION 3.16)
 
 project(unmatched-tracker VERSION 0.1 LANGUAGES CXX)
 
-# build variables
-set(ANDROID_ABI arm64-v8a)
-set(ANDROID_PLATFORM android-31)
-
 set(SRC_DIR src)
 set(QML_DIR ui)
 set(ASSETS_DIR ${QML_DIR}/assets)

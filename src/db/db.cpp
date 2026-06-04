@@ -54,3 +54,24 @@ Rc Database::getHeroes(QVector<models::Hero> &heroes) {
     return Rc::Ok;
 }
 
+Rc Database::getMaps(QVector<models::GameMap> &maps) {
+    const char op[] = "Database::getMaps";
+
+    QSqlQuery query;
+    
+    bool ok = query.exec("SELECT id, name, set_id, img_path FROM maps");
+    if (!ok) {
+        lwarn(op) << "sql error: " << query.lastError().text();
+        return Rc::ErrCantExecQuery;
+    }
+
+    while (query.next()) {
+        models::GameMap map;
+        map.id = query.value(0).toUInt();
+        map.name = query.value(1).toString();
+        map.setId = query.value(2).toUInt();
+        map.imgPath = query.value(3).toString();
+        maps.append(std::move(map));
+    }
+    return Rc::Ok;
+}
