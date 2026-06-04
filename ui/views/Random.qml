@@ -115,7 +115,16 @@ Rectangle {
                         notif.show("First you should randomize two heroes")
                         return
                     }
-                    gm.src = Common.maps[Math.floor(Math.random() * Common.maps.length)].img
+
+                    let enabledMaps = []
+                    for (let i = 0; i < mapsModel.count; ++i) {
+                        const map = mapsModel.get(i)
+
+                        if (map.enabled)
+                            enabledMaps.push(map)
+                    }
+
+                    gm.src = enabledMaps[Math.floor(Math.random() * enabledMaps.length)].img_path
                     gm.visible = true
                     rndMap.visible = false
                 }
@@ -181,6 +190,10 @@ Rectangle {
     }
     ListModel {
         id: mapsModel
+
+        onDataChanged: {
+
+        }
     }
 
     function loadData() {

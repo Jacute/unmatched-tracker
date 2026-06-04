@@ -136,8 +136,6 @@ Rectangle {
         visible: false
     }
 
-    onHeroesChanged: heroesLoad()
-
     function paint() {
         canvas.requestPaint()
     }
