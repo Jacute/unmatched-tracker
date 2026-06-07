@@ -1,11 +1,31 @@
-INSERT INTO sets (name, img_path)
+INSERT INTO sets (name, img_path, released_at)
 VALUES
-('Cobble & Fog', 'qrc:/qt/qml/Tracker/ui/assets/img/set/cobble_fog/cover_ru.jpg'),
-('Battle of Legends, Volume One', 'qrc:/qt/qml/Tracker/ui/assets/img/set/battle_of_legends1/cover_ru.jpg'),
-('Battle of Legends, Volume Two', 'qrc:/qt/qml/Tracker/ui/assets/img/set/battle_of_legends2/cover_eng.jpg'),
-('Robin Hood VS Bigfoot', 'qrc:/qt/qml/Tracker/ui/assets/img/set/robin_hood_vs_bigfoot/cover_ru.jpg'),
-('The Witcher - Steel & Silver', 'qrc:/qt/qml/Tracker/ui/assets/img/set/the_witcher_steel_silver/cover_eng.webp'),
-('The Witcher - Realms Fall', 'qrc:/qt/qml/Tracker/ui/assets/img/set/the_witcher_realms_fail/cover_eng.jpg')
+('Battle of Legends, Volume One', 'qrc:/qt/qml/Tracker/ui/assets/img/set/battle_of_legends1/cover.jpg', '2019-09-01'),
+('Bruce Lee', 'qrc:/qt/qml/Tracker/ui/assets/img/set/bruce_lee/cover.jpg', '2019-10-01'),
+('Robin Hood vs Bigfoot', 'qrc:/qt/qml/Tracker/ui/assets/img/set/robin_hood_vs_bigfoot/cover.jpg', '2019-10-01'),
+('Jurassic Park - Ingen vs Raptors', 'qrc:/qt/qml/Tracker/ui/assets/img/set/jurassic_park_ingen_vs_raptors/cover.webp', '2020-04-01'),
+('Cobble & Fog', 'qrc:/qt/qml/Tracker/ui/assets/img/set/cobble_fog/cover.jpg', '2020-07-01'),
+('Buffy the Vampire Slayer', 'qrc:/qt/qml/Tracker/ui/assets/img/set/buffy_the_vampire_slayer/cover.jpg', '2020-10-01'),
+('Little Red Riding Hood vs Beowulf', 'qrc:/qt/qml/Tracker/ui/assets/img/set/little_red_riding_hood_vs_beowulf/cover.jpg', '2020-12-01'),
+('Deadpool', 'qrc:/qt/qml/Tracker/ui/assets/img/set/deadpool/cover.jpg', '2021-07-01'),
+('Battle of Legends, Volume Two', 'qrc:/qt/qml/Tracker/ui/assets/img/set/battle_of_legends2/cover.jpg', '2022-01-01'),
+('Hell''s Kitchen', 'qrc:/qt/qml/Tracker/ui/assets/img/set/hells_kitchen/cover.webp', '2022-04-01'),
+('Redemption Row', 'qrc:/qt/qml/Tracker/ui/assets/img/set/redemption_row/cover.webp', '2022-04-01'),
+('Jurassic Park - Sattler vs T-Rex', 'qrc:/qt/qml/Tracker/ui/assets/img/set/jurassic_park_settler_vs_trex/cover.jpg', '2022-05-01'),
+('Houdini vs The Genie', 'qrc:/qt/qml/Tracker/ui/assets/img/set/houdini_vs_the_genie/cover.jpg', '2022-12-01'),
+('Teen Spirit', 'qrc:/qt/qml/Tracker/ui/assets/img/set/teen_spirit/cover.webp', '2023-03-01'),
+('For King and Country', 'qrc:/qt/qml/Tracker/ui/assets/img/set/for_king_and_country/cover.jpg', '2023-04-01'),
+('Brains and Brawn', 'qrc:/qt/qml/Tracker/ui/assets/img/set/brains_and_brawn/cover.webp', '2023-06-01'),
+('Adventures: Tales to Amaze', 'qrc:/qt/qml/Tracker/ui/assets/img/set/adventures/tales_to_amaze/cover.jpg', '2023-08-01'),
+('Sun''s Origin', 'qrc:/qt/qml/Tracker/ui/assets/img/set/suns_origin/cover.webp', '2024-01-01'),
+('Slings and Arrows', 'qrc:/qt/qml/Tracker/ui/assets/img/set/slings_and_arrows/cover.jpg', '2024-03-01'),
+('The Witcher - Steel & Silver', 'qrc:/qt/qml/Tracker/ui/assets/img/set/the_witcher_steel_silver/cover.webp', '2024-12-01'),
+('The Witcher - Realms Fall', 'qrc:/qt/qml/Tracker/ui/assets/img/set/the_witcher_realms_fall/cover.jpg', '2024-12-01'),
+('Battle of Legends, Volume Three', 'qrc:/qt/qml/Tracker/ui/assets/img/set/battle_of_legends3/cover.jpg', '2025-07-01'),
+('Adventures: Teenage Mutant Ninja Turtles', 'qrc:/qt/qml/Tracker/ui/assets/img/set/adventures/teenage_mutant_ninja_turtles/cover.webp', '2025-09-01'),
+('TMNT: Shredder vs Krang', 'qrc:/qt/qml/Tracker/ui/assets/img/set/tmnt_shredder_vs_crang/cover.jpg', '2025-09-01'),
+('Muhammad Ali vs Bruce Lee', 'qrc:/qt/qml/Tracker/ui/assets/img/set/muhammad_ali_vs_bruce_lee/cover.jpg', '2025-10-01'),
+('Stars and Stripes', 'qrc:/qt/qml/Tracker/ui/assets/img/set/stars_and_stripes/cover.webp', '2026-03-01')
 ON CONFLICT(name) DO UPDATE SET
     img_path = excluded.img_path;
 

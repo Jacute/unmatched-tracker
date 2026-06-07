@@ -29,25 +29,24 @@ Rectangle {
 
         id: img
 
-        anchors.top: name.bottom
-        // TODO: refactor this by layouts
-        height: isHovered ? (parent.height - name.height - parent.margin * 2) : (parent.height - name.height - parent.margin * 2) * 0.98
-        anchors.margins: parent.margin
-
-        fillMode: Image.PreserveAspectFit
-
         anchors {
-            horizontalCenter: parent.horizontalCenter
+            top: name.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
+            margins: parent.margin
         }
+        fillMode: Image.PreserveAspectFit
+        scale: mouseArea.containsMouse ? 1.02 : 1.0
 
-        Behavior on height {
+        Behavior on scale {
             NumberAnimation { duration: 150 }
         }
-    }
-
-    MouseArea {
-        id: mouseArea
-        anchors.fill: parent
-        hoverEnabled: true
+        
+        MouseArea {
+            id: mouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+        }
     }
 }

@@ -54,7 +54,7 @@ function draw(canvas, root) {
         ctx.textBaseline = "middle"
 
         ctx.fillStyle = "white"
-        ctx.font = "bold 16px sans-serif"
+        ctx.font = `bold ${Math.ceil(root.width * 0.03)}px sans-serif`
 
         ctx.fillText(heroes[i].name, radius * 0.6, 0)
 

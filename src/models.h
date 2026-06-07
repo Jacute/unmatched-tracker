@@ -8,6 +8,7 @@ namespace models {
     struct GameSet {
         quint64 id;
         QString name;
+        QString imgPath;
     };
 
     struct Hero {

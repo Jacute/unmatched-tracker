@@ -11,78 +11,87 @@ Rectangle {
     property var hero2: Common.plugHero
     property bool filtersVisible: false
 
-    ColumnLayout {
-        anchors.fill: parent
-        anchors.margins: root.height * 0.02
-        spacing: root.height * 0.02
+    Rectangle {
+        id: filtergroup
+        width: root.width * 0.96
+        height: filterBtn.height + filterWrapper.height
+        anchors.horizontalCenter: root.horizontalCenter
+        anchors.top: root.top
+        anchors.topMargin: root.height * 0.02
+        color: "transparent"
+        radius: 5
+        // Open filter btn
+        Btn {
+            id: filterBtn
+            anchors.top: filtergroup.top
+            anchors.left: filtergroup.left
+            anchors.right: filtergroup.right
+            height: root.height * 0.04
+            radius: 5
+
+            contentItem: Item {
+                anchors.fill: parent
+
+                Text {
+                    anchors.centerIn: parent
+                    text: "Filters"
+                    color: Common.textColor
+                    font.pixelSize: Common.defaultFontSize
+                }
+
+                Text {
+                    anchors.right: parent.right
+                    anchors.rightMargin: parent.width * 0.05
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: "›"
+                    color: Common.textColor
+                    font.pixelSize: 16
+                    font.bold: true
+                    rotation: root.filtersVisible ? 270 : 90
+                    Behavior on rotation { NumberAnimation { duration: 100 } }
+                }
+            }
+
+            onClicked: root.filtersVisible = !root.filtersVisible
+        }
 
         Rectangle {
-            id: filtergroup
-            Layout.fillWidth: true
-            Layout.preferredHeight: filterBtn.height + filterWrapper.height
-            color: "transparent"
-            radius: 5
-            // Open filter btn
-            Btn {
-                id: filterBtn
-                anchors.top: filtergroup.top
-                anchors.left: filtergroup.left
-                anchors.right: filtergroup.right
-                height: root.height * 0.04
-                radius: 5
-
-                contentItem: Item {
-                    anchors.fill: parent
-
-                    Text {
-                        anchors.centerIn: parent
-                        text: "Filters"
-                        color: Common.textColor
-                        font.pixelSize: Common.defaultFontSize
-                    }
-
-                    Text {
-                        anchors.right: parent.right
-                        anchors.rightMargin: parent.width * 0.05
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: "›"
-                        color: Common.textColor
-                        font.pixelSize: 16
-                        font.bold: true
-                        rotation: root.filtersVisible ? 270 : 90
-                        Behavior on rotation { NumberAnimation { duration: 100 } }
-                    }
-                }
-
-                onClicked: root.filtersVisible = !root.filtersVisible
+            id: filterWrapper
+            anchors {
+                top: filterBtn.bottom
+                left: parent.left
+                right: parent.right
             }
 
-            Rectangle {
-                id: filterWrapper
-                anchors {
-                    top: filterBtn.bottom
-                    left: parent.left
-                    right: parent.right
-                }
+            height: root.filtersVisible ? root.height * 0.1 : 0
+            color: Qt.lighter(Common.secondary, 1.25)
+            clip: true
 
-                height: root.filtersVisible ? root.height * 0.04 : 0
-                color: Qt.lighter(Common.secondary, 1.25)
-                clip: true
-
-                Behavior on height {
-                    NumberAnimation {
-                        duration: 100
-                        easing.type: Easing.InOutQuad
-                    }
+            Behavior on height {
+                NumberAnimation {
+                    duration: 100
+                    easing.type: Easing.InOutQuad
                 }
+            }
 
-                RandomFilter {
-                    anchors.fill: parent
-                    heroes: heroesModel
-                    maps: mapsModel
-                }
+            RandomFilter {
+                anchors.fill: parent
+                heroes: heroesModel
+                maps: mapsModel
+                sets: setModel
             }
         }
+    }
+
+    ColumnLayout {
+        anchors {
+            top: filtergroup.bottom
+            left: root.left
+            right: root.right
+            bottom: root.bottom
+            margins: root.height * 0.02
+        }
+        spacing: root.height * 0.02
 
         VS {
             id: vs
@@ -146,32 +155,40 @@ Rectangle {
             color: Common.secondary
         }
 
-        RandomWheel {
-            id: rw
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Layout.alignment: Qt.AlignHCenter
-            heroes: heroesModel
-            onRandomHeroChanged: {
-                if (root.hero1.img_path === Common.avatarPlug) {
+            RandomWheel {
+                id: rw
+                anchors.centerIn: parent
+                anchors.fill: parent
+                heroes: heroesModel
+                onRandomHeroChanged: {
+                    if (root.hero1.img_path === Common.avatarPlug) {
+                        root.hero1 = randomHero
+                        let idx = root.modelFind(heroesModel, "id", randomHero)
+                        heroesModel.setProperty(idx, "enabled", false)
+                        return
+                    }
+                    if (root.hero2.img_path === Common.avatarPlug) {
+                        root.hero2 = randomHero
+                        for (let i = 0; i < heroesModel.count; i++) {
+                            heroesModel.setProperty(i, "enabled", true)
+                        }
+                        return
+                    }
                     root.hero1 = randomHero
                     let idx = root.modelFind(heroesModel, "id", randomHero)
                     heroesModel.setProperty(idx, "enabled", false)
-                    return
+                    root.hero2 = Common.plugHero
+                    gm.visible = false
+                    rndMap.visible = true
                 }
-                if (root.hero2.img_path === Common.avatarPlug) {
-                    root.hero2 = randomHero
-                    for (let i = 0; i < heroesModel.count; i++) {
-                        heroesModel.setProperty(i, "enabled", true)
-                    }
-                    return
-                }
-                root.hero1 = randomHero
-                let idx = root.modelFind(heroesModel, "id", randomHero)
-                heroesModel.setProperty(idx, "enabled", false)
-                root.hero2 = Common.plugHero
-                gm.visible = false
-                rndMap.visible = true
+                layer.enabled: true
+                scale: Math.min(
+                    parent.width / width,
+                    parent.height / height
+                )
             }
         }
     }
@@ -190,10 +207,9 @@ Rectangle {
     }
     ListModel {
         id: mapsModel
-
-        onDataChanged: {
-
-        }
+    }
+    ListModel {
+        id: setModel
     }
 
     function loadData() {
@@ -217,6 +233,17 @@ Rectangle {
                 id: backMaps[i].id,
                 name: backMaps[i].name,
                 img_path: backMaps[i].img_path,
+                enabled: true
+            })
+        }
+
+        setModel.clear()
+        let backSets = backend.getSets()   
+        for (let i = 0; i < backSets.length; i++) {
+            setModel.append({
+                id: backSets[i].id,
+                name: backSets[i].name,
+                img_path: backSets[i].img_path,
                 enabled: true
             })
         }

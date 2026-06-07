@@ -14,7 +14,7 @@ public:
 
     Q_INVOKABLE QVariantList getHeroes();
     Q_INVOKABLE QVariantList getMaps();
-    // Q_INVOKABLE QVector<models::GameSet> getSets();
+    Q_INVOKABLE QVariantList getSets();
 
 private:
     Database &db_;

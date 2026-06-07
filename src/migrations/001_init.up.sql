@@ -3,7 +3,8 @@ PRAGMA foreign_keys = ON;
 CREATE TABLE IF NOT EXISTS sets (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
-    img_path TEXT
+    img_path TEXT,
+    released_at DATE
 );
 
 CREATE TABLE IF NOT EXISTS heroes (

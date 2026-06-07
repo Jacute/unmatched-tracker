@@ -47,8 +47,9 @@ Rectangle {
         source: root.cursor
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.top: parent.top
-        width: sourceSize.width / 32
-        height: sourceSize.height / 32
+        width: sourceSize.width / 48
+        height: sourceSize.height / 48
+        anchors.topMargin: height / 3
     }
 
     MouseArea {

@@ -24,13 +24,6 @@ ApplicationWindow {
 
         onChangePage: (pageName) => {
             root.page = pageName
-            if (pageName === Common.pageSet) {
-                sview.replace(set);
-            } else if (pageName === Common.pageRandom) {
-                sview.replace(random);
-            } else { // default
-                sview.replace(set);
-            }
             menu.close();
         }
     }
@@ -49,26 +42,24 @@ ApplicationWindow {
         }
     }
 
-    StackView {
-        id: sview
+    Item {
         anchors {
             top: hdr.bottom
-            right: parent.right
             left: parent.left
+            right: parent.right
             bottom: parent.bottom
         }
-        initialItem: set
 
-        replaceEnter: Transition {}
-        replaceExit: Transition {}
-    }
+        Set {
+            id: setPage
+            anchors.fill: parent
+            visible: root.page === Common.pageSet
+        }
 
-    Component {
-        id: set
-        Set {}
-    }
-    Component {
-        id: random
-        Random {}
+        Random {
+            id: randomPage
+            anchors.fill: parent
+            visible: root.page === Common.pageRandom
+        }
     }
 }

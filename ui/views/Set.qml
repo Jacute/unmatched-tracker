@@ -35,32 +35,7 @@ Rectangle {
             columns: 2
 
             Repeater {
-                model: [
-                    {
-                        name: "Битва Легенд: Том 1",
-                        img: qsTr("%1/battle_of_legends1/cover_ru.jpg").arg(root.setImgPrefix)
-                    },
-                    {
-                        name: "Битва Легенд: Том 2",
-                        img: qsTr("%1/battle_of_legends2/cover_eng.jpg").arg(root.setImgPrefix)
-                    },
-                    {
-                        name: "Туман над мостовой",
-                        img: qsTr("%1/cobble_fog/cover_ru.jpg").arg(root.setImgPrefix)
-                    },
-                    {
-                        name: "Робингуд VS Бигфут",
-                        img: qsTr("%1/robin_hood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
-                    },
-                    {
-                        name: "Робингуд VS Бигфут",
-                        img: qsTr("%1/robin_hood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
-                    },
-                    {
-                        name: "Робингуд VS Бигфут",
-                        img: qsTr("%1/robin_hood_vs_bigfoot/cover_ru.jpg").arg(root.setImgPrefix)
-                    },
-                ]
+                model: setModel
 
                 delegate: Item {
                     id: item
@@ -73,11 +48,27 @@ Rectangle {
                         width: parent.width
                         height: parent.height
                         cardName: parent.modelData.name
-                        cardImg: parent.modelData.img
-                        fontSize: height * 0.05
+                        cardImg: parent.modelData.img_path
+                        fontSize: Common.defaultFontSize
                     }
                 }
             }
+        }
+    }
+
+    ListModel {
+        id: setModel
+    }
+
+    Component.onCompleted: {
+        setModel.clear()
+        let backSets = backend.getSets()   
+        for (let i = 0; i < backSets.length; i++) {
+            setModel.append({
+                id: backSets[i].id,
+                name: backSets[i].name,
+                img_path: backSets[i].img_path
+            })
         }
     }
 }

@@ -50,3 +50,25 @@ QVariantList Backend::getMaps() {
     }
     return list;
 }
+
+QVariantList Backend::getSets() {
+    const char op[] = "Backend::getSets";
+
+    QVector<models::GameSet> sets;
+    Rc rc = db_.getSets(sets);
+    if (rc != Rc::Ok) {
+        return QVariantList{};
+    }
+    ldebug(op) << "sets got from db";
+
+    QVariantList list;
+    for (const auto &s : sets) {
+        QVariantMap obj;
+        obj["id"] = s.id;
+        obj["name"] = s.name;
+        obj["img_path"] = s.imgPath;
+
+        list.append(obj);
+    }
+    return list;
+}
