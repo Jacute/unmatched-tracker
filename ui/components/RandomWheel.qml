@@ -7,8 +7,7 @@ import "./RandomWheel.js" as Wheel
 Rectangle {
     property real rotateSpeed: 0
     property real wheelAngle: 0
-    property var heroes
-    property var enabledHeroes: []
+    property var heroes: []
     property string cursor: Common.imgPrefix + "/ui/wheel_cursor.png"
     property var randomHero
 
@@ -17,9 +16,8 @@ Rectangle {
     color: "transparent"
 
     Component.onCompleted: {
-        heroesLoad()
-        for (let i = 0; i < enabledHeroes.length; i++) {
-            canvas.loadImage(enabledHeroes[i].img_path)
+        for (let i = 0; i < heroes.length; i++) {
+            canvas.loadImage(heroes[i].img_path)
         }
         canvas.requestPaint()
     }
@@ -125,7 +123,7 @@ Rectangle {
 
                 root.randomHero = Wheel.getWinHero(
                     root.wheelAngle,
-                    root.enabledHeroes
+                    root.heroes
                 )
             }
         }
@@ -139,14 +137,5 @@ Rectangle {
 
     function paint() {
         canvas.requestPaint()
-    }
-
-    function heroesLoad() {
-        root.enabledHeroes = []
-        for (let i = 0; i < heroes.count; ++i) {
-            const hero = heroes.get(i)
-            if (hero.enabled)
-                enabledHeroes.push(hero)
-        }
     }
 }

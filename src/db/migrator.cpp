@@ -1,18 +1,17 @@
-#include "db.h"
 #include "../log.h"
+#include "db.h"
 
 #include <QFile>
-#include <QSqlQuery>
 #include <QSqlError>
+#include <QSqlQuery>
 
-Rc Database::executeSqlFile(const QString& path)
-{
+Rc Database::executeSqlFile(const QString &path) {
     const char op[] = "Database::executeSqlFile";
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << "Cannot open SQL file:" << path;
-        return Rc::ErrCantOpenFile;
+        return Rc::ErrOpenFile;
     }
 
     QString sql = QString::fromUtf8(file.readAll());
@@ -29,7 +28,7 @@ Rc Database::executeSqlFile(const QString& path)
         ldebug(op) << "Executing sql query " << q;
         if (!query.exec(q)) {
             qWarning() << "sql error: " << query.lastError().text();
-            return Rc::ErrCantExecQuery;
+            return Rc::ErrExecQuery;
         }
     }
 

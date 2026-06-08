@@ -2,9 +2,9 @@
 #include "log.h"
 
 #include <QFile>
+#include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QJsonArray>
 #include <QJsonValue>
 
 Config::Config(const QString &path) {
@@ -19,11 +19,11 @@ Config::Config(const QString &path) {
     ldebug(op) << "config data " << data;
     file.close();
     QJsonDocument doc = QJsonDocument::fromJson(data);
-    
+
     QJsonObject obj = doc.object();
     QJsonObject dbObj = obj["db"].toObject();
 
-    db.dbName_ = dbObj["name"].toString();  
+    db.dbName_ = dbObj["name"].toString();
     for (const QJsonValue &v : dbObj["migrations"].toArray()) {
         db.migrationFiles.append(v.toString());
     }

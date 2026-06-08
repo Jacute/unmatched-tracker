@@ -8,7 +8,7 @@ function draw(canvas, root) {
     const cx = width / 2
     const cy = height / 2
     const radius = Math.min(width, height) / 2 - 25
-    const heroes = root.enabledHeroes
+    const heroes = root.heroes
     // step is a value of one sector in degrees
     const step = 2 * Math.PI / heroes.length
 

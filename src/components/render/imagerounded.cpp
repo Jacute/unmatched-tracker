@@ -1,13 +1,15 @@
+#include <QImage>
 #include <QPainter>
 #include <QPainterPath>
-#include <QImage>
 
-#include "imagerounded.h"
 #include "../../log.h"
+#include "imagerounded.h"
 
-constexpr const char* componentName = "ImageRounded";
+constexpr const char *componentName = "ImageRounded";
 
-ImageRounded::ImageRounded(QQuickItem* parent) : QQuickPaintedItem(parent) {}
+ImageRounded::ImageRounded(QQuickItem *parent)
+    : QQuickPaintedItem(parent) {
+}
 
 QString ImageRounded::getSrc() {
     return src_;
@@ -29,12 +31,12 @@ void ImageRounded::setSrc(QString s) {
         return;
     }
     img_ = image;
-    
+
     emit srcChanged();
     update();
 }
 
-void ImageRounded::paint(QPainter* painter) {
+void ImageRounded::paint(QPainter *painter) {
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     ldebug(componentName) << "id=" << objectName() << "paint call";
@@ -42,7 +44,7 @@ void ImageRounded::paint(QPainter* painter) {
     QRectF rect(0, 0, width(), height());
 
     QPainterPath path;
-    path.addRoundedRect(rect, width()/2, height()/2);
+    path.addRoundedRect(rect, width() / 2, height() / 2);
 
     painter->setClipPath(path);
 

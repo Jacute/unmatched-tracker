@@ -1,15 +1,14 @@
 #pragma once
 
-#include "../rc.h"
 #include "../models.h"
+#include "../rc.h"
 
 #include <QObject>
 #include <QSqlDatabase>
 #include <QVector>
 
-class Database : public QObject
-{
-public:
+class Database : public QObject {
+  public:
     Database(const QString &dbPath, const QString &dbName);
 
     Rc open();
@@ -17,10 +16,16 @@ public:
 
     void migrate(const QVector<QString> &migrationFiles);
 
+    Rc getSets(QVector<models::GameSetShort> &sets);
     Rc getHeroes(QVector<models::Hero> &heroes);
-    Rc getSets(QVector<models::GameSet> &sets);
     Rc getMaps(QVector<models::GameMap> &maps);
-private:
+
+    // @brief Get all sets, heroes and maps that refer to them
+    // @param[out] Reference to vector with game sets
+    // @return Return code
+    Rc getSHM(QVector<models::GameSet> &sets);
+
+  private:
     Rc executeSqlFile(const QString &path);
 
     QSqlDatabase db;

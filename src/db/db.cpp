@@ -1,16 +1,16 @@
 #include "db.h"
-#include "../rc.h"
 #include "../log.h"
+#include "../rc.h"
 
-#include <QDir>
-#include <QSqlQuery>
-#include <QSqlError>
 #include <QDebug>
+#include <QDir>
+#include <QSqlError>
+#include <QSqlQuery>
 #include <QStandardPaths>
 
 Database::Database(const QString &dbPath, const QString &dbName)
-    : dbPath_(dbPath), dbName_(dbName) {
-
+    : dbPath_(dbPath),
+      dbName_(dbName) {
 }
 
 Rc Database::open() {
@@ -18,8 +18,7 @@ Rc Database::open() {
     db.setDatabaseName(dbPath_);
 
     if (!db.open()) {
-        qDebug() << "DB error:"
-                 << db.lastError().text();
+        qDebug() << "DB error:" << db.lastError().text();
         return Rc::ErrCreateDb;
     }
 
@@ -36,11 +35,11 @@ Rc Database::getHeroes(QVector<models::Hero> &heroes) {
     const char op[] = "Database::getHeroes";
 
     QSqlQuery query;
-    
+
     bool ok = query.exec("SELECT id, name, set_id, img_path FROM heroes");
     if (!ok) {
         lwarn(op) << "sql error: " << query.lastError().text();
-        return Rc::ErrCantExecQuery;
+        return Rc::ErrExecQuery;
     }
 
     while (query.next()) {
@@ -58,11 +57,11 @@ Rc Database::getMaps(QVector<models::GameMap> &maps) {
     const char op[] = "Database::getMaps";
 
     QSqlQuery query;
-    
+
     bool ok = query.exec("SELECT id, name, set_id, img_path FROM maps");
     if (!ok) {
         lwarn(op) << "sql error: " << query.lastError().text();
-        return Rc::ErrCantExecQuery;
+        return Rc::ErrExecQuery;
     }
 
     while (query.next()) {
@@ -76,15 +75,37 @@ Rc Database::getMaps(QVector<models::GameMap> &maps) {
     return Rc::Ok;
 }
 
-Rc Database::getSets(QVector<models::GameSet> &sets) {
+Rc Database::getSets(QVector<models::GameSetShort> &sets) {
     const char op[] = "Database::getSets";
 
     QSqlQuery query;
-    
-    bool ok = query.exec("SELECT id, name, img_path FROM sets");
+
+    bool ok = query.exec("SELECT id, name, img_path, released_at FROM sets");
     if (!ok) {
         lwarn(op) << "sql error: " << query.lastError().text();
-        return Rc::ErrCantExecQuery;
+        return Rc::ErrExecQuery;
+    }
+
+    while (query.next()) {
+        models::GameSetShort set;
+        set.id = query.value(0).toUInt();
+        set.name = query.value(1).toString();
+        set.imgPath = query.value(2).toString();
+        set.releasedAt = query.value(3).toDate();
+        sets.append(std::move(set));
+    }
+    return Rc::Ok;
+}
+
+Rc Database::getSHM(QVector<models::GameSet> &sets) {
+    const char op[] = "Database::getSHM";
+
+    QSqlQuery query;
+
+    bool ok = query.exec("SELECT id, name, img_path, released_at FROM sets");
+    if (!ok) {
+        lwarn(op) << "set sql error: " << query.lastError().text();
+        return Rc::ErrExecQuery;
     }
 
     while (query.next()) {
@@ -92,6 +113,51 @@ Rc Database::getSets(QVector<models::GameSet> &sets) {
         set.id = query.value(0).toUInt();
         set.name = query.value(1).toString();
         set.imgPath = query.value(2).toString();
+        set.releasedAt = query.value(3).toDate();
+
+        QSqlQuery heroQuery;
+        ok = heroQuery.prepare("SELECT id, name, img_path FROM heroes WHERE set_id = :setId");
+        if (!ok) {
+            lwarn(op) << "hero sql error: " << heroQuery.lastError().text();
+            return Rc::ErrPrepareQuery;
+        }
+        heroQuery.bindValue(":setId", set.id);
+        if (!heroQuery.exec()) {
+            lwarn(op) << "sql error: " << heroQuery.lastError().text();
+            return Rc::ErrExecQuery;
+        }
+        QVector<models::Hero> heroes;
+        while (heroQuery.next()) {
+            models::Hero hero;
+            hero.id = heroQuery.value(0).toUInt();
+            hero.name = heroQuery.value(1).toString();
+            hero.imgPath = heroQuery.value(2).toString();
+            heroes.append(std::move(hero));
+        }
+        ldebug(op) << "set " << set.name << "heroes length " << heroes.size();
+        set.heroes = std::move(heroes);
+
+        QSqlQuery mapQuery;
+        ok = mapQuery.prepare("SELECT id, name, img_path FROM maps WHERE set_id = :setId");
+        if (!ok) {
+            lwarn(op) << "map sql error: " << mapQuery.lastError().text();
+            return Rc::ErrPrepareQuery;
+        }
+        mapQuery.bindValue(":setId", set.id);
+        if (!mapQuery.exec()) {
+            lwarn(op) << "sql error: " << mapQuery.lastError().text();
+            return Rc::ErrExecQuery;
+        }
+        QVector<models::GameMap> maps;
+        while (mapQuery.next()) {
+            models::GameMap map;
+            map.id = mapQuery.value(0).toUInt();
+            map.name = mapQuery.value(1).toString();
+            map.imgPath = mapQuery.value(2).toString();
+            maps.append(std::move(map));
+        }
+        set.maps = std::move(maps);
+
         sets.append(std::move(set));
     }
     return Rc::Ok;

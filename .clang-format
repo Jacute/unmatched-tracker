@@ -1,0 +1,35 @@
+BasedOnStyle: LLVM
+
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+
+BreakBeforeBraces: Attach
+
+PointerAlignment: Right
+ReferenceAlignment: Right
+
+DerivePointerAlignment: false
+DeriveReferenceAlignment: false
+
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortEnumsOnASingleLine: false
+BreakBeforeBinaryOperators: None
+
+ColumnLimit: 100
+
+SpaceBeforeParens: ControlStatements
+
+SpacesInParentheses: false
+SpacesInSquareBrackets: false
+
+AlignAfterOpenBracket: Align
+BinPackArguments: false
+BinPackParameters: false
+
+FixNamespaceComments: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+BreakConstructorInitializers: BeforeColon
+PackConstructorInitializers: Never

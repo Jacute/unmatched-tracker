@@ -9,13 +9,14 @@
 class Backend : public QObject {
     Q_OBJECT
 
-public:
+  public:
     explicit Backend(Database &db, QObject *parent = nullptr);
 
-    Q_INVOKABLE QVariantList getHeroes();
-    Q_INVOKABLE QVariantList getMaps();
-    Q_INVOKABLE QVariantList getSets();
+    Q_INVOKABLE QVariantList getSets() const;
+    Q_INVOKABLE QVariantList getHeroes() const;
+    Q_INVOKABLE QVariantList getMaps() const;
+    Q_INVOKABLE QVariantList getSHM() const;
 
-private:
+  private:
     Database &db_;
 };

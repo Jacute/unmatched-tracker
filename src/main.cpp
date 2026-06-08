@@ -1,15 +1,15 @@
-#include "components/render/imagerounded.h"
-#include "db/db.h"
-#include "config.h"
-#include "log.h"
 #include "backend/backend.h"
+#include "components/render/imagerounded.h"
+#include "config.h"
+#include "db/db.h"
+#include "log.h"
 
+#include <QDir>
 #include <QFontDatabase>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-#include <QStandardPaths>
 #include <QQmlContext>
-#include <QDir>
+#include <QStandardPaths>
 #include <memory>
 
 const QString rscPath = ":/qt/qml/Tracker";
@@ -51,9 +51,7 @@ int main(int argc, char *argv[]) {
     loadResources(app);
     loadQMLComponents();
 
-    QString path = QStandardPaths::writableLocation(
-        QStandardPaths::AppDataLocation
-    );
+    QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(path);
     const QString dbPath = path + "/app.db";
     Database db(dbPath, cfg.db.dbName_);
@@ -61,11 +59,10 @@ int main(int argc, char *argv[]) {
     db.migrate(cfg.db.migrationFiles);
     Backend backend(db);
 
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed,
-                     [&op](const QUrl &url) {
-                         ldebug(op) << "=== OBJECT CREATION FAILED for:" << url;
-                         QCoreApplication::exit(-1);
-                     });
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, [&op](const QUrl &url) {
+        ldebug(op) << "=== OBJECT CREATION FAILED for:" << url;
+        QCoreApplication::exit(-1);
+    });
     engine.rootContext()->setContextProperty("backend", &backend);
     ldebug(op) << "Loading:" << mainQmlPath;
     engine.load(mainQmlPath);

@@ -1,11 +1,11 @@
 #include "backend.h"
 #include "../log.h"
 
-
 Backend::Backend(Database &db, QObject *parent)
-    : db_(db), QObject(parent) {};
+    : db_(db),
+      QObject(parent){};
 
-QVariantList Backend::getHeroes() {
+QVariantList Backend::getHeroes() const {
     const char op[] = "Backend::getHeroes";
 
     QVector<models::Hero> heroes;
@@ -19,16 +19,16 @@ QVariantList Backend::getHeroes() {
     for (const auto &h : heroes) {
         QVariantMap obj;
         obj["id"] = h.id;
-        obj["name"] = h.name;
-        obj["img_path"] = h.imgPath;
+        obj["name"] = std::move(h.name);
+        obj["img_path"] = std::move(h.imgPath);
         obj["set_id"] = h.setId;
 
-        list.append(obj);
+        list.append(std::move(obj));
     }
     return list;
 }
 
-QVariantList Backend::getMaps() {
+QVariantList Backend::getMaps() const {
     const char op[] = "Backend::getMaps";
 
     QVector<models::GameMap> maps;
@@ -42,20 +42,42 @@ QVariantList Backend::getMaps() {
     for (const auto &m : maps) {
         QVariantMap obj;
         obj["id"] = m.id;
-        obj["name"] = m.name;
-        obj["img_path"] = m.imgPath;
+        obj["name"] = std::move(m.name);
+        obj["img_path"] = std::move(m.imgPath);
         obj["set_id"] = m.setId;
 
-        list.append(obj);
+        list.append(std::move(obj));
     }
     return list;
 }
 
-QVariantList Backend::getSets() {
+QVariantList Backend::getSets() const {
     const char op[] = "Backend::getSets";
 
-    QVector<models::GameSet> sets;
+    QVector<models::GameSetShort> sets;
     Rc rc = db_.getSets(sets);
+    if (rc != Rc::Ok) {
+        return QVariantList{};
+    }
+    ldebug(op) << "short sets got from db";
+
+    QVariantList list;
+    for (const auto &s : sets) {
+        QVariantMap obj;
+        obj["id"] = s.id;
+        obj["name"] = std::move(s.name);
+        obj["img_path"] = std::move(s.imgPath);
+
+        list.append(std::move(obj));
+    }
+    return list;
+}
+
+QVariantList Backend::getSHM() const {
+    const char op[] = "Backend::getSHM";
+
+    QVector<models::GameSet> sets;
+    Rc rc = db_.getSHM(sets);
     if (rc != Rc::Ok) {
         return QVariantList{};
     }
@@ -65,10 +87,31 @@ QVariantList Backend::getSets() {
     for (const auto &s : sets) {
         QVariantMap obj;
         obj["id"] = s.id;
-        obj["name"] = s.name;
-        obj["img_path"] = s.imgPath;
+        obj["name"] = std::move(s.name);
+        obj["img_path"] = std::move(s.imgPath);
+        obj["released_at"] = std::move(s.releasedAt);
 
-        list.append(obj);
+        QVariantList heroes;
+        for (const auto &h : s.heroes) {
+            QVariantMap hObj;
+            hObj["id"] = h.id;
+            hObj["name"] = std::move(h.name);
+            hObj["img_path"] = std::move(h.imgPath);
+            heroes.append(std::move(hObj));
+        }
+        obj["heroes"] = std::move(heroes);
+
+        QVariantList maps;
+        for (const auto &m : s.maps) {
+            QVariantMap mObj;
+            mObj["id"] = m.id;
+            mObj["name"] = std::move(m.name);
+            mObj["img_path"] = std::move(m.imgPath);
+            maps.append(std::move(mObj));
+        }
+        obj["maps"] = std::move(maps);
+
+        list.append(std::move(obj));
     }
     return list;
 }

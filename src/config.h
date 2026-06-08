@@ -9,7 +9,7 @@ struct DatabaseConfig {
 };
 
 class Config {
-public:
+  public:
     Config(const QString &path);
     ~Config() = default;
 
