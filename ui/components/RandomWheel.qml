@@ -12,7 +12,6 @@ Rectangle {
     property var randomHero
 
     id: root
-    radius: width / 2
     color: "transparent"
 
     Component.onCompleted: {
@@ -24,14 +23,29 @@ Rectangle {
     
     Canvas {
         id: canvas
-        anchors.fill: parent
-        anchors.centerIn: parent
-
-        transform: Rotation {
-            origin.x: canvas.width / 2
-            origin.y: canvas.height / 2
-            angle: root.wheelAngle * 180 / Math.PI
+        anchors.centerIn: root
+        
+        Component.onCompleted: {
+            const size = Math.min(root.width, root.height)
+            canvas.width = size
+            canvas.height = size
+            canvas.requestPaint()
         }
+
+        transform: [
+            Rotation {
+                origin.x: canvas.width / 2
+                origin.y: canvas.height / 2
+                angle: root.wheelAngle * 180 / Math.PI
+            },
+            Scale {
+                origin.x: canvas.width / 2
+                origin.y: canvas.height / 2
+                xScale: Math.min(root.width / canvas.width, root.height / canvas.height)
+                yScale: Math.min(root.width / canvas.width, root.height / canvas.height)
+            }
+        ]
+    
 
         onPaint: {
             Wheel.draw(canvas, root);
@@ -47,7 +61,6 @@ Rectangle {
         anchors.top: parent.top
         width: sourceSize.width / 48
         height: sourceSize.height / 48
-        anchors.topMargin: height / 3
     }
 
     MouseArea {

@@ -3,11 +3,13 @@ const cursorAngle = -Math.PI / 2
 function draw(canvas, root) {
     console.debug("[RandomWheel] redraw")
     var ctx = canvas.getContext("2d")
-    ctx.clearRect(0, 0, width, height)
 
-    const cx = width / 2
-    const cy = height / 2
-    const radius = Math.min(width, height) / 2 - 25
+    const size = Math.min(canvas.width, canvas.height);
+    ctx.clearRect(0, 0, size, size)
+
+    const cx = size / 2
+    const cy = size / 2
+    const radius = size / 2 - 10
     const heroes = root.heroes
     // step is a value of one sector in degrees
     const step = 2 * Math.PI / heroes.length
