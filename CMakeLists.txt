@@ -24,9 +24,13 @@ qt_add_executable(tracker
 
 set(plain_qml_files
     ${QML_DIR}/Main.qml
-    ${QML_DIR}/views/Set.qml
+    ${QML_DIR}/views/set/SetStack.qml
+    ${QML_DIR}/views/set/Set.qml
+    ${QML_DIR}/views/set/Heroes.qml
+    ${QML_DIR}/views/set/Hero.qml
     ${QML_DIR}/views/Random.qml
     ${QML_DIR}/components/Card.qml
+    ${QML_DIR}/components/CardGrid.qml
     ${QML_DIR}/components/Header.qml
     ${QML_DIR}/components/Menu.qml
     ${QML_DIR}/components/RandomWheel.qml
@@ -36,6 +40,8 @@ set(plain_qml_files
     ${QML_DIR}/components/GameMap.qml
     ${QML_DIR}/components/Notif.qml
     ${QML_DIR}/components/Btn.qml
+    ${QML_DIR}/components/ico/MenuIco.qml
+    ${QML_DIR}/components/ico/BackIco.qml
 )
 
 set(qml_singletons

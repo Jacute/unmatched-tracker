@@ -1,5 +1,8 @@
 #include "backend/backend.h"
+
+#include "components/events/keyboard/backhandler.h"
 #include "components/render/imagerounded.h"
+
 #include "config.h"
 #include "db/db.h"
 #include "log.h"

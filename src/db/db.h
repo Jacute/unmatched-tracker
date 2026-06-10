@@ -25,6 +25,8 @@ class Database : public QObject {
     // @return Return code
     Rc getSHM(QVector<models::GameSet> &sets);
 
+    Rc getHeroesBySetId(int setId, QVector<models::Hero> &heroes);
+
   private:
     Rc executeSqlFile(const QString &path);
 

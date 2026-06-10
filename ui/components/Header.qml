@@ -3,14 +3,15 @@ import QtQuick.Controls 2.15
 import QtQuick.Layouts 2.15
 
 import Tracker
-import "../components"
+import "ico"
 
 Rectangle {
     id: root
     
     property alias text: pageName.text
     readonly property int headerFontPixelSize: parent.width / 20
-    signal menuClicked
+    property string btnIconType
+    signal btnClicked
 
     height: parent.height * 0.05
     width: parent.width
@@ -27,37 +28,20 @@ Rectangle {
         background: Rectangle {
             color: Common.secondary
         }
-
-        contentItem: Column {
-            anchors {
-                top: parent.top
-                topMargin: parent.height * 0.25
-                horizontalCenter: parent.horizontalCenter
+        
+        contentItem: Loader {
+            id: iconLoader
+            source: {
+                if (root.btnIconType === "back") {
+                    return "ico/BackIco.qml"
+                }
+                return "ico/MenuIco.qml"
             }
-            spacing: parent.height * 0.1
-            
-            Rectangle {
-                color: Common.primary
-                width: parent.parent.width * 0.4
-                height: parent.parent.height * 0.1
-                radius: parent.parent.height * 0.05
-            }
-            Rectangle {
-                color: Common.primary
-                width: parent.parent.width * 0.4
-                height: parent.parent.height * 0.1
-                radius: parent.parent.height * 0.05
-            }
-            Rectangle {
-                color: Common.primary
-                width: parent.parent.width * 0.4
-                height: parent.parent.height * 0.1
-                radius: parent.parent.height * 0.05
-            }
+            anchors.fill: parent
         }
 
         onClicked: {
-            root.menuClicked()
+            root.btnClicked()
         }
     }
 

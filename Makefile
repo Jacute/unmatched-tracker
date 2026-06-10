@@ -9,7 +9,7 @@ ARCH ?= amd64
 QT_CMAKE_ARM_V8A := $(QT_ANDROID_ARM_V8A_PATH)/bin/qt-cmake
 QT_CMAKE_AMD64 := $(QT_ANDROID_AMD64_PATH)/bin/qt-cmake
 
-ANDROID_PLATFORM := android-31
+ANDROID_PLATFORM := android-33
 
 BUILD_ANDROID_AMD64_DIR := build-android-amd64
 BUILD_ANDROID_ARM_v8A_DIR := build-android-arm64-v8a

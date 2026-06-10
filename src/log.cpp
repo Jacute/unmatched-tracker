@@ -9,3 +9,7 @@ QDebug ldebug(const char *tag) {
 QDebug lwarn(const char *tag) {
     return qWarning().noquote() << "[" << tag << "]";
 }
+
+QDebug linfo(const char *tag) {
+    return qInfo().noquote() << "[" << tag << "]";
+}

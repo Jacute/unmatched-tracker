@@ -14,6 +14,7 @@ class Backend : public QObject {
 
     Q_INVOKABLE QVariantList getSets() const;
     Q_INVOKABLE QVariantList getHeroes() const;
+    Q_INVOKABLE QVariantList getHeroesBySetId(int setId) const;
     Q_INVOKABLE QVariantList getMaps() const;
     Q_INVOKABLE QVariantList getSHM() const;
 

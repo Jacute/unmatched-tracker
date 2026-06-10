@@ -5,7 +5,9 @@ import QtQuick.Controls 2.15
 
 import Tracker
 import "./views"
+import "./views/set"
 import "./components"
+import "./components/ico"
 
 ApplicationWindow {
     readonly property bool isMobile: Qt.platform.os === "android" || Qt.platform.os === "ios"
@@ -31,14 +33,31 @@ ApplicationWindow {
     Header {
         id: hdr
         text: getHeaderText()
-        onMenuClicked: {
-            menu.open()
+        btnIconType: getIconType()
+        onBtnClicked: {
+            switch (btnIconType) {
+            case "back":
+                if (setPage.canPop()) {
+                    setPage.pop()
+                }
+                break
+            case "menu":
+                menu.open()
+                break
+            }
         }
 
         function getHeaderText() {
             if (root.page === Common.pageSet) return "Наборы персонажей"
             if (root.page === Common.pageRandom) return "Рандомайзер"
             return "Unmatched Tracker"
+        }
+
+        function getIconType() {
+            if (root.page === Common.pageSet && setPage.canPop()) {
+                return "back"
+            }
+            return "menu"
         }
     }
 
@@ -50,7 +69,7 @@ ApplicationWindow {
             bottom: parent.bottom
         }
 
-        Set {
+        SetStack {
             id: setPage
             anchors.fill: parent
             visible: root.page === Common.pageSet
@@ -60,6 +79,24 @@ ApplicationWindow {
             id: randomPage
             anchors.fill: parent
             visible: root.page === Common.pageRandom
+        }
+    }
+
+    onClosing: (close) => {
+        if (Qt.platform.os !== "android") {
+            return
+        }
+
+        close.accepted = true
+        switch (root.page) {
+        case Common.pageSet:
+            if (setPage.canPop()) {
+                close.accepted = false
+                setPage.pop()
+            }
+            break
+        case Common.pageRandom:
+            break
         }
     }
 }

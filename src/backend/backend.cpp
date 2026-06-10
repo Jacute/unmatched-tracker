@@ -5,16 +5,7 @@ Backend::Backend(Database &db, QObject *parent)
     : db_(db),
       QObject(parent){};
 
-QVariantList Backend::getHeroes() const {
-    const char op[] = "Backend::getHeroes";
-
-    QVector<models::Hero> heroes;
-    Rc rc = db_.getHeroes(heroes);
-    if (rc != Rc::Ok) {
-        return QVariantList{};
-    }
-    ldebug(op) << "heroes got from db";
-
+static QVariantList mapHeroesQml(const QVector<models::Hero> &heroes) {
     QVariantList list;
     for (const auto &h : heroes) {
         QVariantMap obj;
@@ -26,6 +17,33 @@ QVariantList Backend::getHeroes() const {
         list.append(std::move(obj));
     }
     return list;
+}
+
+QVariantList Backend::getHeroes() const {
+    const char op[] = "Backend::getHeroes";
+
+    QVector<models::Hero> heroes;
+    Rc rc = db_.getHeroes(heroes);
+    if (rc != Rc::Ok) {
+        return QVariantList{};
+    }
+    ldebug(op) << "heroes got from db";
+
+    return mapHeroesQml(heroes);
+}
+
+QVariantList Backend::getHeroesBySetId(int setId) const {
+    const char op[] = "Backend::getHeroesBySetId";
+
+    linfo(op) << "getting heroes by set id";
+    QVector<models::Hero> heroes;
+    Rc rc = db_.getHeroesBySetId(setId, heroes);
+    if (rc != Rc::Ok) {
+        return QVariantList{};
+    }
+    linfo(op) << "heroes by set id got successfully";
+
+    return mapHeroesQml(heroes);
 }
 
 QVariantList Backend::getMaps() const {
