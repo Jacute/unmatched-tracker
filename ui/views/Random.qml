@@ -138,6 +138,7 @@ Rectangle {
             Layout.alignment: Qt.AlignHCenter
             Layout.preferredWidth: parent.width * 0.65
             Layout.preferredHeight: root.height * 0.05
+            radius: height
             text: "Save results"
         }
 

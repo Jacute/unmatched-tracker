@@ -18,6 +18,7 @@ Rectangle {
         text: root.text
         width: root.width
         height: root.height
+        radius: height
         onClicked: {
             pp.open()
         }

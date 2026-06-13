@@ -2,8 +2,8 @@ pragma Singleton
 import QtQuick 2.15
 
 QtObject {
-    readonly property color primary: "#202030"      // Тёмный фон
-    readonly property color bgColor: Qt.darker(primary, 1.15)
+    readonly property color primary: "#202030"
+    readonly property color bgColor: "#1B1B29"
     readonly property color secondary: "#313244"    // Карточки, панели
     
     readonly property color shadow2: "#181825"

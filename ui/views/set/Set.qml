@@ -9,7 +9,7 @@ import Tracker
 
 
 Rectangle {
-    property StackView pager
+    property StackView pager: null
 
     id: root
     color: Common.bgColor
@@ -33,11 +33,14 @@ Rectangle {
             columns: 2
 
             onModelClicked: (index) => {
+                if (!root.pager) {
+                    return
+                }
+
                 root.pager.push(
-                    "Heroes.qml", 
+                    "hero/Hero.qml", 
                     {
-                        setId: setModel.get(index).id,
-                        pager: root.pager
+                        setId: setModel.get(index).id
                     }
                 )
             }

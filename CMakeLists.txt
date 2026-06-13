@@ -26,8 +26,7 @@ set(plain_qml_files
     ${QML_DIR}/Main.qml
     ${QML_DIR}/views/set/SetStack.qml
     ${QML_DIR}/views/set/Set.qml
-    ${QML_DIR}/views/set/Heroes.qml
-    ${QML_DIR}/views/set/Hero.qml
+    ${QML_DIR}/views/set/hero/Hero.qml
     ${QML_DIR}/views/Random.qml
     ${QML_DIR}/components/Card.qml
     ${QML_DIR}/components/CardGrid.qml
