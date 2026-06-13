@@ -36,6 +36,14 @@ void ImageRounded::setSrc(QString s) {
     update();
 }
 
+qreal ImageRounded::getRadius() {
+    return radius_;
+}
+
+void ImageRounded::setRadius(qreal r) {
+    radius_ = r;
+}
+
 void ImageRounded::paint(QPainter *painter) {
     painter->setRenderHint(QPainter::Antialiasing, true);
 
@@ -44,7 +52,7 @@ void ImageRounded::paint(QPainter *painter) {
     QRectF rect(0, 0, width(), height());
 
     QPainterPath path;
-    path.addRoundedRect(rect, width() / 2, height() / 2);
+    path.addRoundedRect(rect, radius_, radius_);
 
     painter->setClipPath(path);
 

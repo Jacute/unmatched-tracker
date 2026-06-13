@@ -8,25 +8,28 @@ import Tracker
 import "../../../components"
 
 Rectangle {
-    property int setId
+    required property int setId
     property int heroInd: 0
+    property int activeTabInd: 0
     property var currentPage: null
 
     id: root
     color: "transparent"
 
-    // hero avatar
     ColumnLayout {
         anchors.fill: parent
         spacing: 0
         
+        // Hero avatar
         Item {
             Layout.fillWidth: true
-            Layout.preferredHeight: root.height * 0.6
+            Layout.preferredHeight: root.height * 0.4
             
             Image {
                 id: avatar
-                source: heroesModel.get(root.heroInd).img_path
+                source: heroesModel.count > root.heroInd
+                    ? heroesModel.get(root.heroInd).img_path
+                    : ""
                 fillMode: Image.PreserveAspectCrop
                 anchors.fill: parent
             }
@@ -45,6 +48,7 @@ Rectangle {
             }
         }
 
+        // Hero menu
         RowLayout {
             id: selector
             Layout.fillWidth: true
@@ -53,29 +57,7 @@ Rectangle {
 
             Repeater {
                 id: repeater
-                model: ListModel {
-                    id: tabsModel
-                    ListElement {
-                        text: "Описание и карты"
-                        path: "Description.qml"
-                        active: true
-                    }
-                    ListElement {
-                        text: "Общая статистика"
-                        path: "CommonStat.qml"
-                        active: false
-                    }
-                    ListElement {
-                        text: "Статистика профиля"
-                        path: "ProfileStat.qml"
-                        active: false
-                    }
-                    ListElement {
-                        text: "Матчапы"
-                        path: "Matchups.qml"
-                        active: false
-                    }
-                }
+                model: tabsModel
 
                 Item {
                     required property int index
@@ -88,16 +70,13 @@ Rectangle {
                     Btn {
                         id: btn
                         anchors.fill: parent
-                        bgColor: !btnWrapper.modelData.active ? Common.primary : Common.secondary
+                        bgColor: btnWrapper.index != root.activeTabInd ? Common.primary : Common.secondary
                         text: btnWrapper.modelData.text
                         fontSize: btnWrapper.height *  0.3
                         borderWidth: 0
                         
                         onClicked: {
-                            for (let i = 0; i < tabsModel.count; i++) {
-                                tabsModel.setProperty(i, "active", false)
-                            }
-                            tabsModel.setProperty(btnWrapper.index, "active", true)
+                            root.activeTabInd = btnWrapper.index
                         }
                     }
 
@@ -127,6 +106,7 @@ Rectangle {
             }
         }
 
+        // Page body - information about hero
         Item {
             id: body
             Layout.fillWidth: true
@@ -137,10 +117,31 @@ Rectangle {
                 anchors.fill: parent
                 onStatusChanged: {
                     if (status === Loader.Ready) {
-                        console.log("Page loaded:", item)
+                        console.debug("Hero subpage loaded:", item)
                     }
                 }
+                source: tabsModel.get(root.activeTabInd).path
             }
+        }
+    }
+
+    ListModel {
+        id: tabsModel
+        ListElement {
+            text: "Описание и карты"
+            path: "Cards.qml"
+        }
+        ListElement {
+            text: "Общая статистика"
+            path: "CommonStat.qml"
+        }
+        ListElement {
+            text: "Статистика профиля"
+            path: "ProfileStat.qml"
+        }
+        ListElement {
+            text: "Матчапы"
+            path: "Matchups.qml"
         }
     }
 
