@@ -44,7 +44,7 @@ Rc Database::getHeroes(QVector<models::Hero> &heroes) {
 
     while (query.next()) {
         models::Hero hero;
-        hero.id = query.value(0).toUInt();
+        hero.id = query.value(0).toULongLong();
         hero.name = query.value(1).toString();
         hero.setId = query.value(2).toUInt();
         hero.imgPath = query.value(3).toString();
@@ -53,7 +53,7 @@ Rc Database::getHeroes(QVector<models::Hero> &heroes) {
     return Rc::Ok;
 }
 
-Rc Database::getHeroesBySetId(int setId, QVector<models::Hero> &heroes) {
+Rc Database::getHeroesBySetId(quint64 setId, QVector<models::Hero> &heroes) {
     const char op[] = "Database::getHeroesBySetId";
 
     QSqlQuery query;
@@ -71,7 +71,7 @@ Rc Database::getHeroesBySetId(int setId, QVector<models::Hero> &heroes) {
 
     while (query.next()) {
         models::Hero hero;
-        hero.id = query.value(0).toUInt();
+        hero.id = query.value(0).toULongLong();
         hero.name = query.value(1).toString();
         hero.imgPath = query.value(2).toString();
         heroes.append(std::move(hero));
@@ -92,7 +92,7 @@ Rc Database::getMaps(QVector<models::GameMap> &maps) {
 
     while (query.next()) {
         models::GameMap map;
-        map.id = query.value(0).toUInt();
+        map.id = query.value(0).toULongLong();
         map.name = query.value(1).toString();
         map.setId = query.value(2).toUInt();
         map.imgPath = query.value(3).toString();
@@ -114,7 +114,7 @@ Rc Database::getSets(QVector<models::GameSetShort> &sets) {
 
     while (query.next()) {
         models::GameSetShort set;
-        set.id = query.value(0).toUInt();
+        set.id = query.value(0).toULongLong();
         set.name = query.value(1).toString();
         set.imgPath = query.value(2).toString();
         set.releasedAt = query.value(3).toDate();
@@ -136,7 +136,7 @@ Rc Database::getSHM(QVector<models::GameSet> &sets) {
 
     while (query.next()) {
         models::GameSet set;
-        set.id = query.value(0).toUInt();
+        set.id = query.value(0).toULongLong();
         set.name = query.value(1).toString();
         set.imgPath = query.value(2).toString();
         set.releasedAt = query.value(3).toDate();
@@ -144,18 +144,18 @@ Rc Database::getSHM(QVector<models::GameSet> &sets) {
         QSqlQuery heroQuery;
         ok = heroQuery.prepare("SELECT id, name, img_path FROM heroes WHERE set_id = :setId");
         if (!ok) {
-            lwarn(op) << "hero sql error: " << heroQuery.lastError().text();
+            lwarn(op) << "hero sql prepare error: " << heroQuery.lastError().text();
             return Rc::ErrPrepareQuery;
         }
         heroQuery.bindValue(":setId", set.id);
         if (!heroQuery.exec()) {
-            lwarn(op) << "sql error: " << heroQuery.lastError().text();
+            lwarn(op) << "hero sql exec error: " << heroQuery.lastError().text();
             return Rc::ErrExecQuery;
         }
         QVector<models::Hero> heroes;
         while (heroQuery.next()) {
             models::Hero hero;
-            hero.id = heroQuery.value(0).toUInt();
+            hero.id = heroQuery.value(0).toULongLong();
             hero.name = heroQuery.value(1).toString();
             hero.imgPath = heroQuery.value(2).toString();
             heroes.append(std::move(hero));
@@ -166,18 +166,18 @@ Rc Database::getSHM(QVector<models::GameSet> &sets) {
         QSqlQuery mapQuery;
         ok = mapQuery.prepare("SELECT id, name, img_path FROM maps WHERE set_id = :setId");
         if (!ok) {
-            lwarn(op) << "map sql error: " << mapQuery.lastError().text();
+            lwarn(op) << "map sql prepare error: " << mapQuery.lastError().text();
             return Rc::ErrPrepareQuery;
         }
         mapQuery.bindValue(":setId", set.id);
         if (!mapQuery.exec()) {
-            lwarn(op) << "sql error: " << mapQuery.lastError().text();
+            lwarn(op) << "map sql exec error: " << mapQuery.lastError().text();
             return Rc::ErrExecQuery;
         }
         QVector<models::GameMap> maps;
         while (mapQuery.next()) {
             models::GameMap map;
-            map.id = mapQuery.value(0).toUInt();
+            map.id = mapQuery.value(0).toULongLong();
             map.name = mapQuery.value(1).toString();
             map.imgPath = mapQuery.value(2).toString();
             maps.append(std::move(map));
@@ -185,6 +185,37 @@ Rc Database::getSHM(QVector<models::GameSet> &sets) {
         set.maps = std::move(maps);
 
         sets.append(std::move(set));
+    }
+    return Rc::Ok;
+}
+
+Rc Database::getCardsByHeroId(quint64 heroId, QVector<models::Card> &cards) {
+    const char op[] = "Database::getCardsByHeroId";
+
+    QSqlQuery query;
+
+    bool ok = query.prepare("SELECT id, name, description, count, img_path, hero_id, card_type_id "
+                            "FROM cards WHERE hero_id = :heroId");
+    if (!ok) {
+        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        return Rc::ErrExecQuery;
+    }
+    query.bindValue(":heroId", heroId);
+    if (!query.exec()) {
+        lwarn(op) << "sql exec error: " << query.lastError().text();
+        return Rc::ErrExecQuery;
+    }
+
+    while (query.next()) {
+        models::Card card;
+        card.id = query.value(0).toULongLong();
+        card.name = query.value(1).toString();
+        card.description = query.value(2).toString();
+        card.count = query.value(3).toULongLong();
+        card.imgPath = query.value(4).toString();
+        card.heroId = query.value(5).toULongLong();
+        card.cardTypeId = query.value(6).toULongLong();
+        cards.append(std::move(card));
     }
     return Rc::Ok;
 }

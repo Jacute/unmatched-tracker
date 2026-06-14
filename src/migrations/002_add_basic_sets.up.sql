@@ -31,6 +31,7 @@ ON CONFLICT(name) DO UPDATE SET
 
 INSERT INTO heroes (name, set_id, img_path)
 VALUES
+-- Battle of Legends, Volume One
 (
     'Medusa',
     (SELECT id FROM sets WHERE name = 'Battle of Legends, Volume One'),
@@ -51,6 +52,7 @@ VALUES
     (SELECT id FROM sets WHERE name = 'Battle of Legends, Volume One'),
     'qrc:/qt/qml/Tracker/ui/assets/img/set/battle_of_legends1/heroes/alice/avatar.webp'
 ),
+-- Cobble & Fog
 (
     'Dracula',
     (SELECT id FROM sets WHERE name = 'Cobble & Fog'),
@@ -71,6 +73,7 @@ VALUES
     (SELECT id FROM sets WHERE name = 'Cobble & Fog'),
     'qrc:/qt/qml/Tracker/ui/assets/img/set/cobble_fog/heroes/invisible_man/avatar.webp'
 ),
+-- The Witcher - Steel & Silver
 (
     'Geralt of Rivia',
     (SELECT id FROM sets WHERE name = 'The Witcher - Steel & Silver'),
@@ -86,6 +89,7 @@ VALUES
     (SELECT id FROM sets WHERE name = 'The Witcher - Steel & Silver'),
     'qrc:/qt/qml/Tracker/ui/assets/img/set/the_witcher_steel_silver/heroes/ancient_leshen/avatar.webp'
 ),
+-- The Witcher - Realms Fall
 (
     'Philippa',
     (SELECT id FROM sets WHERE name = 'The Witcher - Realms Fall'),
@@ -107,6 +111,7 @@ ON CONFLICT(name) DO UPDATE SET
 
 INSERT INTO maps (name, set_id, img_path)
 VALUES
+-- Battle of Legends, Volume One
 (
     'Marmoreal',
     (SELECT id FROM sets WHERE name = 'Battle of Legends, Volume One'),
@@ -117,6 +122,7 @@ VALUES
     (SELECT id FROM sets WHERE name = 'Battle of Legends, Volume One'),
     'qrc:/qt/qml/Tracker/ui/assets/img/set/battle_of_legends1/maps/sarpedon.webp' 
 ),
+-- Cobble & Fog
 (
     'Baskerville Manor',
     (SELECT id FROM sets WHERE name = 'Cobble & Fog'),
@@ -127,6 +133,7 @@ VALUES
     (SELECT id FROM sets WHERE name = 'Cobble & Fog'),
     'qrc:/qt/qml/Tracker/ui/assets/img/set/cobble_fog/maps/soho.webp' 
 ),
+-- Robin Hood VS Bigfoot
 (
     'Sherwood Forest',
     (SELECT id FROM sets WHERE name = 'Robin Hood VS Bigfoot'),
@@ -137,11 +144,13 @@ VALUES
     (SELECT id FROM sets WHERE name = 'Robin Hood VS Bigfoot'),
     'qrc:/qt/qml/Tracker/ui/assets/img/set/robin_hood_vs_bigfoot/maps/yukon.webp' 
 ),
+-- Battle of Legends, Volume Two
 (
     'Hanging Gardens',
-    (SELECT id FROM sets WHERE name = 'Cobble & Fog'),
+    (SELECT id FROM sets WHERE name = 'Battle of Legends, Volume Two'),
     'qrc:/qt/qml/Tracker/ui/assets/img/set/battle_of_legends2/maps/hanging_gardens.webp' 
 ),
+-- The Witcher - Steel & Silver
 (
     'Kaer Morhen',
     (SELECT id FROM sets WHERE name = 'The Witcher - Steel & Silver'),
@@ -152,6 +161,7 @@ VALUES
     (SELECT id FROM sets WHERE name = 'The Witcher - Steel & Silver'),
     'qrc:/qt/qml/Tracker/ui/assets/img/set/the_witcher_steel_silver/maps/fayrlund_forest.webp' 
 ),
+-- The Witcher - Realms Fall
 (
     'Streets of Novigrad',
     (SELECT id FROM sets WHERE name = 'The Witcher - Realms Fall'),
@@ -162,6 +172,6 @@ VALUES
     (SELECT id FROM sets WHERE name = 'The Witcher - Realms Fall'),
     'qrc:/qt/qml/Tracker/ui/assets/img/set/the_witcher_realms_fall/maps/naglfar.webp' 
 )
-ON CONFLICT(name) DO UPDATE SET
+ON CONFLICT (name) DO UPDATE SET
     set_id = excluded.set_id,
     img_path = excluded.img_path;

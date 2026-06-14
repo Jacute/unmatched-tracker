@@ -33,4 +33,14 @@ struct GameSet : public GameSetShort {
     QVector<Hero> heroes;
     QVector<GameMap> maps;
 };
+
+struct Card {
+    quint64 id;
+    QString name;
+    QString description;
+    quint64 count;
+    QString imgPath;
+    quint64 heroId;
+    quint64 cardTypeId;
+};
 } // namespace models

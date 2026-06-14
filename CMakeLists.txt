@@ -31,6 +31,7 @@ set(plain_qml_files
     ${QML_DIR}/views/Random.qml
     ${QML_DIR}/components/Card.qml
     ${QML_DIR}/components/CardGrid.qml
+    ${QML_DIR}/components/BigImagePopup.qml
     ${QML_DIR}/components/Header.qml
     ${QML_DIR}/components/Menu.qml
     ${QML_DIR}/components/RandomWheel.qml

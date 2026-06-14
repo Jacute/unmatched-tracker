@@ -1,6 +1,6 @@
 import QtQuick 2.15
+import QtQuick.Controls 2.15
 import Tracker
-import Qt5Compat.GraphicalEffects
 
 Rectangle {
     property string cardName
@@ -8,7 +8,7 @@ Rectangle {
     property int fontSize: 14
     property string labelPosition: "top"
     property int imgRadius: 0
-    property alias cardImgFillMode: img.fillMode
+    property Popup pressedPopup: null
 
     signal imgClicked()
 
@@ -24,7 +24,7 @@ Rectangle {
             id: nameTop
             visible: root.labelPosition === "top"
             width: img.width
-            height: root.height * 0.15
+            height: root.height * 0.2
 
             Text {
                 text: root.cardName
@@ -38,8 +38,12 @@ Rectangle {
         }
 
         // Card image
-        Rectangle {
-            id: imageContainer
+        Image {
+            property bool isHovered: mouseArea.containsMouse
+            property bool isLongPressed: false
+
+            id: img
+            source: root.cardImg
             width: root.width
             height: {
                 var labelHeight = 0
@@ -50,44 +54,50 @@ Rectangle {
                 } 
                 return parent.height - labelHeight
             }
-            color: "transparent"
-
-            Image {
-                property bool isHovered: mouseArea.containsMouse
-
-                id: img
-                source: root.cardImg
-                anchors.fill: parent
-
-                smooth: true
-                visible: false
-            }
-
-            // Round
-            Rectangle {
-                id: mask
-                width: parent.width
-                height: parent.height
-                radius: root.imgRadius
-                visible: false
-            }
-            OpacityMask {
-                anchors.fill: parent
-                source: img
-                maskSource: mask
-                scale: mouseArea.containsMouse ? 1.02 : 1.0
-
-                Behavior on scale {
-                    NumberAnimation { duration: 150 }
-                }
-            }
+            fillMode: Image.PreserveAspectFit
+            smooth: true
 
             MouseArea {
                 id: mouseArea
                 anchors.fill: parent
                 hoverEnabled: true
+                
+                onPressed: {
+                    longPressTimer.start()
+                    img.scale = 1.02
+                }
+                
+                onReleased: {
+                    if (longPressTimer.running) {
+                        longPressTimer.stop()
+                        console.debug("[Card] Short tap")
+                        root.imgClicked()
+                    }
+                    img.scale = 1.0
+                    img.isLongPressed = false
+                }
+                
+                onCanceled: {
+                    img.scale = 1.0
+                    img.isLongPressed = false
+                }
 
-                onClicked: root.imgClicked()
+                Timer {
+                    id: longPressTimer
+                    interval: 500
+                    running: false
+                    onTriggered: {
+                        img.isLongPressed = true
+                        if (root.pressedPopup) {
+                            root.pressedPopup.open()
+                        }
+                        img.scale = 1.0
+                    }
+                }
+            }
+
+            Behavior on scale {
+                NumberAnimation { duration: 150 }
             }
         }
 
@@ -96,7 +106,7 @@ Rectangle {
             id: nameBottom
             visible: root.labelPosition === "bottom"
             width: img.width
-            height: root.height * 0.15
+            height: root.height * 0.2
             
             Text {
                 text: root.cardName

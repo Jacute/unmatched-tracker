@@ -32,7 +32,7 @@ QVariantList Backend::getHeroes() const {
     return mapHeroesQml(heroes);
 }
 
-QVariantList Backend::getHeroesBySetId(int setId) const {
+QVariantList Backend::getHeroesBySetId(quint64 setId) const {
     const char op[] = "Backend::getHeroesBySetId";
 
     linfo(op) << "getting heroes by set id";
@@ -130,6 +130,30 @@ QVariantList Backend::getSHM() const {
         obj["maps"] = std::move(maps);
 
         list.append(std::move(obj));
+    }
+    return list;
+}
+
+QVariantList Backend::getCardsByHeroId(quint64 heroId) const {
+    const char op[] = "Backend::getCardsByHeroId";
+
+    QVector<models::Card> cards;
+    Rc rc = db_.getCardsByHeroId(heroId, cards);
+    if (rc != Rc::Ok) {
+        return QVariantList{};
+    }
+    ldebug(op) << "cards by hero id got from db";
+
+    QVariantList list;
+    for (const auto &c : cards) {
+        QVariantMap obj;
+        obj["id"] = c.id;
+        obj["name"] = c.name;
+        obj["description"] = c.description;
+        obj["count"] = c.count;
+        obj["img_path"] = c.imgPath;
+        obj["hero_id"] = c.heroId;
+        obj["card_type_id"] = c.cardTypeId;
     }
     return list;
 }

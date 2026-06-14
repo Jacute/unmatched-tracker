@@ -13,7 +13,6 @@ Item {
         labelPosition: "bottom"
 
         imgRadius: width / columns * 0.02
-        cardImgFillMode: Image.Stretch
     }
 
     ListModel {

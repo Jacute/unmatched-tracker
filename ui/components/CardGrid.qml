@@ -7,7 +7,6 @@ Grid {
     property alias model: repeater.model
     property real imgRadius: 0
     property string labelPosition: "top"
-    property int cardImgFillMode: Image.PreserveAspectFit
 
     signal modelClicked(int index)
 
@@ -37,7 +36,6 @@ Grid {
                 cardImg: parent.modelData.img_path
                 fontSize: Common.defaultFontSize
                 labelPosition: root.labelPosition
-                cardImgFillMode: cardImgFillMode
 
                 onImgClicked: root.modelClicked(item.index)
             }
