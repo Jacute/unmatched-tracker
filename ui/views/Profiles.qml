@@ -46,7 +46,7 @@ Rectangle {
                     color: Common.textColor
                     selectionColor: Common.accent
                     selectedTextColor: Common.primary
-                    placeholderText: "Имя игрока"
+                    placeholderText: qsTr("Player name")
                     placeholderTextColor: Common.textHint
                     font.pixelSize: Common.defaultFontSize
                     verticalAlignment: TextInput.AlignVCenter
@@ -61,7 +61,7 @@ Rectangle {
                 Layout.preferredWidth: root.width * 0.2
                 Layout.preferredHeight: root.controlHeight
                 radius: Common.defaultRadius
-                text: "Добавить"
+                text: qsTr("Add")
                 fontSize: Common.defaultFontSize
                 onClicked: root.createProfile()
             }
@@ -143,7 +143,7 @@ Rectangle {
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: profilesModel.count === 0
-            text: "Профилей пока нет"
+            text: qsTr("No profiles yet")
             color: Common.textHint
             font.pixelSize: Common.defaultFontSize
             horizontalAlignment: Text.AlignHCenter
@@ -174,16 +174,16 @@ Rectangle {
         if (!result.ok) {
             switch (result.error) {
             case Common.profileErrEmptyName:
-                statusText.text = "Введите имя игрока"
+                statusText.text = qsTr("Enter a player name")
                 break
             case Common.profileErrNameTooLong:
-                statusText.text = "Имя игрока слишком длинное"
+                statusText.text = qsTr("Player name is too long")
                 break
             case Common.profileErrDuplicateName:
-                statusText.text = "Такой профиль уже существует"
+                statusText.text = qsTr("This profile already exists")
                 break
             default:
-                statusText.text = "Не удалось создать профиль"
+                statusText.text = qsTr("Could not create profile")
                 break
             }
             return
@@ -199,10 +199,10 @@ Rectangle {
         if (!result.ok) {
             switch (result.error) {
             case Common.profileErrNotFound:
-                statusText.text = "Профиль уже удалён"
+                statusText.text = qsTr("Profile has already been deleted")
                 break
             default:
-                statusText.text = "Не удалось удалить профиль"
+                statusText.text = qsTr("Could not delete profile")
                 break
             }
             loadProfiles()

@@ -27,7 +27,7 @@ Rectangle {
             MultiSelectDropdown {
                 id: setFilter
                 anchors.fill: parent
-                text: "Set"
+                text: qsTr("Set")
             }
         }
 
@@ -45,7 +45,7 @@ Rectangle {
                 MultiSelectDropdown {
                     id: mapFilter
                     anchors.fill: parent
-                    text: "Map"
+                    text: qsTr("Map")
                 }
             }
 
@@ -57,7 +57,7 @@ Rectangle {
                 MultiSelectDropdown {
                     id: heroFilter
                     anchors.fill: parent
-                    text: "Hero"
+                    text: qsTr("Hero")
                 }
             }
         }

@@ -49,13 +49,13 @@ ApplicationWindow {
         function getHeaderText() {
             switch (root.page) {
             case Common.pageSet:
-                return "Наборы персонажей"
+                return qsTr("Character Sets")
             case Common.pageRandom:
-                return "Рандомайзер"
+                return qsTr("Randomizer")
             case Common.pageProfiles:
-                return "Профили игроков"
+                return qsTr("Player Profiles")
             default:
-                return "Unmatched Tracker"
+                return qsTr("Unmatched Tracker")
             }
         }
 

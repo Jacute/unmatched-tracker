@@ -182,19 +182,19 @@ Rectangle {
     ListModel {
         id: tabsModel
         ListElement {
-            text: "Описание и карты"
+            text: qsTr("Overview and Cards")
             path: "Cards.qml"
         }
         ListElement {
-            text: "Общая статистика"
+            text: qsTr("Global Stats")
             path: "CommonStat.qml"
         }
         ListElement {
-            text: "Статистика профиля"
+            text: qsTr("Profile Stats")
             path: "ProfileStat.qml"
         }
         ListElement {
-            text: "Матчапы"
+            text: qsTr("Matchups")
             path: "Matchups.qml"
         }
     }

@@ -34,7 +34,7 @@ Rectangle {
 
                 Text {
                     anchors.centerIn: parent
-                    text: "Filters"
+                    text: qsTr("Filters")
                     color: Common.textColor
                     font.pixelSize: Common.defaultFontSize
                 }
@@ -117,7 +117,7 @@ Rectangle {
                 id: rndMap
                 anchors.fill: parent
                 radius: 0
-                text: "Random map"
+                text: qsTr("Random map")
                 onClicked: {
                     if (root.hero1.name === Common.plugHero.name ||
                         root.hero2.name === Common.plugHero.name) {
@@ -145,7 +145,7 @@ Rectangle {
             Layout.preferredWidth: parent.width * 0.65
             Layout.preferredHeight: root.height * 0.05
             radius: height
-            text: "Save results"
+            text: qsTr("Save results")
         }
 
         Rectangle {

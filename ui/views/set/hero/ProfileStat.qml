@@ -6,6 +6,6 @@ Item {
         anchors.centerIn: parent
         color: Common.textHint
         font.pixelSize: Common.defaultFontSize
-        text: "Раздел в разработке"
+        text: qsTr("Section in development")
     }
 }

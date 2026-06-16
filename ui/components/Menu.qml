@@ -46,15 +46,15 @@ Drawer {
             id: repeater
             model: [
                 {
-                    text: "Наборы персонажей",
+                    text: qsTr("Character Sets"),
                     page: Common.pageSet
                 },
                 {
-                    text: "Рандомайзер",
+                    text: qsTr("Randomizer"),
                     page: Common.pageRandom
                 },
                 {
-                    text: "Профили игроков",
+                    text: qsTr("Player Profiles"),
                     page: Common.pageProfiles
                 }
             ]
