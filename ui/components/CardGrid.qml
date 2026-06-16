@@ -1,5 +1,6 @@
 pragma ComponentBehavior: Bound
 import QtQuick
+import QtQuick.Controls
 
 import Tracker
 
@@ -7,8 +8,10 @@ Grid {
     property alias model: repeater.model
     property real imgRadius: 0
     property string labelPosition: "top"
+    property Popup pressedPopup: null
 
     signal modelClicked(int index)
+    signal modelLongPressed(int index)
 
     id: root
     
@@ -40,8 +43,10 @@ Grid {
                 cardImg: parent.modelData.img_path
                 fontSize: Common.defaultFontSize
                 labelPosition: root.labelPosition
+                pressedPopup: root.pressedPopup
 
                 onImgClicked: root.modelClicked(item.index)
+                onImgLongPressed: root.modelLongPressed(item.index)
             }
         }
     }

@@ -11,6 +11,7 @@ Rectangle {
     property Popup pressedPopup: null
 
     signal imgClicked()
+    signal imgLongPressed()
 
     id: root
     color: "transparent"
@@ -89,6 +90,7 @@ Rectangle {
                     onTriggered: {
                         img.isLongPressed = true
                         if (root.pressedPopup) {
+                            root.imgLongPressed()
                             root.pressedPopup.open()
                         }
                         img.scale = 1.0

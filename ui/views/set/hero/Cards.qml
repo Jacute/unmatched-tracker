@@ -23,9 +23,20 @@ Item {
             rowSpacing: 5
             columns: 3
             labelPosition: "bottom"
+            pressedPopup: cardPopup
 
             imgRadius: width / columns * 0.02
+
+            onModelLongPressed: (index) => {
+                const card = cardModel.get(index)
+                cardPopup.img = card.img_path
+                cardPopup.text = card.card_name
+            }
         }
+    }
+
+    BigImagePopup {
+        id: cardPopup
     }
 
     ListModel {

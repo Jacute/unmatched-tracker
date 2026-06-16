@@ -1,5 +1,7 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+import QtQuick.Window 2.15
+import QtQuick.Layouts 2.15
 
 import Tracker
 
@@ -11,35 +13,45 @@ Popup {
     modal: true
     focus: true
     closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-    width: col.width
-    height: col.height
-    anchors.centerIn: parent.Overlay.overlay
+    width: ci.width
+    height: ci.height
+    parent: Overlay.overlay
+    anchors.centerIn: parent
     
     background: Rectangle {
         color: "transparent"
     }
     
-    contentItem: Column {
-        id: col
-        spacing: 10
-        anchors.centerIn: parent
+    contentItem: Rectangle {
+        id: ci
+        color: Common.secondary
+        width: Screen.width * 0.8
+        height: Screen.height * 0.5
+        radius: width * 0.1
         
-        Image {
-            id: enlargedImage
-            width: Screen.width * 0.5
-            anchors.horizontalCenter: parent.horizontalCenter
-            fillMode: Image.PreserveAspectFit
-            smooth: true
-        }
-        
-        Text {
-            id: text
-            color: Common.textColor
-            font.pixelSize: Common.defaultFontSize + 4
-            font.bold: true
-            horizontalAlignment: Text.AlignHCenter
-            width: imagePopup.width
-            wrapMode: Text.WordWrap
+        ColumnLayout {
+            anchors.fill: parent
+            anchors.margins: ci.width * 0.06
+
+            Image {
+                id: enlargedImage
+                Layout.preferredHeight: ci.height * 0.8
+                Layout.fillWidth: true
+                Layout.alignment: Qt.AlignHCenter
+                fillMode: Image.PreserveAspectFit
+                smooth: true
+            }
+            Text {
+                id: text
+                color: Common.textColor
+                font.pixelSize: Common.defaultFontSize + 4
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                verticalAlignment: Text.AlignVCenter
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                wrapMode: Text.WordWrap
+            }
         }
     }
     
