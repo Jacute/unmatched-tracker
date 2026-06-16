@@ -7,5 +7,7 @@ enum class Rc : uint16_t {
     ErrCreateDb = 1,
     ErrOpenFile = 2,
     ErrExecQuery = 3,
-    ErrPrepareQuery = 4
+    ErrPrepareQuery = 4,
+    ErrDuplicate = 5,
+    ErrNotFound = 6
 };

@@ -52,6 +52,10 @@ Drawer {
                 {
                     text: "Рандомайзер",
                     page: Common.pageRandom
+                },
+                {
+                    text: "Профили игроков",
+                    page: Common.pageProfiles
                 }
             ]
 

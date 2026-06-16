@@ -43,4 +43,10 @@ struct Card {
     quint64 heroId;
     quint64 cardTypeId;
 };
+
+struct PlayerProfile {
+    quint64 id;
+    QString name;
+    QString createdAt;
+};
 } // namespace models

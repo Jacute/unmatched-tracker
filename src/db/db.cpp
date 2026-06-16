@@ -195,7 +195,7 @@ Rc Database::getCardsByHeroId(quint64 heroId, QVector<models::Card> &cards) {
     QSqlQuery query;
 
     bool ok = query.prepare("SELECT id, name, description, count, img_path, hero_id, card_type_id "
-                            "FROM cards WHERE hero_id = :heroId");
+                            "FROM cards WHERE hero_id = :heroId ORDER BY card_type_id");
     if (!ok) {
         lwarn(op) << "sql prepare error: " << query.lastError().text();
         return Rc::ErrExecQuery;
@@ -216,6 +216,70 @@ Rc Database::getCardsByHeroId(quint64 heroId, QVector<models::Card> &cards) {
         card.heroId = query.value(5).toULongLong();
         card.cardTypeId = query.value(6).toULongLong();
         cards.append(std::move(card));
+    }
+    return Rc::Ok;
+}
+
+Rc Database::getProfiles(QVector<models::PlayerProfile> &profiles) {
+    const char op[] = "Database::getProfiles";
+
+    QSqlQuery query;
+    bool ok = query.exec("SELECT id, name, created_at FROM player_profiles ORDER BY name");
+    if (!ok) {
+        lwarn(op) << "sql error: " << query.lastError().text();
+        return Rc::ErrExecQuery;
+    }
+
+    while (query.next()) {
+        models::PlayerProfile profile;
+        profile.id = query.value(0).toULongLong();
+        profile.name = query.value(1).toString();
+        profile.createdAt = query.value(2).toString();
+        profiles.append(std::move(profile));
+    }
+    return Rc::Ok;
+}
+
+Rc Database::createProfile(const QString &name) {
+    const char op[] = "Database::createProfile";
+
+    QSqlQuery query;
+    bool ok = query.prepare("INSERT INTO player_profiles (name) VALUES (:name)");
+    if (!ok) {
+        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        return Rc::ErrPrepareQuery;
+    }
+
+    query.bindValue(":name", name.trimmed());
+    if (!query.exec()) {
+        const QSqlError error = query.lastError();
+        lwarn(op) << "sql exec error: " << error.text();
+        if (error.databaseText().contains("UNIQUE constraint failed")) {
+            return Rc::ErrDuplicate;
+        }
+        return Rc::ErrExecQuery;
+    }
+    return Rc::Ok;
+}
+
+Rc Database::deleteProfile(quint64 id) {
+    const char op[] = "Database::deleteProfile";
+
+    QSqlQuery query;
+    bool ok = query.prepare("DELETE FROM player_profiles WHERE id = :id");
+    if (!ok) {
+        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        return Rc::ErrPrepareQuery;
+    }
+
+    query.bindValue(":id", id);
+    if (!query.exec()) {
+        lwarn(op) << "sql exec error: " << query.lastError().text();
+        return Rc::ErrExecQuery;
+    }
+    if (query.numRowsAffected() == 0) {
+        lwarn(op) << "profile not found: " << id;
+        return Rc::ErrNotFound;
     }
     return Rc::Ok;
 }

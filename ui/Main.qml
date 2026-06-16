@@ -7,7 +7,6 @@ import Tracker
 import "./views"
 import "./views/set"
 import "./components"
-import "./components/ico"
 
 ApplicationWindow {
     readonly property bool isMobile: Qt.platform.os === "android" || Qt.platform.os === "ios"
@@ -48,9 +47,16 @@ ApplicationWindow {
         }
 
         function getHeaderText() {
-            if (root.page === Common.pageSet) return "Наборы персонажей"
-            if (root.page === Common.pageRandom) return "Рандомайзер"
-            return "Unmatched Tracker"
+            switch (root.page) {
+            case Common.pageSet:
+                return "Наборы персонажей"
+            case Common.pageRandom:
+                return "Рандомайзер"
+            case Common.pageProfiles:
+                return "Профили игроков"
+            default:
+                return "Unmatched Tracker"
+            }
         }
 
         function getIconType() {
@@ -80,6 +86,12 @@ ApplicationWindow {
             anchors.fill: parent
             visible: root.page === Common.pageRandom
         }
+
+        Profiles {
+            id: profilesPage
+            anchors.fill: parent
+            visible: root.page === Common.pageProfiles
+        }
     }
 
     onClosing: (close) => {
@@ -96,6 +108,8 @@ ApplicationWindow {
             }
             break
         case Common.pageRandom:
+            break
+        case Common.pageProfiles:
             break
         }
     }

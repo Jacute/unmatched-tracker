@@ -41,6 +41,9 @@ class Database : public QObject {
     // @param[out] cards Reference to vector with cards
     // @return Return code
     Rc getCardsByHeroId(quint64 heroId, QVector<models::Card> &cards);
+    Rc getProfiles(QVector<models::PlayerProfile> &profiles);
+    Rc createProfile(const QString &name);
+    Rc deleteProfile(quint64 id);
 
   private:
     Rc executeSqlFile(const QString &path);

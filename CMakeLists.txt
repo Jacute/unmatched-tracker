@@ -32,6 +32,7 @@ set(plain_qml_files
     ${QML_DIR}/views/set/hero/ProfileStat.qml
     ${QML_DIR}/views/set/hero/Matchups.qml
     ${QML_DIR}/views/Random.qml
+    ${QML_DIR}/views/Profiles.qml
     ${QML_DIR}/components/Card.qml
     ${QML_DIR}/components/CardGrid.qml
     ${QML_DIR}/components/BigImagePopup.qml

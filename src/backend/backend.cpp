@@ -1,5 +1,6 @@
 #include "backend.h"
 #include "../log.h"
+#include "errors.h"
 
 Backend::Backend(Database &db, QObject *parent)
     : db_(db),
@@ -157,4 +158,79 @@ QVariantList Backend::getCardsByHeroId(quint64 heroId) const {
         list.append(obj);
     }
     return list;
+}
+
+QVariantList Backend::getProfiles() const {
+    const char op[] = "Backend::getProfiles";
+
+    QVector<models::PlayerProfile> profiles;
+    Rc rc = db_.getProfiles(profiles);
+    if (rc != Rc::Ok) {
+        return QVariantList{};
+    }
+    ldebug(op) << "profiles got from db";
+
+    QVariantList list;
+    for (const auto &p : profiles) {
+        QVariantMap obj;
+        obj["id"] = p.id;
+        obj["name"] = p.name;
+        obj["created_at"] = p.createdAt;
+        list.append(std::move(obj));
+    }
+    return list;
+}
+
+QVariantMap Backend::createProfile(const QString &name) {
+    const char op[] = "Backend::createProfile";
+    QVariantMap result;
+    result["ok"] = false;
+
+    const QString trimmedName = name.trimmed();
+    if (trimmedName.isEmpty()) {
+        lwarn(op) << "profile name is empty";
+        result["error"] = err_profile::EmptyName;
+        return result;
+    }
+
+    if (trimmedName.size() > 256) {
+        lwarn(op) << "profile name is long";
+        result["error"] = err_profile::NameTooLong;
+        return result;
+    }
+
+    Rc rc = db_.createProfile(trimmedName);
+    switch (rc) {
+    case Rc::Ok:
+        result["ok"] = true;
+        result["error"] = err::None;
+        break;
+    case Rc::ErrDuplicate:
+        result["error"] = err_profile::DuplicateName;
+        break;
+    default:
+        result["error"] = err::DbError;
+        break;
+    }
+    return result;
+}
+
+QVariantMap Backend::deleteProfile(quint64 id) {
+    QVariantMap result;
+    result["ok"] = false;
+
+    Rc rc = db_.deleteProfile(id);
+    switch (rc) {
+    case Rc::Ok:
+        result["ok"] = true;
+        result["error"] = err::None;
+        break;
+    case Rc::ErrNotFound:
+        result["error"] = err_profile::NotFound;
+        break;
+    default:
+        result["error"] = err::DbError;
+        break;
+    }
+    return result;
 }
