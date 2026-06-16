@@ -38,8 +38,6 @@ Rectangle {
                 fillMode: Image.PreserveAspectCrop
                 width: parent.width
                 height: parent.height
-                x: 0
-                y: 0
             }
 
             Image {
@@ -50,8 +48,6 @@ Rectangle {
                 fillMode: Image.PreserveAspectCrop
                 width: parent.width
                 height: parent.height
-                x: 0
-                y: 0
                 visible: root.switchingHero
             }
             
@@ -174,11 +170,9 @@ Rectangle {
             Loader {
                 id: pageLoader
                 anchors.fill: parent
-                onStatusChanged: {
-                    if (status === Loader.Ready) {
-                        console.debug("Hero subpage loaded:", item)
-                        root.setLoadedSectionCtx()
-                    }
+                onLoaded: {
+                    console.debug("Hero subpage loaded: ", item)
+                    root.setLoadedSectionCtx()
                 }
                 source: tabsModel.get(root.activeTabInd).path
             }
