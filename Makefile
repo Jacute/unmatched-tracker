@@ -37,7 +37,7 @@ $(BUILD_ANDROID_ARM_v8A_DIR):
 	-S . -B $(BUILD_ANDROID_ARM_v8A_DIR) \
 	-GNinja
 
-build: $(BUILD_ANDROID_AMD64_DIR)
+build: $(BUILD_ANDROID_AMD64_DIR) $(BUILD_ANDROID_ARM_v8A_DIR)
 ifeq ($(ARCH), amd64)
 	cmake --build $(BUILD_ANDROID_AMD64_DIR) --target apk
 else ifeq ($(ARCH), arm64)

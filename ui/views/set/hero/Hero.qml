@@ -118,6 +118,7 @@ Rectangle {
                 onStatusChanged: {
                     if (status === Loader.Ready) {
                         console.debug("Hero subpage loaded:", item)
+                        root.setLoadedSectionCtx()
                     }
                 }
                 source: tabsModel.get(root.activeTabInd).path
@@ -149,6 +150,8 @@ Rectangle {
         id: heroesModel
     }
 
+    onHeroIndChanged: setLoadedSectionCtx()
+
     onSetIdChanged: {
         console.debug("getting heroes for set id " + setId)
         heroesModel.clear()
@@ -159,6 +162,17 @@ Rectangle {
                 name: backHeroes[i].name,
                 img_path: backHeroes[i].img_path
             })
+        }
+        setLoadedSectionCtx()
+    }
+
+    function setLoadedSectionCtx() {
+        if (!pageLoader.item || heroesModel.count <= root.heroInd) {
+            return
+        }
+
+        if (typeof pageLoader.item.heroId !== "undefined") {
+            pageLoader.item.heroId = heroesModel.get(root.heroInd).id
         }
     }
 }

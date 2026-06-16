@@ -154,6 +154,7 @@ QVariantList Backend::getCardsByHeroId(quint64 heroId) const {
         obj["img_path"] = c.imgPath;
         obj["hero_id"] = c.heroId;
         obj["card_type_id"] = c.cardTypeId;
+        list.append(obj);
     }
     return list;
 }

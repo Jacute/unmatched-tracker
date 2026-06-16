@@ -40,7 +40,7 @@ class Database : public QObject {
     // @param[in] heroId
     // @param[out] cards Reference to vector with cards
     // @return Return code
-    Rc Database::getCardsByHeroId(quint64 heroId, QVector<models::Card> &cards);
+    Rc getCardsByHeroId(quint64 heroId, QVector<models::Card> &cards);
 
   private:
     Rc executeSqlFile(const QString &path);

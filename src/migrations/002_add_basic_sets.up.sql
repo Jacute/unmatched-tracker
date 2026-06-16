@@ -104,6 +104,26 @@ VALUES
     'Eredin',
     (SELECT id FROM sets WHERE name = 'The Witcher - Realms Fall'),
     'qrc:/qt/qml/Tracker/ui/assets/img/set/the_witcher_realms_fall/heroes/eredin/avatar.webp'
+),
+(
+    'Raphael',
+    (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
+    'qrc:/qt/qml/Tracker/ui/assets/img/set/adventures/teenage_mutant_ninja_turtles/heroes/raphael/avatar.webp'
+),
+(
+    'Michelangelo',
+    (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
+    'qrc:/qt/qml/Tracker/ui/assets/img/set/adventures/teenage_mutant_ninja_turtles/heroes/michelangelo/avatar.webp'
+),
+(
+    'Leonardo',
+    (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
+    'qrc:/qt/qml/Tracker/ui/assets/img/set/adventures/teenage_mutant_ninja_turtles/heroes/leonardo/avatar.webp'
+),
+(
+    'Donatello',
+    (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
+    'qrc:/qt/qml/Tracker/ui/assets/img/set/adventures/teenage_mutant_ninja_turtles/heroes/donatello/avatar.webp'
 )
 ON CONFLICT(name) DO UPDATE SET
     set_id = excluded.set_id,

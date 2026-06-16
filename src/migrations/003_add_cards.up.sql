@@ -1,7 +1,7 @@
 INSERT INTO card_types (id, name)
 VALUES
 (
-    1, 'attack',
+    1, 'attack'
 ),
 (
     2, 'defense'
@@ -11,12 +11,8 @@ VALUES
 ),
 (
     4, 'scheme'
-);
-ON CONFLICT(name) DO UPDATE SET
-    name = excluded.name,
-    count = excluded.count,
-    img_path = excluded.img_path,
-    hero_id = excluded.hero_id;
+) ON CONFLICT(name) DO UPDATE SET
+    id = excluded.id;
 
 ALTER TABLE cards ADD COLUMN card_type_id INTEGER REFERENCES card_types(id);
 

@@ -32,9 +32,9 @@ CREATE TABLE IF NOT EXISTS cards (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
     count INTEGER NOT NULL,
+    description TEXT,
     img_path TEXT,
     hero_id INTEGER,
     FOREIGN KEY (hero_id) REFERENCES heroes(id)
 );
-ALTER TABLE cards ADD description TEXT;
-ALTER TABLE cards ADD UNIQUE(hero_id, name);
+CREATE UNIQUE INDEX IF NOT EXISTS cards_hero_name_idx ON cards(hero_id, name);

@@ -31,6 +31,7 @@ void ImageRounded::setSrc(QString s) {
         return;
     }
     img_ = image;
+    radius_ = image.height() / 2; // default radius
 
     emit srcChanged();
     update();
