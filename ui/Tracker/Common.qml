@@ -22,6 +22,7 @@ QtObject {
 
     readonly property int defaultFontSize: 16
     readonly property int defaultRadius: 10
+    readonly property real borderLightFactor: 1.25
     
     // file path
     readonly property string assetsPrefix: "qrc:/qt/qml/Tracker/ui/assets"

@@ -71,7 +71,7 @@ Rectangle {
                 height: width
                 radius: width / 2
                 bgColor: Common.secondary
-                borderColor: Qt.lighter(Common.secondary, 1.35)
+                borderColor: Qt.lighter(Common.secondary, Common.borderLightFactor)
                 text: "‹"
                 fontSize: height * 0.65
                 anchors {
@@ -90,7 +90,7 @@ Rectangle {
                 height: width
                 radius: width / 2
                 bgColor: Common.secondary
-                borderColor: Qt.lighter(Common.secondary, 1.35)
+                borderColor: Qt.lighter(Common.secondary, Common.borderLightFactor)
                 text: "›"
                 fontSize: height * 0.65
                 anchors {

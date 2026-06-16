@@ -9,32 +9,39 @@ import "../components"
 Rectangle {
     id: root
     color: Common.bgColor
+    readonly property real pageMargin: width * 0.04
+    readonly property real controlHeight: profileNameInput.font.pixelSize * 3
+    readonly property real contentSpacing: height * 0.02
+    readonly property real itemSpacing: controlHeight * 0.15
+    readonly property real fieldHPadding: controlHeight * 0.25
+    readonly property real listHPadding: controlHeight * 0.3
+    readonly property real deleteButtonSize: controlHeight * 0.7
 
     ColumnLayout {
         anchors {
             fill: parent
-            margins: parent.width * 0.04
+            margins: root.pageMargin
         }
-        spacing: parent.height * 0.02
+        spacing: root.contentSpacing
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 8
+            spacing: root.itemSpacing
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: profileNameInput.font.pixelSize * 3
+                Layout.preferredHeight: root.controlHeight
                 color: Common.primary
                 radius: Common.defaultRadius
                 border.width: 1
-                border.color: Qt.lighter(Common.secondary, 1.25)
+                border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
 
                 TextField {
                     id: profileNameInput
                     anchors {
                         fill: parent
-                        leftMargin: 12
-                        rightMargin: 12
+                        leftMargin: root.fieldHPadding
+                        rightMargin: root.fieldHPadding
                     }
                     color: Common.textColor
                     selectionColor: Common.accent
@@ -52,7 +59,7 @@ Rectangle {
 
             Btn {
                 Layout.preferredWidth: root.width * 0.2
-                Layout.preferredHeight: root.height * 0.05
+                Layout.preferredHeight: root.controlHeight
                 radius: Common.defaultRadius
                 text: "Добавить"
                 fontSize: Common.defaultFontSize
@@ -82,26 +89,26 @@ Rectangle {
             Layout.fillHeight: true
             clip: true
             model: profilesModel
-            spacing: 8
+            spacing: root.itemSpacing
 
             delegate: Rectangle {
                 required property string name
                 required property int id
 
                 width: profilesList.width
-                height: Math.max(root.height * 0.065, 48)
+                height: root.controlHeight
                 color: Common.secondary
                 radius: Common.defaultRadius
                 border.width: 1
-                border.color: Qt.lighter(Common.secondary, 1.18)
+                border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
 
                 Text {
                     anchors {
                         left: parent.left
                         right: deleteBtn.left
                         verticalCenter: parent.verticalCenter
-                        leftMargin: 14
-                        rightMargin: 8
+                        leftMargin: root.listHPadding
+                        rightMargin: root.itemSpacing
                     }
                     text: name
                     color: Common.textColor
@@ -114,10 +121,10 @@ Rectangle {
                     id: deleteBtn
                     anchors {
                         right: parent.right
-                        rightMargin: 8
+                        rightMargin: root.itemSpacing
                         verticalCenter: parent.verticalCenter
                     }
-                    width: Math.min(parent.height * 0.72, 40)
+                    width: root.deleteButtonSize
                     height: width
                     radius: width / 2
                     text: "×"

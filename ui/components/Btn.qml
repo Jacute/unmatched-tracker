@@ -13,7 +13,7 @@ Button {
     property int fontSize: Common.defaultFontSize
     
     property int borderWidth: 1
-    property color borderColor: Qt.lighter(bgColor, 1.25)
+    property color borderColor: Qt.lighter(bgColor, Common.borderLightFactor)
 
     id: root
 

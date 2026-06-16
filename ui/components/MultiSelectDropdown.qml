@@ -36,7 +36,7 @@ Rectangle {
             color: Common.secondary
             radius: 5
             border.width: 1
-            border.color: Qt.lighter(Common.secondary, 1.25)
+            border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
         }
 
         ListView {

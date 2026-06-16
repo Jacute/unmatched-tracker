@@ -14,7 +14,7 @@ Rectangle {
     radius: 20
     color: Common.secondary
 
-    border.color: Qt.lighter(Common.secondary, 1.25)
+    border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
     border.width: 1
 
     implicitWidth: vsLayout.implicitWidth + 28
