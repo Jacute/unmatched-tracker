@@ -126,7 +126,13 @@ Rectangle {
                     }
 
                     const enabledMaps = root.getEnabledMaps()
-                    gm.src = enabledMaps[Math.floor(Math.random() * enabledMaps.length)].img_path
+                    if (enabledMaps.length === 0) {
+                        notif.show("No maps available")
+                        return
+                    }
+
+                    const randomMap = enabledMaps[Math.floor(Math.random() * enabledMaps.length)]
+                    gm.src = randomMap.img_path
                     gm.visible = true
                     rndMap.visible = false
                 }
@@ -156,6 +162,8 @@ Rectangle {
                 id: rw
                 anchors.centerIn: parent
                 anchors.fill: parent
+
+                // function after hero is randomized
                 onRandomHeroChanged: {
                     if (root.hero1.img_path === Common.avatarPlug) {
                         root.hero1 = randomHero
@@ -212,7 +220,7 @@ Rectangle {
 
     Component.onCompleted: {
         loadData()
-        rw.heroes = root.getEnabledHeroes()
+        rw.heroes = root.getEnabledHeroes().sort(() => Math.random() - 0.5)
     }
 
     function loadData() {
@@ -259,8 +267,8 @@ Rectangle {
     function modelFind(model, field, value) {
         let idx = -1
 
-        for (let i = 0; i < heroesModel.count; ++i) {
-            if (heroesModel.get(i)[field] === value[field]) {
+        for (let i = 0; i < model.count; ++i) {
+            if (model.get(i)[field] === value[field]) {
                 idx = i
                 break
             }
@@ -271,9 +279,11 @@ Rectangle {
     function getEnabledMaps() {
         let maps = []
         for (let i = 0; i < setModel.count; ++i) {
-            if (setModel.get(i).enabled) {
-                for (const map of setModel[i].maps) {
-                    maps.push(map)   
+            const set = setModel.get(i)
+            if (set.enabled) {
+                const setMaps = set.maps
+                for (let j = 0; j < setMaps.count; ++j) {
+                    maps.push(setMaps.get(j))
                 }
             }
         }
