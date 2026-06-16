@@ -28,9 +28,8 @@ Rectangle {
         CardGrid {
             model: setModel
             width: parent.width - parent.height * 0.02            
-            columnSpacing: 15
-            rowSpacing: 5
             columns: 2
+            anchors.centerIn: parent
 
             onModelClicked: (index) => {
                 if (!root.pager) {

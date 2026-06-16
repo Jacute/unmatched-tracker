@@ -12,9 +12,13 @@ Grid {
 
     id: root
     
-    padding: height * 0.01
+    padding: 8
     columnSpacing: 15
     rowSpacing: 5
+
+    readonly property real cellWidth: Math.max(0,
+        (width - padding * 2 - columnSpacing * (columns - 1)) / columns
+    )
 
     Repeater {
         id: repeater
@@ -25,7 +29,7 @@ Grid {
             
             id: item
 
-            width: (root.width - root.columnSpacing) / root.columns
+            width: root.cellWidth
             height: width * 1.4
 
             Card {

@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 
 import "../../../components"
 
@@ -7,15 +8,24 @@ Item {
 
     id: root
 
-    CardGrid {
-        model: cardModel
-        width: parent.width
-        columnSpacing: 15
-        rowSpacing: 5
-        columns: 3
-        labelPosition: "bottom"
+    ScrollView {
+        id: view
+        anchors.fill: parent
+        clip: true
+        contentWidth: availableWidth
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
+        ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
-        imgRadius: width / columns * 0.02
+        CardGrid {
+            model: cardModel
+            width: view.availableWidth
+            columnSpacing: 15
+            rowSpacing: 5
+            columns: 3
+            labelPosition: "bottom"
+
+            imgRadius: width / columns * 0.02
+        }
     }
 
     ListModel {
@@ -35,7 +45,7 @@ Item {
         for (let i = 0; i < cards.length; i++) {
             cardModel.append({
                 id: cards[i].id,
-                name: "x" + cards[i].name,
+                name: "x" + cards[i].count,
                 card_name: cards[i].name,
                 description: cards[i].description,
                 count: cards[i].count,
