@@ -11,6 +11,9 @@ Rectangle {
     property int heroInd: 0
     property int activeTabInd: 0
     property var currentPage: null
+    property int pendingHeroInd: 0
+    property int switchDirection: 1
+    property bool switchingHero: false
 
     id: root
     color: "transparent"
@@ -21,8 +24,11 @@ Rectangle {
         
         // Hero avatar
         Item {
+            id: avatarWrapper
+
             Layout.fillWidth: true
             Layout.preferredHeight: root.height * 0.4
+            clip: true
             
             Image {
                 id: avatar
@@ -30,20 +36,74 @@ Rectangle {
                     ? heroesModel.get(root.heroInd).img_path
                     : ""
                 fillMode: Image.PreserveAspectCrop
-                anchors.fill: parent
+                width: parent.width
+                height: parent.height
+                x: 0
+                y: 0
+            }
+
+            Image {
+                id: nextAvatar
+                source: root.switchingHero && heroesModel.count > root.pendingHeroInd
+                    ? heroesModel.get(root.pendingHeroInd).img_path
+                    : ""
+                fillMode: Image.PreserveAspectCrop
+                width: parent.width
+                height: parent.height
+                x: 0
+                y: 0
+                visible: root.switchingHero
             }
             
             Rectangle {
                 anchors {
-                    left: avatar.left
-                    right: avatar.right
-                    bottom: avatar.bottom
+                    left: parent.left
+                    right: parent.right
+                    bottom: parent.bottom
                 }
-                height: avatar.height * 0.3
+                height: parent.height * 0.3
                 gradient: Gradient {
                     GradientStop { position: 0.0; color: "transparent" }
                     GradientStop { position: 1.0; color: Common.bgColor }
                 }
+            }
+
+            Btn {
+                id: prevHeroBtn
+                visible: heroesModel.count > 1
+                width: Math.min(parent.width * 0.14, parent.height * 0.22)
+                height: width
+                radius: width / 2
+                bgColor: Common.secondary
+                borderColor: Qt.lighter(Common.secondary, 1.35)
+                text: "‹"
+                fontSize: height * 0.65
+                anchors {
+                    left: parent.left
+                    leftMargin: parent.width * 0.04
+                    verticalCenter: parent.verticalCenter
+                }
+
+                onClicked: root.switchHero(-1)
+            }
+
+            Btn {
+                id: nextHeroBtn
+                visible: heroesModel.count > 1
+                width: prevHeroBtn.width
+                height: width
+                radius: width / 2
+                bgColor: Common.secondary
+                borderColor: Qt.lighter(Common.secondary, 1.35)
+                text: "›"
+                fontSize: height * 0.65
+                anchors {
+                    right: parent.right
+                    rightMargin: parent.width * 0.04
+                    verticalCenter: parent.verticalCenter
+                }
+
+                onClicked: root.switchHero(1)
             }
         }
 
@@ -155,6 +215,7 @@ Rectangle {
         console.debug("getting heroes for set id " + setId)
         heroesModel.clear()
         let backHeroes = backend.getHeroesBySetId(setId)   
+        root.heroInd = 0
         for (let i = 0; i < backHeroes.length; i++) {
             heroesModel.append({
                 id: backHeroes[i].id,
@@ -165,6 +226,19 @@ Rectangle {
         setLoadedSectionCtx()
     }
 
+    function switchHero(offset) {
+        if (heroesModel.count <= 1 || root.switchingHero) {
+            return
+        }
+
+        root.switchDirection = offset > 0 ? 1 : -1
+        root.pendingHeroInd = (root.heroInd + offset + heroesModel.count) % heroesModel.count
+        avatar.x = 0
+        nextAvatar.x = root.switchDirection * avatarWrapper.width
+        root.switchingHero = true
+        heroSwitchAnimation.start()
+    }
+
     function setLoadedSectionCtx() {
         if (!pageLoader.item || heroesModel.count <= root.heroInd) {
             return
@@ -172,6 +246,33 @@ Rectangle {
 
         if (typeof pageLoader.item.heroId !== "undefined") {
             pageLoader.item.heroId = heroesModel.get(root.heroInd).id
+        }
+    }
+
+    ParallelAnimation {
+        id: heroSwitchAnimation
+
+        NumberAnimation {
+            target: avatar
+            property: "x"
+            to: -root.switchDirection * avatarWrapper.width
+            duration: 220
+            easing.type: Easing.InOutQuad
+        }
+
+        NumberAnimation {
+            target: nextAvatar
+            property: "x"
+            to: 0
+            duration: 220
+            easing.type: Easing.InOutQuad
+        }
+
+        onStopped: {
+            root.heroInd = root.pendingHeroInd
+            avatar.x = 0
+            nextAvatar.x = root.switchDirection * avatarWrapper.width
+            root.switchingHero = false
         }
     }
 }
