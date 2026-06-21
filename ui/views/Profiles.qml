@@ -158,7 +158,7 @@ Rectangle {
 
     function loadProfiles() {
         profilesModel.clear()
-        const profiles = backend.getProfiles()
+        const profiles = core.getProfiles()
         for (let i = 0; i < profiles.length; i++) {
             profilesModel.append({
                 id: profiles[i].id,
@@ -170,7 +170,7 @@ Rectangle {
 
     function createProfile() {
         const profileName = profileNameInput.text.trim()
-        const result = backend.createProfile(profileName)
+        const result = core.createProfile(profileName)
         if (!result.ok) {
             switch (result.error) {
             case Common.profileErrEmptyName:
@@ -195,7 +195,7 @@ Rectangle {
     }
 
     function deleteProfile(profileId) {
-        const result = backend.deleteProfile(profileId)
+        const result = core.deleteProfile(profileId)
         if (!result.ok) {
             switch (result.error) {
             case Common.profileErrNotFound:

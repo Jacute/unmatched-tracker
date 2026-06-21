@@ -52,7 +52,7 @@ Item {
             return
         }
 
-        const cards = backend.getCardsByHeroId(root.heroId)
+        const cards = core.getCardsByHeroId(root.heroId)
         for (let i = 0; i < cards.length; i++) {
             cardModel.append({
                 id: cards[i].id,

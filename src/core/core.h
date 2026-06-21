@@ -7,11 +7,11 @@
 #include <QVariantMap>
 #include <QVector>
 
-class Backend : public QObject {
+class Core : public QObject {
     Q_OBJECT
 
   public:
-    explicit Backend(Database &db, QObject *parent = nullptr);
+    explicit Core(Database &db, QObject *parent = nullptr);
 
     Q_INVOKABLE QVariantList getSets() const;
     Q_INVOKABLE QVariantList getHeroes() const;

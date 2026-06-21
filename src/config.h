@@ -14,4 +14,5 @@ class Config {
     ~Config() = default;
 
     DatabaseConfig db;
+    QString assetsBaseUrl;
 };

@@ -208,7 +208,7 @@ Rectangle {
     onSetIdChanged: {
         console.debug("getting heroes for set id " + setId)
         heroesModel.clear()
-        let backHeroes = backend.getHeroesBySetId(setId)   
+        let backHeroes = core.getHeroesBySetId(setId)   
         root.heroInd = 0
         for (let i = 0; i < backHeroes.length; i++) {
             heroesModel.append({

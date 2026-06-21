@@ -7,5 +7,7 @@
             ":/qt/qml/Tracker/src/migrations/003_add_cards.up.sql",
             ":/qt/qml/Tracker/src/migrations/004_add_profiles.up.sql"
         ]
-    }
+    },
+    "assets_base_url": "https://jacute.pro:56031",
+    "cache_path": "./cache"
 }

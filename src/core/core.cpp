@@ -1,8 +1,8 @@
-#include "backend.h"
+#include "core.h"
 #include "../log.h"
 #include "errors.h"
 
-Backend::Backend(Database &db, QObject *parent)
+Core::Core(Database &db, QObject *parent)
     : db_(db),
       QObject(parent){};
 
@@ -20,8 +20,8 @@ static QVariantList mapHeroesQml(const QVector<models::Hero> &heroes) {
     return list;
 }
 
-QVariantList Backend::getHeroes() const {
-    const char op[] = "Backend::getHeroes";
+QVariantList Core::getHeroes() const {
+    const char op[] = "Core::getHeroes";
 
     QVector<models::Hero> heroes;
     Rc rc = db_.getHeroes(heroes);
@@ -33,8 +33,8 @@ QVariantList Backend::getHeroes() const {
     return mapHeroesQml(heroes);
 }
 
-QVariantList Backend::getHeroesBySetId(quint64 setId) const {
-    const char op[] = "Backend::getHeroesBySetId";
+QVariantList Core::getHeroesBySetId(quint64 setId) const {
+    const char op[] = "Core::getHeroesBySetId";
 
     linfo(op) << "getting heroes by set id";
     QVector<models::Hero> heroes;
@@ -47,8 +47,8 @@ QVariantList Backend::getHeroesBySetId(quint64 setId) const {
     return mapHeroesQml(heroes);
 }
 
-QVariantList Backend::getMaps() const {
-    const char op[] = "Backend::getMaps";
+QVariantList Core::getMaps() const {
+    const char op[] = "Core::getMaps";
 
     QVector<models::GameMap> maps;
     Rc rc = db_.getMaps(maps);
@@ -70,8 +70,8 @@ QVariantList Backend::getMaps() const {
     return list;
 }
 
-QVariantList Backend::getSets() const {
-    const char op[] = "Backend::getSets";
+QVariantList Core::getSets() const {
+    const char op[] = "Core::getSets";
 
     QVector<models::GameSetShort> sets;
     Rc rc = db_.getSets(sets);
@@ -92,8 +92,8 @@ QVariantList Backend::getSets() const {
     return list;
 }
 
-QVariantList Backend::getSHM() const {
-    const char op[] = "Backend::getSHM";
+QVariantList Core::getSHM() const {
+    const char op[] = "Core::getSHM";
 
     QVector<models::GameSet> sets;
     Rc rc = db_.getSHM(sets);
@@ -135,8 +135,8 @@ QVariantList Backend::getSHM() const {
     return list;
 }
 
-QVariantList Backend::getCardsByHeroId(quint64 heroId) const {
-    const char op[] = "Backend::getCardsByHeroId";
+QVariantList Core::getCardsByHeroId(quint64 heroId) const {
+    const char op[] = "Core::getCardsByHeroId";
 
     QVector<models::Card> cards;
     Rc rc = db_.getCardsByHeroId(heroId, cards);
@@ -160,8 +160,8 @@ QVariantList Backend::getCardsByHeroId(quint64 heroId) const {
     return list;
 }
 
-QVariantList Backend::getProfiles() const {
-    const char op[] = "Backend::getProfiles";
+QVariantList Core::getProfiles() const {
+    const char op[] = "Core::getProfiles";
 
     QVector<models::PlayerProfile> profiles;
     Rc rc = db_.getProfiles(profiles);
@@ -181,8 +181,8 @@ QVariantList Backend::getProfiles() const {
     return list;
 }
 
-QVariantMap Backend::createProfile(const QString &name) {
-    const char op[] = "Backend::createProfile";
+QVariantMap Core::createProfile(const QString &name) {
+    const char op[] = "Core::createProfile";
     QVariantMap result;
     result["ok"] = false;
 
@@ -215,7 +215,7 @@ QVariantMap Backend::createProfile(const QString &name) {
     return result;
 }
 
-QVariantMap Backend::deleteProfile(quint64 id) {
+QVariantMap Core::deleteProfile(quint64 id) {
     QVariantMap result;
     result["ok"] = false;
 

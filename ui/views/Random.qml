@@ -225,7 +225,7 @@ Rectangle {
 
     function loadData() {
         heroesModel.clear()
-        let backHeroes = backend.getHeroes()
+        let backHeroes = core.getHeroes()
 
         for (let i = 0; i < backHeroes.length; i++) {
             heroesModel.append({
@@ -238,7 +238,7 @@ Rectangle {
         console.debug("heroes loaded " + heroesModel)
 
         mapsModel.clear()
-        let backMaps = backend.getMaps()
+        let backMaps = core.getMaps()
         for (let i = 0; i < backMaps.length; i++) {
             mapsModel.append({
                 id: backMaps[i].id,
@@ -250,7 +250,7 @@ Rectangle {
         console.debug("maps loaded " + mapsModel)
 
         setModel.clear()
-        let backSets = backend.getSHM()   
+        let backSets = core.getSHM()   
         for (let i = 0; i < backSets.length; i++) {
             setModel.append({
                 id: backSets[i].id,

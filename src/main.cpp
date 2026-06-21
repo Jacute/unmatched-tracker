@@ -60,13 +60,13 @@ int main(int argc, char *argv[]) {
     Database db(dbPath, cfg.db.dbName_);
     db.open();
     db.migrate(cfg.db.migrationFiles);
-    Backend backend(db);
+    Core core(db);
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, [&op](const QUrl &url) {
         ldebug(op) << "=== OBJECT CREATION FAILED for:" << url;
         QCoreApplication::exit(-1);
     });
-    engine.rootContext()->setContextProperty("backend", &backend);
+    engine.rootContext()->setContextProperty("core", &core);
     ldebug(op) << "Loading:" << mainQmlPath;
     engine.load(mainQmlPath);
 

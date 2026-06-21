@@ -46,7 +46,7 @@ QtObject {
     readonly property string pageRandom: "random"
     readonly property string pageProfiles: "profiles"
 
-    // backend profile creation errors
+    // core profile creation errors
     readonly property string profileErrEmptyName: "empty_name"
     readonly property string profileErrNameTooLong: "name_too_long"
     readonly property string profileErrDuplicateName: "duplicate_name"

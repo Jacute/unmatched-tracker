@@ -2,6 +2,7 @@
 .pro.swp
 CMakeLists.txt.user
 build-android-*
+build
 .vscode
 todo
 .gitignore

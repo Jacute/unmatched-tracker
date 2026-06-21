@@ -41,20 +41,32 @@ ANDROID_NDK - path to android NDK
 source ~/.bashrc
 ```
 
-3. Build and run
+3. Configure project for platform android-33 and arch arm64-v8a
 
-For x86_64:
+```bash
+$QT_CMAKE \
+	-DANDROID_SDK_ROOT=$ANDROID_SDK \
+	-DANDROID_NDK_ROOT=$ANDROID_NDK \
+	-DANDROID_ABI=arm64-v8a \
+	-DANDROID_PLATFORM=android-33 \
+	-S . -B ./build \
+	-GNinja
+```
+
+4. Build
 
 ```bash
 make
-make install # install apk by adb
-./build-android-amd64/tracker # running via adb
 ```
 
-For arm64-v8a:
+5. Install via adb
 
 ```bash
-make ARCH=arm64
-make install ARCH=arm64
-./build-android-arm64-v8a/tracker # running via adb
+make install
+```
+
+6. Run via adb
+
+```bash
+./build/tracker
 ```

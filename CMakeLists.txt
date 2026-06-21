@@ -6,7 +6,7 @@ set(SRC_DIR src)
 set(QML_DIR ui)
 set(ASSETS_DIR ${QML_DIR}/assets)
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Sql)
+find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Sql Network)
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
@@ -16,6 +16,7 @@ qt_add_executable(tracker
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/log.cpp
     ${SRC_DIR}/config.cpp
+    ${SRC_DIR}/api/api.cpp
     ${SRC_DIR}/db/db.cpp
     ${SRC_DIR}/db/migrator.cpp
     ${SRC_DIR}/backend/backend.cpp
@@ -92,6 +93,7 @@ target_link_libraries(tracker
     PRIVATE
         Qt6::Quick
         Qt6::Sql
+        Qt6::Network
 )
 
 include(GNUInstallDirs)

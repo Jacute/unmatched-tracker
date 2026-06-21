@@ -52,7 +52,7 @@ Rectangle {
 
     Component.onCompleted: {
         setModel.clear()
-        let backSets = backend.getSets()   
+        let backSets = core.getSets()   
         for (let i = 0; i < backSets.length; i++) {
             setModel.append({
                 id: backSets[i].id,

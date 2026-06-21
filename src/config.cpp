@@ -21,6 +21,7 @@ Config::Config(const QString &path) {
     QJsonDocument doc = QJsonDocument::fromJson(data);
 
     QJsonObject obj = doc.object();
+    assetsBaseUrl = obj["assets_base_url"].toString();
     QJsonObject dbObj = obj["db"].toObject();
 
     db.dbName_ = dbObj["name"].toString();
