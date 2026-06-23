@@ -30,9 +30,7 @@ cmake --install .
 
 1. Set variables in ~/.bashrc
 
-QT_HOST_PATH - path to qtbase dir in qt host build 
-QT_ANDROID_AMD64_PATH - path to qt android build for architecture amd64 (only for android-amd64 build)
-QT_ANDROID_ARM_V8A_PATH - path to qt android build for architecture arm64-v8a (only for android-arm64-v8a build)
+QT_CMAKE - path to qt-cmake in qt directory builded for your architecture
 ANDROID_SDK - path to android SDK
 ANDROID_NDK - path to android NDK
 
@@ -49,6 +47,7 @@ $QT_CMAKE \
 	-DANDROID_NDK_ROOT=$ANDROID_NDK \
 	-DANDROID_ABI=arm64-v8a \
 	-DANDROID_PLATFORM=android-33 \
+	-DAPI_URL=http://lolcathost \
 	-S . -B ./build \
 	-GNinja
 ```

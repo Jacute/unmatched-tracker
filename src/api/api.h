@@ -1,25 +1,27 @@
 #ifndef API_H
 #define API_H
 
+#include "../rc.h"
+
 #include <QByteArray>
 #include <QString>
 
 class Api {
   private:
-    QString assetsBaseUrl_;
+    QString baseUrl_;
 
-    QByteArray get(const QString &path);
+    Rc get(const QString& path, QByteArray& out, QString& contentType) const;
 
   public:
-    Api(const QString &assetsBaseUrl);
+    Api(const QString& baseUrl);
     ~Api();
 
-    Api(const Api &) = delete;
-    Api &operator=(const Api &) = delete;
-    Api(Api &&) = delete;
-    Api &operator=(Api &&) = delete;
+    Api(const Api&) = delete;
+    Api& operator=(const Api&) = delete;
+    Api(Api&&) = delete;
+    Api& operator=(Api&&) = delete;
 
-    size_t getAsset(const QString &path, char *out);
+    Rc getAsset(const QString& path, QByteArray& out) const;
 };
 
 #endif

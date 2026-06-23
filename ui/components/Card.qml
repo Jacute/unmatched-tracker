@@ -44,7 +44,7 @@ Rectangle {
             property bool isLongPressed: false
 
             id: img
-            source: root.cardImg
+            source: core.getImage(root.cardImg)
             width: root.width
             height: {
                 var labelHeight = 0

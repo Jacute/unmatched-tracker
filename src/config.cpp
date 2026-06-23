@@ -7,7 +7,7 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-Config::Config(const QString &path) {
+Config::Config(const QString& path) {
     const char op[] = "Config::Config";
 
     QFile file(path);
@@ -25,7 +25,7 @@ Config::Config(const QString &path) {
     QJsonObject dbObj = obj["db"].toObject();
 
     db.dbName_ = dbObj["name"].toString();
-    for (const QJsonValue &v : dbObj["migrations"].toArray()) {
+    for (const QJsonValue& v : dbObj["migrations"].toArray()) {
         db.migrationFiles.append(v.toString());
     }
 }

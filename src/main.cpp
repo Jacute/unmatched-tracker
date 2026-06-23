@@ -1,10 +1,10 @@
-#include "backend/backend.h"
-
-#include "components/events/keyboard/backhandler.h"
+#include "api/api.h"
 #include "components/render/imagerounded.h"
-
 #include "config.h"
+#include "core/core.h"
 #include "db/db.h"
+#include "files/filecache.h"
+#include "files/provider.h"
 #include "log.h"
 
 #include <QDir>
@@ -21,7 +21,7 @@ const QString defaultFontPath = uiPath + "/assets/fonts/BebasNeue-Regular.ttf";
 const QString mainQmlPath = uiPath + "/Main.qml";
 const QString cfgPath = rscPath + "/src/config.json";
 
-void loadResources(QGuiApplication &app) {
+void loadResources(QGuiApplication& app) {
     const char op[] = "loadResources";
 
     int fontId = QFontDatabase::addApplicationFont(defaultFontPath);
@@ -43,7 +43,7 @@ void loadQMLComponents() {
     qmlRegisterType<ImageRounded>("Render", 1, 0, "ImageRounded");
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char* argv[]) {
     const char op[] = "main";
 
     QGuiApplication app(argc, argv);
@@ -60,9 +60,15 @@ int main(int argc, char *argv[]) {
     Database db(dbPath, cfg.db.dbName_);
     db.open();
     db.migrate(cfg.db.migrationFiles);
-    Core core(db);
 
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, [&op](const QUrl &url) {
+    const QString apiBaseUrl = cfg.assetsBaseUrl.isEmpty() ? QString(API_URL) : cfg.assetsBaseUrl;
+    Api api(apiBaseUrl);
+    FileCache cache;
+    File fileProvider(cache, api);
+
+    Core core(db, &fileProvider);
+
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, [&op](const QUrl& url) {
         ldebug(op) << "=== OBJECT CREATION FAILED for:" << url;
         QCoreApplication::exit(-1);
     });

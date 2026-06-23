@@ -6,8 +6,6 @@
 #include <QSaveFile>
 #include <QStandardPaths>
 
-#include <utility>
-
 FileCache::FileCache()
     : cacheDir_(defaultCacheDir()) {
     ensureCacheDir();
@@ -29,45 +27,66 @@ bool FileCache::exists(const QString &key) const {
     return QFileInfo::exists(filePath(key));
 }
 
-QByteArray FileCache::read(const QString &key) const {
+Rc FileCache::read(const QString &key, QByteArray &out) const {
     QFile file(filePath(key));
     if (!file.open(QIODevice::ReadOnly)) {
-        return {};
+        return Rc::ErrOpenFile;
     }
-    return file.readAll();
+
+    out = file.readAll();
+    if (file.error() != QFileDevice::NoError) {
+        return Rc::ErrReadFile;
+    }
+
+    return Rc::Ok;
 }
 
-bool FileCache::write(const QString &key, const QByteArray &data) const {
-    if (!ensureCacheDir()) {
-        return false;
+Rc FileCache::write(const QString &key, const QByteArray &data) const {
+    const Rc rc = ensureCacheDir();
+    if (rc != Rc::Ok) {
+        return rc;
     }
 
     QSaveFile file(filePath(key));
     if (!file.open(QIODevice::WriteOnly)) {
-        return false;
+        return Rc::ErrOpenFile;
     }
 
     if (file.write(data) != data.size()) {
-        return false;
+        return Rc::ErrWriteFile;
     }
 
-    return file.commit();
+    if (!file.commit()) {
+        return Rc::ErrCommitFile;
+    }
+
+    return Rc::Ok;
 }
 
-bool FileCache::remove(const QString &key) const {
+Rc FileCache::remove(const QString &key) const {
     const QString path = filePath(key);
     if (!QFileInfo::exists(path)) {
-        return true;
+        return Rc::Ok;
     }
-    return QFile::remove(path);
+
+    if (!QFile::remove(path)) {
+        return Rc::ErrRemoveFile;
+    }
+
+    return Rc::Ok;
 }
 
-bool FileCache::clear() const {
+Rc FileCache::clear() const {
     QDir dir(cacheDir_);
     if (!dir.exists()) {
-        return true;
+        return ensureCacheDir();
     }
-    return dir.removeRecursively() && ensureCacheDir();
+
+    if (!dir.removeRecursively()) {
+        return Rc::ErrClearCache;
+    }
+
+    return ensureCacheDir();
 }
 
 QString FileCache::defaultCacheDir() {
@@ -90,10 +109,13 @@ QString FileCache::fileNameForKey(const QString &key) {
     return QString::fromLatin1(hash) + "." + suffix;
 }
 
-bool FileCache::ensureCacheDir() const {
+Rc FileCache::ensureCacheDir() const {
     QDir dir(cacheDir_);
     if (dir.exists()) {
-        return true;
+        return Rc::Ok;
     }
-    return dir.mkpath(".");
+    if (!dir.mkpath(".")) {
+        return Rc::ErrCreateCacheDir;
+    }
+    return Rc::Ok;
 }

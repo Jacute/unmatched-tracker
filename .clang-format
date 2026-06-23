@@ -6,8 +6,8 @@ UseTab: Never
 
 BreakBeforeBraces: Attach
 
-PointerAlignment: Right
-ReferenceAlignment: Right
+PointerAlignment: Left
+ReferenceAlignment: Left
 
 DerivePointerAlignment: false
 DeriveReferenceAlignment: false

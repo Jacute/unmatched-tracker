@@ -2,13 +2,14 @@
 #include "../log.h"
 #include "errors.h"
 
-Core::Core(Database &db, QObject *parent)
+Core::Core(Database& db, FileProvider* fp)
     : db_(db),
-      QObject(parent){};
+      provider_(fp),
+      QObject(nullptr){};
 
-static QVariantList mapHeroesQml(const QVector<models::Hero> &heroes) {
+static QVariantList mapHeroesQml(const QVector<models::Hero>& heroes) {
     QVariantList list;
-    for (const auto &h : heroes) {
+    for (const auto& h : heroes) {
         QVariantMap obj;
         obj["id"] = h.id;
         obj["name"] = std::move(h.name);
@@ -58,7 +59,7 @@ QVariantList Core::getMaps() const {
     ldebug(op) << "heroes got from db";
 
     QVariantList list;
-    for (const auto &m : maps) {
+    for (const auto& m : maps) {
         QVariantMap obj;
         obj["id"] = m.id;
         obj["name"] = std::move(m.name);
@@ -81,7 +82,7 @@ QVariantList Core::getSets() const {
     ldebug(op) << "short sets got from db";
 
     QVariantList list;
-    for (const auto &s : sets) {
+    for (const auto& s : sets) {
         QVariantMap obj;
         obj["id"] = s.id;
         obj["name"] = std::move(s.name);
@@ -103,7 +104,7 @@ QVariantList Core::getSHM() const {
     ldebug(op) << "sets got from db";
 
     QVariantList list;
-    for (const auto &s : sets) {
+    for (const auto& s : sets) {
         QVariantMap obj;
         obj["id"] = s.id;
         obj["name"] = std::move(s.name);
@@ -111,7 +112,7 @@ QVariantList Core::getSHM() const {
         obj["released_at"] = std::move(s.releasedAt);
 
         QVariantList heroes;
-        for (const auto &h : s.heroes) {
+        for (const auto& h : s.heroes) {
             QVariantMap hObj;
             hObj["id"] = h.id;
             hObj["name"] = std::move(h.name);
@@ -121,7 +122,7 @@ QVariantList Core::getSHM() const {
         obj["heroes"] = std::move(heroes);
 
         QVariantList maps;
-        for (const auto &m : s.maps) {
+        for (const auto& m : s.maps) {
             QVariantMap mObj;
             mObj["id"] = m.id;
             mObj["name"] = std::move(m.name);
@@ -146,7 +147,7 @@ QVariantList Core::getCardsByHeroId(quint64 heroId) const {
     ldebug(op) << "cards by hero id got from db";
 
     QVariantList list;
-    for (const auto &c : cards) {
+    for (const auto& c : cards) {
         QVariantMap obj;
         obj["id"] = c.id;
         obj["name"] = c.name;
@@ -171,7 +172,7 @@ QVariantList Core::getProfiles() const {
     ldebug(op) << "profiles got from db";
 
     QVariantList list;
-    for (const auto &p : profiles) {
+    for (const auto& p : profiles) {
         QVariantMap obj;
         obj["id"] = p.id;
         obj["name"] = p.name;
@@ -181,7 +182,7 @@ QVariantList Core::getProfiles() const {
     return list;
 }
 
-QVariantMap Core::createProfile(const QString &name) {
+QVariantMap Core::createProfile(const QString& name) const {
     const char op[] = "Core::createProfile";
     QVariantMap result;
     result["ok"] = false;
@@ -215,22 +216,40 @@ QVariantMap Core::createProfile(const QString &name) {
     return result;
 }
 
-QVariantMap Core::deleteProfile(quint64 id) {
+QVariantMap Core::deleteProfile(quint64 id) const {
+    const char op[] = "Core::deleteProfile";
     QVariantMap result;
     result["ok"] = false;
 
     Rc rc = db_.deleteProfile(id);
+    // TODO: refactor this -> throw error events to frontend using signal
     switch (rc) {
     case Rc::Ok:
+        linfo(op) << "profile with id " << id << " successfully deleted";
         result["ok"] = true;
         result["error"] = err::None;
         break;
     case Rc::ErrNotFound:
+        lerr(op) << "error profile not found: " << id;
         result["error"] = err_profile::NotFound;
         break;
     default:
         result["error"] = err::DbError;
         break;
     }
+
     return result;
+}
+
+QString Core::getImage(const QString& path) const {
+    const char op[] = "Core::getImage";
+    QString sourceUrl;
+    Rc rc = provider_->get(path, sourceUrl);
+    if (rc != Rc::Ok) {
+        lerr(op) << "error getting image: " << path;
+        // TODO: throw error event to fronted using signal
+        return ""; // TODO: add placeholder image
+    }
+    linfo(op) << "image got successfully url=" << sourceUrl;
+    return sourceUrl;
 }

@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(unmatched-tracker VERSION 0.1 LANGUAGES CXX)
+project(unmatched-tracker VERSION 0.0.1 LANGUAGES CXX)
 
+set(TARGET tracker)
 set(SRC_DIR src)
 set(QML_DIR ui)
 set(ASSETS_DIR ${QML_DIR}/assets)
+set(API_URL "")
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Sql Network)
 
@@ -12,14 +14,16 @@ qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
 qt_policy(SET QTP0004 NEW)
 
-qt_add_executable(tracker
+qt_add_executable(${TARGET}
     ${SRC_DIR}/main.cpp
     ${SRC_DIR}/log.cpp
     ${SRC_DIR}/config.cpp
     ${SRC_DIR}/api/api.cpp
     ${SRC_DIR}/db/db.cpp
     ${SRC_DIR}/db/migrator.cpp
-    ${SRC_DIR}/backend/backend.cpp
+    ${SRC_DIR}/core/core.cpp
+    ${SRC_DIR}/files/filecache.cpp
+    ${SRC_DIR}/files/provider.cpp
     ${SRC_DIR}/components/render/imagerounded.cpp
 )
 
@@ -69,27 +73,29 @@ list(APPEND rsc_files
 set_source_files_properties(${qml_singletons}
     PROPERTIES QT_QML_SINGLETON_TYPE TRUE)
 
-qt_add_qml_module(tracker
+qt_add_qml_module(${TARGET}
     URI Tracker
     QML_FILES ${plain_qml_files} ${qml_singletons}
     RESOURCES ${rsc_files}
 )
 
-set_target_properties(tracker PROPERTIES
+set_target_properties(${TARGET} PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
 )
 
-set_property(TARGET tracker PROPERTY
+set_property(TARGET ${TARGET} PROPERTY
     QT_ANDROID_PACKAGE_NAME "com.jacute.unmatched_tracker"
 )
-target_compile_definitions(tracker PRIVATE
+target_compile_definitions(${TARGET} PRIVATE
     PACKAGE_NAME="${PACKAGE_NAME}"
+    API_URL="${API_URL}"
+    APP_VERSION="${PROJECT_VERSION}"
 )
 
-target_link_libraries(tracker
+target_link_libraries(${TARGET}
     PRIVATE
         Qt6::Quick
         Qt6::Sql

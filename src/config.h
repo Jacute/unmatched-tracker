@@ -10,7 +10,7 @@ struct DatabaseConfig {
 
 class Config {
   public:
-    Config(const QString &path);
+    Config(const QString& path);
     ~Config() = default;
 
     DatabaseConfig db;
