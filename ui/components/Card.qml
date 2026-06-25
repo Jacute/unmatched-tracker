@@ -1,10 +1,12 @@
 import QtQuick 2.15
 import QtQuick.Controls 2.15
+
 import Tracker
+import "."
 
 Rectangle {
     property string cardName
-    property string cardImg: ""
+    property alias imgPath: img.imgPath
     property int fontSize: 14
     property string labelPosition: "top"
     property int imgRadius: 0
@@ -39,12 +41,11 @@ Rectangle {
         }
 
         // Card image
-        Image {
+        LoadImage {
             property bool isHovered: mouseArea.containsMouse
             property bool isLongPressed: false
 
             id: img
-            source: core.getImage(root.cardImg)
             width: root.width
             height: {
                 var labelHeight = 0

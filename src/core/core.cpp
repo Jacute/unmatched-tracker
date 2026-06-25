@@ -2,10 +2,14 @@
 #include "../log.h"
 #include "errors.h"
 
+#include <QPointer>
+
 Core::Core(Database& db, FileProvider* fp)
     : db_(db),
       provider_(fp),
-      QObject(nullptr){};
+      QObject(nullptr) {
+    imageThreadPool_.setMaxThreadCount(6);
+};
 
 static QVariantList mapHeroesQml(const QVector<models::Hero>& heroes) {
     QVariantList list;
@@ -252,4 +256,36 @@ QString Core::getImage(const QString& path) const {
     }
     linfo(op) << "image got successfully url=" << sourceUrl;
     return sourceUrl;
+}
+
+void Core::requestImage(const QString& path) {
+    QPointer<Core> self(this);
+    FileProvider* provider = provider_;
+
+    imageThreadPool_.start([self, provider, path]() {
+        QString sourceUrl;
+        Rc rc = provider->get(path, sourceUrl);
+
+        if (!self) {
+            return;
+        }
+
+        QMetaObject::invokeMethod(
+            self,
+            [self, path, sourceUrl, rc]() {
+                if (!self) {
+                    return;
+                }
+
+                if (rc != Rc::Ok) {
+                    lerr("Core::requestImage") << "error getting image: " << path;
+                    emit self->imageFailed(path);
+                    return;
+                }
+
+                linfo("Core::requestImage") << "image got successfully url=" << sourceUrl;
+                emit self->imageReady(path, sourceUrl);
+            },
+            Qt::QueuedConnection);
+    });
 }

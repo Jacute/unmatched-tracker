@@ -40,7 +40,7 @@ Grid {
                 width: parent.width
                 height: parent.height
                 cardName: parent.modelData.name
-                cardImg: parent.modelData.img_path
+                imgPath: parent.modelData.img_path
                 fontSize: Common.defaultFontSize
                 labelPosition: root.labelPosition
                 pressedPopup: root.pressedPopup

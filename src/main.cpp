@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
     Core core(db, &fileProvider);
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, [&op](const QUrl& url) {
-        ldebug(op) << "=== OBJECT CREATION FAILED for:" << url;
+        ldebug(op) << "object creation failed:" << url;
         QCoreApplication::exit(-1);
     });
     engine.rootContext()->setContextProperty("core", &core);

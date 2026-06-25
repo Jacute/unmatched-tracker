@@ -5,6 +5,7 @@
 #include "fileprovider.h"
 
 #include <QObject>
+#include <QThreadPool>
 #include <QVariantMap>
 #include <QVector>
 
@@ -30,8 +31,14 @@ class Core : public QObject {
     Q_INVOKABLE QVariantMap deleteProfile(quint64 id) const;
 
     Q_INVOKABLE QString getImage(const QString& path) const;
+    Q_INVOKABLE void requestImage(const QString& path);
+
+  signals:
+    void imageReady(const QString& path, const QString& sourceUrl);
+    void imageFailed(const QString& path);
 
   private:
     Database& db_;
     FileProvider* provider_;
+    QThreadPool imageThreadPool_;
 };

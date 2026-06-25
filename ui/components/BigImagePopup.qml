@@ -6,7 +6,7 @@ import QtQuick.Layouts 2.15
 import Tracker
 
 Popup {
-    property alias img: enlargedImage.source
+    property string img
     property alias text: text.text
 
     id: imagePopup
@@ -33,8 +33,9 @@ Popup {
             anchors.fill: parent
             anchors.margins: ci.width * 0.06
 
-            Image {
+            LoadImage {
                 id: enlargedImage
+                imgPath: imagePopup.img
                 Layout.preferredHeight: ci.height * 0.8
                 Layout.fillWidth: true
                 Layout.alignment: Qt.AlignHCenter

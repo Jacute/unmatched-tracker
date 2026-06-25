@@ -10,171 +10,178 @@ Rectangle {
     required property int setId
     property int heroInd: 0
     property int activeTabInd: 0
-    property var currentPage: null
-    property int pendingHeroInd: 0
-    property int switchDirection: 1
-    property bool switchingHero: false
 
     id: root
     color: "transparent"
 
-    ColumnLayout {
-        anchors.fill: parent
-        spacing: 0
-        
-        // Hero avatar
+    Repeater {
+        id: heroPageRepeater
+        model: heroesModel
+
         Item {
-            id: avatarWrapper
+            required property int index
+            required property var modelData
 
-            Layout.fillWidth: true
-            Layout.preferredHeight: root.height * 0.4
-            clip: true
-            
-            Image {
-                id: avatar
-                source: heroesModel.count > root.heroInd
-                    ? heroesModel.get(root.heroInd).img_path
-                    : ""
-                fillMode: Image.PreserveAspectCrop
-                width: parent.width
-                height: parent.height
-            }
+            id: heroPage
+            anchors.fill: parent
+            visible: index === root.heroInd
 
-            Image {
-                id: nextAvatar
-                source: root.switchingHero && heroesModel.count > root.pendingHeroInd
-                    ? heroesModel.get(root.pendingHeroInd).img_path
-                    : ""
-                fillMode: Image.PreserveAspectCrop
-                width: parent.width
-                height: parent.height
-                visible: root.switchingHero
-            }
-            
-            Rectangle {
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                    bottom: parent.bottom
-                }
-                height: parent.height * 0.3
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: "transparent" }
-                    GradientStop { position: 1.0; color: Common.bgColor }
-                }
-            }
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 0
 
-            Btn {
-                id: prevHeroBtn
-                visible: heroesModel.count > 1
-                width: Math.min(parent.width * 0.14, parent.height * 0.22)
-                height: width
-                radius: width / 2
-                bgColor: Common.secondary
-                borderColor: Qt.lighter(Common.secondary, Common.borderLightFactor)
-                text: "‹"
-                fontSize: height * 0.65
-                anchors {
-                    left: parent.left
-                    leftMargin: parent.width * 0.04
-                    verticalCenter: parent.verticalCenter
-                }
-
-                onClicked: root.switchHero(-1)
-            }
-
-            Btn {
-                id: nextHeroBtn
-                visible: heroesModel.count > 1
-                width: prevHeroBtn.width
-                height: width
-                radius: width / 2
-                bgColor: Common.secondary
-                borderColor: Qt.lighter(Common.secondary, Common.borderLightFactor)
-                text: "›"
-                fontSize: height * 0.65
-                anchors {
-                    right: parent.right
-                    rightMargin: parent.width * 0.04
-                    verticalCenter: parent.verticalCenter
-                }
-
-                onClicked: root.switchHero(1)
-            }
-        }
-
-        // Hero menu
-        RowLayout {
-            id: selector
-            Layout.fillWidth: true
-            Layout.preferredHeight: root.height * 0.05
-            spacing: 0
-
-            Repeater {
-                id: repeater
-                model: tabsModel
-
+                // Hero avatar
                 Item {
-                    required property int index
-                    required property var modelData
+                    id: avatarWrapper
 
-                    id: btnWrapper
                     Layout.fillWidth: true
-                    Layout.preferredHeight: selector.height
-                    
-                    Btn {
-                        id: btn
-                        anchors.fill: parent
-                        bgColor: btnWrapper.index != root.activeTabInd ? Common.primary : Common.secondary
-                        text: btnWrapper.modelData.text
-                        fontSize: btnWrapper.height *  0.3
-                        borderWidth: 0
-                        
-                        onClicked: {
-                            root.activeTabInd = btnWrapper.index
-                        }
+                    Layout.preferredHeight: root.height * 0.4
+                    clip: true
+
+                    LoadImage {
+                        id: avatar
+                        imgPath: heroPage.modelData.img_path
+                        fillMode: Image.PreserveAspectCrop
+                        width: parent.width
+                        height: parent.height
                     }
 
-                    // vertical borders
                     Rectangle {
-                        visible: btnWrapper.index > 0
                         anchors {
                             left: parent.left
-                            top: parent.top
+                            right: parent.right
                             bottom: parent.bottom
                         }
-                        width: 1
-                        color: Common.secondary
+                        height: parent.height * 0.3
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: "transparent" }
+                            GradientStop { position: 1.0; color: Common.bgColor }
+                        }
                     }
-                    
-                    Rectangle {
-                        visible: btnWrapper.index !== repeater.count - 1
+
+                    Btn {
+                        id: prevHeroBtn
+                        visible: heroesModel.count > 1
+                        width: Math.min(parent.width * 0.14, parent.height * 0.22)
+                        height: width
+                        radius: width / 2
+                        bgColor: Common.secondary
+                        borderColor: Qt.lighter(Common.secondary, Common.borderLightFactor)
+                        text: "‹"
+                        fontSize: height * 0.65
+                        anchors {
+                            left: parent.left
+                            leftMargin: parent.width * 0.04
+                            verticalCenter: parent.verticalCenter
+                        }
+
+                        onClicked: root.switchHero(-1)
+                    }
+
+                    Btn {
+                        id: nextHeroBtn
+                        visible: heroesModel.count > 1
+                        width: prevHeroBtn.width
+                        height: width
+                        radius: width / 2
+                        bgColor: Common.secondary
+                        borderColor: Qt.lighter(Common.secondary, Common.borderLightFactor)
+                        text: "›"
+                        fontSize: height * 0.65
                         anchors {
                             right: parent.right
-                            top: parent.top
-                            bottom: parent.bottom
+                            rightMargin: parent.width * 0.04
+                            verticalCenter: parent.verticalCenter
                         }
-                        width: 1
-                        color: Common.secondary
+
+                        onClicked: root.switchHero(1)
                     }
                 }
-            }
-        }
 
-        // Page body - information about hero
-        Item {
-            id: body
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            
-            Loader {
-                id: pageLoader
-                anchors.fill: parent
-                onLoaded: {
-                    console.debug("Hero subpage loaded: ", item)
-                    root.setLoadedSectionCtx()
+                // Hero menu
+                RowLayout {
+                    id: selector
+
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root.height * 0.05
+                    spacing: 0
+
+                    Repeater {
+                        id: repeater
+                        model: tabsModel
+
+                        Item {
+                            required property int index
+                            required property var modelData
+
+                            id: btnWrapper
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: selector.height
+
+                            Btn {
+                                id: btn
+                                anchors.fill: parent
+                                bgColor: btnWrapper.index != root.activeTabInd ? Common.primary : Common.secondary
+                                text: btnWrapper.modelData.text
+                                fontSize: btnWrapper.height *  0.3
+                                borderWidth: 0
+
+                                onClicked: {
+                                    root.activeTabInd = btnWrapper.index
+                                }
+                            }
+
+                            // vertical borders
+                            Rectangle {
+                                visible: btnWrapper.index > 0
+                                anchors {
+                                    left: parent.left
+                                    top: parent.top
+                                    bottom: parent.bottom
+                                }
+                                width: 1
+                                color: Common.secondary
+                            }
+
+                            Rectangle {
+                                visible: btnWrapper.index !== repeater.count - 1
+                                anchors {
+                                    right: parent.right
+                                    top: parent.top
+                                    bottom: parent.bottom
+                                }
+                                width: 1
+                                color: Common.secondary
+                            }
+                        }
+                    }
                 }
-                source: tabsModel.get(root.activeTabInd).path
+
+                // Page body - information about hero
+                Item {
+                    id: body
+
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+
+                    Repeater {
+                        model: tabsModel
+
+                        Loader {
+                            required property int index
+                            required property var modelData
+
+                            anchors.fill: parent
+                            source: modelData.path
+                            visible: index === root.activeTabInd
+
+                            onLoaded: {
+                                console.debug("Hero subpage loaded: ", item)
+                                root.setLoadedSectionCtx(item, heroPage.modelData.id)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -203,8 +210,6 @@ Rectangle {
         id: heroesModel
     }
 
-    onHeroIndChanged: setLoadedSectionCtx()
-
     onSetIdChanged: {
         console.debug("getting heroes for set id " + setId)
         heroesModel.clear()
@@ -217,56 +222,22 @@ Rectangle {
                 img_path: backHeroes[i].img_path
             })
         }
-        setLoadedSectionCtx()
     }
 
     function switchHero(offset) {
-        if (heroesModel.count <= 1 || root.switchingHero) {
+        if (heroesModel.count <= 1) {
             return
         }
 
-        root.switchDirection = offset > 0 ? 1 : -1
-        root.pendingHeroInd = (root.heroInd + offset + heroesModel.count) % heroesModel.count
-        avatar.x = 0
-        nextAvatar.x = root.switchDirection * avatarWrapper.width
-        root.switchingHero = true
-        heroSwitchAnimation.start()
+        root.heroInd = (root.heroInd + offset + heroesModel.count) % heroesModel.count
     }
 
-    function setLoadedSectionCtx() {
-        if (!pageLoader.item || heroesModel.count <= root.heroInd) {
+    function setLoadedSectionCtx(page, heroId) {
+        if (!page || typeof page.heroId === "undefined") {
             return
         }
 
-        if (typeof pageLoader.item.heroId !== "undefined") {
-            pageLoader.item.heroId = heroesModel.get(root.heroInd).id
-        }
+        page.heroId = heroId
     }
 
-    ParallelAnimation {
-        id: heroSwitchAnimation
-
-        NumberAnimation {
-            target: avatar
-            property: "x"
-            to: -root.switchDirection * avatarWrapper.width
-            duration: 220
-            easing.type: Easing.InOutQuad
-        }
-
-        NumberAnimation {
-            target: nextAvatar
-            property: "x"
-            to: 0
-            duration: 220
-            easing.type: Easing.InOutQuad
-        }
-
-        onStopped: {
-            root.heroInd = root.pendingHeroInd
-            avatar.x = 0
-            nextAvatar.x = root.switchDirection * avatarWrapper.width
-            root.switchingHero = false
-        }
-    }
 }

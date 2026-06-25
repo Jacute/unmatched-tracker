@@ -5,6 +5,8 @@ import "../../../components"
 
 Item {
     property int heroId: 0
+    property var cardsByHeroId: ({})
+    property var currentCards: []
 
     id: root
 
@@ -17,7 +19,7 @@ Item {
         ScrollBar.vertical.policy: ScrollBar.AsNeeded
 
         CardGrid {
-            model: cardModel
+            model: root.currentCards
             width: view.availableWidth
             columnSpacing: 15
             rowSpacing: 5
@@ -28,7 +30,10 @@ Item {
             imgRadius: width / columns * 0.02
 
             onModelLongPressed: (index) => {
-                const card = cardModel.get(index)
+                const card = root.currentCards[index]
+                if (!card) {
+                    return
+                }
                 cardPopup.img = card.img_path
                 cardPopup.text = card.card_name
             }
@@ -39,22 +44,25 @@ Item {
         id: cardPopup
     }
 
-    ListModel {
-        id: cardModel
-    }
-
     onHeroIdChanged: loadCards()
     Component.onCompleted: loadCards()
 
     function loadCards() {
-        cardModel.clear()
         if (root.heroId <= 0) {
+            root.currentCards = []
+            return
+        }
+
+        const key = String(root.heroId)
+        if (root.cardsByHeroId[key]) {
+            root.currentCards = root.cardsByHeroId[key]
             return
         }
 
         const cards = core.getCardsByHeroId(root.heroId)
+        const mappedCards = []
         for (let i = 0; i < cards.length; i++) {
-            cardModel.append({
+            mappedCards.push({
                 id: cards[i].id,
                 name: "x" + cards[i].count,
                 card_name: cards[i].name,
@@ -65,5 +73,7 @@ Item {
                 card_type_id: cards[i].card_type_id
             })
         }
+        root.cardsByHeroId[key] = mappedCards
+        root.currentCards = mappedCards
     }
 }
