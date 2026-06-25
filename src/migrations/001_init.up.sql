@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS card_types (
 CREATE TABLE IF NOT EXISTS cards (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL,
+    value INTEGER,
     count INTEGER NOT NULL,
     description TEXT,
     img_path TEXT,
