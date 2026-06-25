@@ -4,11 +4,13 @@
 
 #include <QPointer>
 
+constexpr int imgThreadCount = 8;
+
 Core::Core(Database& db, FileProvider* fp)
     : db_(db),
       provider_(fp),
       QObject(nullptr) {
-    imageThreadPool_.setMaxThreadCount(6);
+    imageThreadPool_.setMaxThreadCount(imgThreadCount);
 };
 
 static QVariantList mapHeroesQml(const QVector<models::Hero>& heroes) {

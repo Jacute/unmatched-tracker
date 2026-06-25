@@ -195,7 +195,7 @@ Rc Database::getCardsByHeroId(quint64 heroId, QVector<models::Card> &cards) {
     QSqlQuery query;
 
     bool ok = query.prepare("SELECT id, name, description, count, img_path, hero_id, card_type_id "
-                            "FROM cards WHERE hero_id = :heroId ORDER BY card_type_id, value, name");
+                            "FROM cards WHERE hero_id = :heroId ORDER BY card_type_id ASC, value DESC, name ASC");
     if (!ok) {
         lwarn(op) << "sql prepare error: " << query.lastError().text();
         return Rc::ErrExecQuery;
