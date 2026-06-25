@@ -16,19 +16,20 @@ VALUES
 
 ALTER TABLE cards ADD COLUMN card_type_id INTEGER REFERENCES card_types(id);
 
-INSERT INTO cards (name, count, img_path, hero_id, card_type_id)
+INSERT INTO cards (name, count, value, img_path, hero_id, card_type_id)
 VALUES
--- Battle of Legends: Tom 1
--- Sinbad
+-- Battle of Legends, Volume One: Sinbad
 (
     'Commanding Impact',
     1,
+    5,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/1.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     1
 ),
 (
     'By Fortune and Fate',
+    3,
     3,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/2.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
@@ -37,6 +38,7 @@ VALUES
 (
     'Voyage to the Cannibals With the Root of Madness',
     1,
+    2,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/3.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     1
@@ -44,6 +46,7 @@ VALUES
 (
     'Voyage to the Creature With Eyes Like Coals of Fire',
     1,
+    2,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/4.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     1
@@ -51,6 +54,7 @@ VALUES
 (
     'Voyage to the City of the King of Serendib',
     1,
+    2,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/5.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     1
@@ -58,6 +62,7 @@ VALUES
 (
     'Voyage to the Valley of the Giant Snakes',
     1,
+    2,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/6.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     1
@@ -65,6 +70,7 @@ VALUES
 (
     'Voyage Home',
     1,
+    2,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/7.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     1
@@ -72,6 +78,7 @@ VALUES
 (
     'Voyage to the City of the Man-Eating Apes',
     1,
+    2,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/8.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     1
@@ -79,6 +86,7 @@ VALUES
 (
     'Voyage to the Island That Was a Whale',
     1,
+    2,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/9.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     1
@@ -86,6 +94,7 @@ VALUES
 (
     'Exploit',
     2,
+    4,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/10.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     2
@@ -93,12 +102,14 @@ VALUES
 (
     'Leap Away',
     2,
+    4,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/11.webp',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     2
 ),
 (
     'Momentous Shift',
+    3,
     3,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/12.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
@@ -107,6 +118,7 @@ VALUES
 (
     'Toil and Danger',
     4,
+    3,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/13.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     2
@@ -114,6 +126,7 @@ VALUES
 (
     'Feint',
     3,
+    2,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/14.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     2
@@ -121,6 +134,7 @@ VALUES
 (
     'Regroup',
     3,
+    1,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/15.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     2
@@ -128,13 +142,15 @@ VALUES
 (
     'Riches Beyond Compare',
     2,
+    NULL,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/16.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
     4
 ),
--- Medusa
+-- Battle of Legends, Volume One: Medusa
 (
     'Second Shot',
+    3,
     3,
     '/img/set/battle_of_legends1/heroes/medusa/cards/1.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
@@ -143,6 +159,7 @@ VALUES
 (
     'Gaze of Stone',
     3,
+    2,
     '/img/set/battle_of_legends1/heroes/medusa/cards/2.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
     1
@@ -150,6 +167,7 @@ VALUES
 (
     'Hiss and Slither',
     3,
+    4,
     '/img/set/battle_of_legends1/heroes/medusa/cards/9.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
     3
@@ -157,12 +175,14 @@ VALUES
 (
     'A Momentary Glance',
     2,
+    NULL,
     '/img/set/battle_of_legends1/heroes/medusa/cards/10.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
     4
 ),
 (
     'Clutching Claws',
+    3,
     3,
     '/img/set/battle_of_legends1/heroes/medusa/cards/5.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
@@ -171,6 +191,7 @@ VALUES
 (
     'The Hounds of Mighty Zeus',
     2,
+    4,
     '/img/set/battle_of_legends1/heroes/medusa/cards/3.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
     2
@@ -178,6 +199,7 @@ VALUES
 (
     'Winged Frenzy',
     2,
+    NULL,
     '/img/set/battle_of_legends1/heroes/medusa/cards/11.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
     4
@@ -185,6 +207,7 @@ VALUES
 (
     'Feint',
     3,
+    2,
     '/img/set/battle_of_legends1/heroes/medusa/cards/7.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
     2
@@ -192,12 +215,14 @@ VALUES
 (
     'Regroup',
     3,
+    1,
     '/img/set/battle_of_legends1/heroes/medusa/cards/8.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
     2
 ),
 (
     'Dash',
+    3,
     3,
     '/img/set/battle_of_legends1/heroes/medusa/cards/6.webp',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
@@ -206,17 +231,11 @@ VALUES
 (
     'Snipe',
     3,
+    3,
     '/img/set/battle_of_legends1/heroes/medusa/cards/4.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
     2
-)
-ON CONFLICT (hero_id, name) DO UPDATE SET
-    count = excluded.count,
-    img_path = excluded.img_path,
-    card_type_id = excluded.card_type_id;
-
-INSERT INTO cards (name, count, value, img_path, hero_id, card_type_id)
-VALUES
+),
 -- Battle of Legends, Volume One: King Arthur
 (
     'Excalibur',
