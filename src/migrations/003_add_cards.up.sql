@@ -4,10 +4,10 @@ VALUES
     1, 'attack'
 ),
 (
-    2, 'defense'
+    2, 'versatile'
 ),
 (
-    3, 'versatile'
+    3, 'defense'
 ),
 (
     4, 'scheme'
@@ -88,42 +88,42 @@ VALUES
     2,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/10.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
-    3
+    2
 ),
 (
     'Leap Away',
     2,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/11.webp',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
-    3
+    2
 ),
 (
     'Momentous Shift',
     3,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/12.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
-    3
+    2
 ),
 (
     'Toil and Danger',
     4,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/13.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
-    3
+    2
 ),
 (
     'Feint',
     3,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/14.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
-    3
+    2
 ),
 (
     'Regroup',
     3,
     '/img/set/battle_of_legends1/heroes/sinbad/cards/15.png',
     (SELECT id FROM heroes WHERE name = 'Sinbad'),
-    3
+    2
 ),
 (
     'Riches Beyond Compare',
@@ -152,7 +152,7 @@ VALUES
     3,
     '/img/set/battle_of_legends1/heroes/medusa/cards/9.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
-    2
+    3
 ),
 (
     'A Momentary Glance',
@@ -166,14 +166,14 @@ VALUES
     3,
     '/img/set/battle_of_legends1/heroes/medusa/cards/5.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
-    3
+    2
 ),
 (
     'The Hounds of Mighty Zeus',
     2,
     '/img/set/battle_of_legends1/heroes/medusa/cards/3.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
-    3
+    2
 ),
 (
     'Winged Frenzy',
@@ -187,28 +187,28 @@ VALUES
     3,
     '/img/set/battle_of_legends1/heroes/medusa/cards/7.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
-    3
+    2
 ),
 (
     'Regroup',
     3,
     '/img/set/battle_of_legends1/heroes/medusa/cards/8.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
-    3
+    2
 ),
 (
     'Dash',
     3,
     '/img/set/battle_of_legends1/heroes/medusa/cards/6.webp',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
-    3
+    2
 ),
 (
     'Snipe',
     3,
     '/img/set/battle_of_legends1/heroes/medusa/cards/4.png',
     (SELECT id FROM heroes WHERE name = 'Medusa'),
-    3
+    2
 )
 ON CONFLICT (hero_id, name) DO UPDATE SET
     count = excluded.count,
@@ -256,7 +256,7 @@ VALUES
     1,
     '/img/set/battle_of_legends1/heroes/king_arthur/cards/11.png',
     (SELECT id FROM heroes WHERE name = 'King Arthur'),
-    2
+    3
 ),
 (
     'Divine Intervention',
@@ -264,7 +264,7 @@ VALUES
     3,
     '/img/set/battle_of_legends1/heroes/king_arthur/cards/8.png',
     (SELECT id FROM heroes WHERE name = 'King Arthur'),
-    3
+    2
 ),
 (
     'Swift Strike',
@@ -312,7 +312,7 @@ VALUES
     0,
     '/img/set/battle_of_legends1/heroes/king_arthur/cards/12.png',
     (SELECT id FROM heroes WHERE name = 'King Arthur'),
-    2
+    3
 ),
 (
     'Momentous Shift',
@@ -320,7 +320,7 @@ VALUES
     3,
     '/img/set/battle_of_legends1/heroes/king_arthur/cards/7.png',
     (SELECT id FROM heroes WHERE name = 'King Arthur'),
-    3
+    2
 ),
 (
     'Regroup',
@@ -328,7 +328,7 @@ VALUES
     1,
     '/img/set/battle_of_legends1/heroes/king_arthur/cards/10.png',
     (SELECT id FROM heroes WHERE name = 'King Arthur'),
-    3
+    2
 ),
 (
     'Skirmish',
@@ -336,7 +336,7 @@ VALUES
     4,
     '/img/set/battle_of_legends1/heroes/king_arthur/cards/6.png',
     (SELECT id FROM heroes WHERE name = 'King Arthur'),
-    3
+    2
 ),
 (
     'Feint',
@@ -344,7 +344,7 @@ VALUES
     2,
     '/img/set/battle_of_legends1/heroes/king_arthur/cards/9.png',
     (SELECT id FROM heroes WHERE name = 'King Arthur'),
-    3
+    2
 ),
 
 -- Battle of Legends, Volume One: Alice
@@ -378,7 +378,7 @@ VALUES
     2,
     '/img/set/battle_of_legends1/heroes/alice/cards/11.png',
     (SELECT id FROM heroes WHERE name = 'Alice'),
-    3
+    2
 ),
 (
     'Mad as a Hatter',
@@ -386,7 +386,7 @@ VALUES
     3,
     '/img/set/battle_of_legends1/heroes/alice/cards/7.png',
     (SELECT id FROM heroes WHERE name = 'Alice'),
-    3
+    2
 ),
 (
     'Looking Glass',
@@ -394,7 +394,7 @@ VALUES
     2,
     '/img/set/battle_of_legends1/heroes/alice/cards/13.png',
     (SELECT id FROM heroes WHERE name = 'Alice'),
-    2
+    3
 ),
 (
     'Eat Me',
@@ -434,7 +434,7 @@ VALUES
     3,
     '/img/set/battle_of_legends1/heroes/alice/cards/9.png',
     (SELECT id FROM heroes WHERE name = 'Alice'),
-    3
+    2
 ),
 (
     'Momentous Shift',
@@ -442,7 +442,7 @@ VALUES
     3,
     '/img/set/battle_of_legends1/heroes/alice/cards/8.png',
     (SELECT id FROM heroes WHERE name = 'Alice'),
-    3
+    2
 ),
 (
     'Regroup',
@@ -450,7 +450,7 @@ VALUES
     1,
     '/img/set/battle_of_legends1/heroes/alice/cards/12.png',
     (SELECT id FROM heroes WHERE name = 'Alice'),
-    3
+    2
 ),
 (
     'Skirmish',
@@ -458,7 +458,7 @@ VALUES
     4,
     '/img/set/battle_of_legends1/heroes/alice/cards/6.png',
     (SELECT id FROM heroes WHERE name = 'Alice'),
-    3
+    2
 ),
 (
     'Feint',
@@ -466,7 +466,7 @@ VALUES
     2,
     '/img/set/battle_of_legends1/heroes/alice/cards/10.png',
     (SELECT id FROM heroes WHERE name = 'Alice'),
-    3
+    2
 ),
 
 -- Cobble & Fog: Dracula
@@ -492,7 +492,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/dracula/cards/8.webp',
     (SELECT id FROM heroes WHERE name = 'Dracula'),
-    2
+    3
 ),
 (
     'Look Into My Eyes',
@@ -500,7 +500,7 @@ VALUES
     1,
     '/img/set/cobble_fog/heroes/dracula/cards/9.webp',
     (SELECT id FROM heroes WHERE name = 'Dracula'),
-    2
+    3
 ),
 (
     'Mistform',
@@ -556,7 +556,7 @@ VALUES
     2,
     '/img/set/cobble_fog/heroes/dracula/cards/7.webp',
     (SELECT id FROM heroes WHERE name = 'Dracula'),
-    3
+    2
 ),
 (
     'Dash',
@@ -564,7 +564,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/dracula/cards/5.webp',
     (SELECT id FROM heroes WHERE name = 'Dracula'),
-    3
+    2
 ),
 (
     'Exploit',
@@ -572,7 +572,7 @@ VALUES
     4,
     '/img/set/cobble_fog/heroes/dracula/cards/5.webp',
     (SELECT id FROM heroes WHERE name = 'Dracula'),
-    3
+    2
 ),
 
 -- Cobble & Fog: Sherlock Holmes
@@ -582,7 +582,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/sherlock_holmes/cards/3.webp',
     (SELECT id FROM heroes WHERE name = 'Sherlock Holmes'),
-    3
+    2
 ),
 (
     'Deduce Strategy',
@@ -590,7 +590,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/sherlock_holmes/cards/6.webp',
     (SELECT id FROM heroes WHERE name = 'Sherlock Holmes'),
-    3
+    2
 ),
 (
     'The Game Is Afoot',
@@ -606,7 +606,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/sherlock_holmes/cards/9.webp',
     (SELECT id FROM heroes WHERE name = 'Sherlock Holmes'),
-    2
+    3
 ),
 (
     'Confirm Suspicion',
@@ -646,7 +646,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/sherlock_holmes/cards/4.webp',
     (SELECT id FROM heroes WHERE name = 'Sherlock Holmes'),
-    3
+    2
 ),
 (
     'Administer Aid',
@@ -662,7 +662,7 @@ VALUES
     2,
     '/img/set/cobble_fog/heroes/sherlock_holmes/cards/8.webp',
     (SELECT id FROM heroes WHERE name = 'Sherlock Holmes'),
-    3
+    2
 ),
 (
     'Study Methods',
@@ -670,7 +670,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/sherlock_holmes/cards/7.webp',
     (SELECT id FROM heroes WHERE name = 'Sherlock Holmes'),
-    3
+    2
 ),
 (
     'Education Never Ends',
@@ -678,7 +678,7 @@ VALUES
     NULL,
     '/img/set/cobble_fog/heroes/sherlock_holmes/cards/5.webp',
     (SELECT id FROM heroes WHERE name = 'Sherlock Holmes'),
-    3
+    2
 ),
 
 -- Cobble & Fog: Jekyll & Hyde
@@ -688,7 +688,7 @@ VALUES
     2,
     '/img/set/cobble_fog/heroes/jekyll_hyde/cards/7.webp',
     (SELECT id FROM heroes WHERE name = 'Jekyll & Hyde'),
-    3
+    2
 ),
 (
     'Distracted Triage',
@@ -696,7 +696,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/jekyll_hyde/cards/7.webp',
     (SELECT id FROM heroes WHERE name = 'Jekyll & Hyde'),
-    3
+    2
 ),
 (
     'With Haste!',
@@ -704,7 +704,7 @@ VALUES
     4,
     '/img/set/cobble_fog/heroes/jekyll_hyde/cards/9.webp',
     (SELECT id FROM heroes WHERE name = 'Jekyll & Hyde'),
-    2
+    3
 ),
 (
     'Scientific Method',
@@ -712,7 +712,7 @@ VALUES
     2,
     '/img/set/cobble_fog/heroes/jekyll_hyde/cards/10.webp',
     (SELECT id FROM heroes WHERE name = 'Jekyll & Hyde'),
-    2
+    3
 ),
 (
     'Calming Research',
@@ -744,7 +744,7 @@ VALUES
     4,
     '/img/set/cobble_fog/heroes/jekyll_hyde/cards/4.webp',
     (SELECT id FROM heroes WHERE name = 'Jekyll & Hyde'),
-    3
+    2
 ),
 (
     'Pure Evil',
@@ -768,7 +768,7 @@ VALUES
     2,
     '/img/set/cobble_fog/heroes/jekyll_hyde/cards/8.webp',
     (SELECT id FROM heroes WHERE name = 'Jekyll & Hyde'),
-    3
+    2
 ),
 (
     'Skirmish',
@@ -776,7 +776,7 @@ VALUES
     4,
     '/img/set/cobble_fog/heroes/jekyll_hyde/cards/3.webp',
     (SELECT id FROM heroes WHERE name = 'Jekyll & Hyde'),
-    3
+    2
 ),
 (
     'Duality of Man',
@@ -784,7 +784,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/jekyll_hyde/cards/6.webp',
     (SELECT id FROM heroes WHERE name = 'Jekyll & Hyde'),
-    3
+    2
 ),
 
 -- Cobble & Fog: Invisible Man
@@ -818,7 +818,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/invisible_man/cards/9.webp',
     (SELECT id FROM heroes WHERE name = 'Invisible man'),
-    2
+    3
 ),
 (
     'Into Thin Air',
@@ -826,7 +826,7 @@ VALUES
     4,
     '/img/set/cobble_fog/heroes/invisible_man/cards/8.webp',
     (SELECT id FROM heroes WHERE name = 'Invisible man'),
-    2
+    3
 ),
 (
     'Lurking',
@@ -834,7 +834,7 @@ VALUES
     2,
     '/img/set/cobble_fog/heroes/invisible_man/cards/10.webp',
     (SELECT id FROM heroes WHERE name = 'Invisible man'),
-    2
+    3
 ),
 (
     'Rolling Fog',
@@ -874,7 +874,7 @@ VALUES
     2,
     '/img/set/cobble_fog/heroes/invisible_man/cards/7.webp',
     (SELECT id FROM heroes WHERE name = 'Invisible man'),
-    3
+    2
 ),
 (
     'Impossible to See',
@@ -882,7 +882,7 @@ VALUES
     2,
     '/img/set/cobble_fog/heroes/invisible_man/cards/3.webp',
     (SELECT id FROM heroes WHERE name = 'Invisible man'),
-    3
+    2
 ),
 (
     'Confound',
@@ -890,7 +890,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/invisible_man/cards/4.webp',
     (SELECT id FROM heroes WHERE name = 'Invisible man'),
-    3
+    2
 ),
 (
     'Dreaming of Revenge',
@@ -898,7 +898,7 @@ VALUES
     3,
     '/img/set/cobble_fog/heroes/invisible_man/cards/5.webp',
     (SELECT id FROM heroes WHERE name = 'Invisible man'),
-    3
+    2
 )
 ON CONFLICT (hero_id, name) DO UPDATE SET
     count = excluded.count,
