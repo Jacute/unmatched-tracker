@@ -5,6 +5,7 @@ import QtQuick.Layouts 2.15
 
 import Tracker
 import "../../../components"
+import "."
 
 Rectangle {
     required property int setId
@@ -31,131 +32,34 @@ Rectangle {
                 spacing: 0
 
                 // Hero avatar
-                Item {
-                    id: avatarWrapper
-
+                Avatar {
+                    imgPath: heroPage.modelData.img_path
+                    heroesCount: heroesModel.count
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.height * 0.4
                     clip: true
 
-                    LoadImage {
-                        id: avatar
-                        imgPath: heroPage.modelData.img_path
-                        fillMode: Image.PreserveAspectCrop
-                        width: parent.width
-                        height: parent.height
-                    }
-
-                    Rectangle {
-                        anchors {
-                            left: parent.left
-                            right: parent.right
-                            bottom: parent.bottom
-                        }
-                        height: parent.height * 0.3
-                        gradient: Gradient {
-                            GradientStop { position: 0.0; color: "transparent" }
-                            GradientStop { position: 1.0; color: Common.bgColor }
-                        }
-                    }
-
-                    Btn {
-                        id: prevHeroBtn
-                        visible: heroesModel.count > 1
-                        width: Math.min(parent.width * 0.14, parent.height * 0.22)
-                        height: width
-                        radius: width / 2
-                        bgColor: Common.secondary
-                        borderColor: Qt.lighter(Common.secondary, Common.borderLightFactor)
-                        text: "‹"
-                        fontSize: height * 0.65
-                        anchors {
-                            left: parent.left
-                            leftMargin: parent.width * 0.04
-                            verticalCenter: parent.verticalCenter
+                    onSwitchHero: (offset) => {
+                        if (heroesModel.count <= 1) {
+                            return
                         }
 
-                        onClicked: root.switchHero(-1)
-                    }
-
-                    Btn {
-                        id: nextHeroBtn
-                        visible: heroesModel.count > 1
-                        width: prevHeroBtn.width
-                        height: width
-                        radius: width / 2
-                        bgColor: Common.secondary
-                        borderColor: Qt.lighter(Common.secondary, Common.borderLightFactor)
-                        text: "›"
-                        fontSize: height * 0.65
-                        anchors {
-                            right: parent.right
-                            rightMargin: parent.width * 0.04
-                            verticalCenter: parent.verticalCenter
-                        }
-
-                        onClicked: root.switchHero(1)
+                        root.heroInd = (root.heroInd + offset + heroesModel.count) % heroesModel.count
                     }
                 }
 
                 // Hero menu
-                RowLayout {
-                    id: selector
-
+                TabMenu {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.height * 0.05
                     spacing: 0
-
-                    Repeater {
-                        id: repeater
-                        model: tabsModel
-
-                        Item {
-                            required property int index
-                            required property var modelData
-
-                            id: btnWrapper
-                            Layout.fillWidth: true
-                            Layout.preferredHeight: selector.height
-
-                            Btn {
-                                id: btn
-                                anchors.fill: parent
-                                bgColor: btnWrapper.index != root.activeTabInd ? Common.primary : Common.secondary
-                                text: btnWrapper.modelData.text
-                                fontSize: btnWrapper.height *  0.3
-                                borderWidth: 0
-
-                                onClicked: {
-                                    root.activeTabInd = btnWrapper.index
-                                }
-                            }
-
-                            // vertical borders
-                            Rectangle {
-                                visible: btnWrapper.index > 0
-                                anchors {
-                                    left: parent.left
-                                    top: parent.top
-                                    bottom: parent.bottom
-                                }
-                                width: 1
-                                color: Common.secondary
-                            }
-
-                            Rectangle {
-                                visible: btnWrapper.index !== repeater.count - 1
-                                anchors {
-                                    right: parent.right
-                                    top: parent.top
-                                    bottom: parent.bottom
-                                }
-                                width: 1
-                                color: Common.secondary
-                            }
-                        }
+                    
+                    tabs: tabsModel
+                    activeTabInd: root.activeTabInd
+                    onChangeActiveTabInd: (tabInd) => {
+                        root.activeTabInd = tabInd
                     }
-                }
+                }                
 
                 // Page body - information about hero
                 Item {
@@ -190,19 +94,19 @@ Rectangle {
         id: tabsModel
         ListElement {
             text: qsTr("Overview and Cards")
-            path: "Cards.qml"
+            path: "tabs/Cards.qml"
         }
         ListElement {
             text: qsTr("Global Stats")
-            path: "CommonStat.qml"
+            path: "tabs/CommonStat.qml"
         }
         ListElement {
             text: qsTr("Profile Stats")
-            path: "ProfileStat.qml"
+            path: "tabs/ProfileStat.qml"
         }
         ListElement {
             text: qsTr("Matchups")
-            path: "Matchups.qml"
+            path: "tabs/Matchups.qml"
         }
     }
 
@@ -222,14 +126,6 @@ Rectangle {
                 img_path: backHeroes[i].img_path
             })
         }
-    }
-
-    function switchHero(offset) {
-        if (heroesModel.count <= 1) {
-            return
-        }
-
-        root.heroInd = (root.heroInd + offset + heroesModel.count) % heroesModel.count
     }
 
     function setLoadedSectionCtx(page, heroId) {

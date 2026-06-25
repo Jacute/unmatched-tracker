@@ -32,10 +32,12 @@ set(plain_qml_files
     ${QML_DIR}/views/set/SetStack.qml
     ${QML_DIR}/views/set/Set.qml
     ${QML_DIR}/views/set/hero/Hero.qml
-    ${QML_DIR}/views/set/hero/Cards.qml
-    ${QML_DIR}/views/set/hero/CommonStat.qml
-    ${QML_DIR}/views/set/hero/ProfileStat.qml
-    ${QML_DIR}/views/set/hero/Matchups.qml
+    ${QML_DIR}/views/set/hero/Avatar.qml
+    ${QML_DIR}/views/set/hero/TabMenu.qml
+    ${QML_DIR}/views/set/hero/tabs/Cards.qml
+    ${QML_DIR}/views/set/hero/tabs/CommonStat.qml
+    ${QML_DIR}/views/set/hero/tabs/ProfileStat.qml
+    ${QML_DIR}/views/set/hero/tabs/Matchups.qml
     ${QML_DIR}/views/Random.qml
     ${QML_DIR}/views/Profiles.qml
     ${QML_DIR}/components/Card.qml
