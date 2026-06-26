@@ -252,7 +252,7 @@ QString Core::getImage(const QString& path) const {
     QString sourceUrl;
     Rc rc = provider_->get(path, sourceUrl);
     if (rc != Rc::Ok) {
-        lerr(op) << "error getting image: " << path;
+        lerr("Core::requestImage") << "error getting image: " << path << " rc=" << rc2str(rc);
         // TODO: throw error event to fronted using signal
         return ""; // TODO: add placeholder image
     }
@@ -280,7 +280,7 @@ void Core::requestImage(const QString& path) {
                 }
 
                 if (rc != Rc::Ok) {
-                    lerr("Core::requestImage") << "error getting image: " << path;
+                    lerr("Core::requestImage") << "error getting image: " << path << " rc=" << rc2str(rc);
                     emit self->imageFailed(path);
                     return;
                 }

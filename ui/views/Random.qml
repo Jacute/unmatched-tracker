@@ -10,6 +10,8 @@ Rectangle {
     property var hero1: Common.plugHero
     property var hero2: Common.plugHero
     property bool filtersVisible: false
+    property var mapImageUrls: ({})
+    property var requestedMapImagePaths: ({})
 
     Rectangle {
         id: filtergroup
@@ -95,8 +97,8 @@ Rectangle {
 
         VS {
             id: vs
-            src1: root.hero1.img_path
-            src2: root.hero2.img_path
+            hero1AvatarPath: root.hero1.img_path
+            hero2AvatarPath: root.hero2.img_path
             textColor: Common.textColor
             Layout.alignment: Qt.AlignHCenter
         }
@@ -131,8 +133,16 @@ Rectangle {
                         return
                     }
 
+                    const unloadedMap = enabledMaps.find(map => !root.mapImageUrls[map.img_path])
+                    if (unloadedMap) {
+                        root.requestMapImages()
+                        notif.show("Maps are still loading")
+                        return
+                    }
+
                     const randomMap = enabledMaps[Math.floor(Math.random() * enabledMaps.length)]
-                    gm.src = randomMap.img_path
+                    gm.sourceUrl = root.mapImageUrls[randomMap.img_path]
+                    gm.imgPath = randomMap.img_path
                     gm.visible = true
                     rndMap.visible = false
                 }
@@ -198,6 +208,28 @@ Rectangle {
         id: notif
     }
 
+    Connections {
+        target: core
+
+        function onImageReady(path, sourceUrl) {
+            if (root.requestedMapImagePaths[path] !== true) {
+                return
+            }
+
+            root.requestedMapImagePaths[path] = false
+            root.mapImageUrls[path] = sourceUrl
+        }
+
+        function onImageFailed(path) {
+            if (root.requestedMapImagePaths[path] !== true) {
+                return
+            }
+
+            root.requestedMapImagePaths[path] = false
+            console.error("[Random] map image " + path + " not loaded")
+        }
+    }
+
     ListModel {
         id: heroesModel
 
@@ -248,6 +280,7 @@ Rectangle {
             })
         }
         console.debug("maps loaded " + mapsModel)
+        root.requestMapImages()
 
         setModel.clear()
         let backSets = core.getSHM()   
@@ -296,6 +329,18 @@ Rectangle {
         }
 
         return maps
+    }
+
+    function requestMapImages() {
+        for (let i = 0; i < mapsModel.count; ++i) {
+            const path = mapsModel.get(i).img_path
+            if (!path || root.mapImageUrls[path] || root.requestedMapImagePaths[path] === true) {
+                continue
+            }
+
+            root.requestedMapImagePaths[path] = true
+            core.requestImage(path)
+        }
     }
     
     function getEnabledHeroes() {

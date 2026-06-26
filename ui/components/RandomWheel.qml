@@ -7,20 +7,22 @@ import "./RandomWheel.js" as Wheel
 Rectangle {
     property real rotateSpeed: 0
     property real wheelAngle: 0
-    property var heroes: []
+    property var heroes: [] // got from api
+    property var imageUrls: ({}) // map with key - imgPath, value - imgUrl
+    property var requestedImagePaths: ({}) // map with image requests to cache, key - imgPath, value - request is active
     property string cursor: Common.imgPrefix + "/ui/wheel_cursor.png"
     property var randomHero
+
+    property color placeholderColor: Common.imagePlaceholder
+    property color placeholderSoftColor: Common.imagePlaceholderSoft
+    property color sectorBorderColor: Common.textColor
+    property color sectorTextColor: Common.textColor
 
     id: root
     color: "transparent"
 
-    Component.onCompleted: {
-        for (let i = 0; i < heroes.length; i++) {
-            canvas.loadImage(heroes[i].img_path)
-        }
-        canvas.requestPaint()
-    }
-    
+    onHeroesChanged: requestHeroImages()
+
     Canvas {
         id: canvas
         anchors.centerIn: root
@@ -51,7 +53,9 @@ Rectangle {
             Wheel.draw(canvas, root);
         }
 
-        onImageLoaded: requestPaint()
+        onImageLoaded: {
+            requestPaint()
+        }
     }
 
     Image {
@@ -134,21 +138,66 @@ Rectangle {
                 root.rotateSpeed = 0
                 running = false
 
-                root.randomHero = Wheel.getWinHero(
-                    root.wheelAngle,
-                    root.heroes
-                )
+                if (root.heroes.length > 0) {
+                    root.randomHero = Wheel.getWinHero(
+                        root.wheelAngle,
+                        root.heroes
+                    )
+                }
             }
         }
     }
 
-    Image {
-        id: cursorImg
-        source: root.cursor
-        visible: false
+    Connections {
+        target: core
+
+        function onImageReady(path, sourceUrl) {
+            if (root.requestedImagePaths[path] !== true) {
+                return
+            }
+
+            root.requestedImagePaths[path] = false
+            root.imageUrls[path] = sourceUrl
+            canvas.loadImage(sourceUrl)
+        }
+
+        function onImageFailed(path) {
+            if (root.requestedImagePaths[path] !== true) {
+                return
+            }
+
+            root.requestedImagePaths[path] = false
+            console.error("[RandomWheel] image " + path + " not loaded")
+        }
     }
 
-    function paint() {
+    Component.onCompleted: requestHeroImages()
+
+    function requestHeroImages() {
+        for (let i = 0; i < root.heroes.length; i++) {
+            const path = root.heroes[i].img_path
+            if (!path) {
+                continue
+            }
+
+            const sourceUrl = root.imageUrls[path] || ""
+            if (sourceUrl) {
+                if (!canvas.isImageLoaded(sourceUrl)) {
+                    canvas.loadImage(sourceUrl)
+                }
+                continue
+            }
+
+            if (root.requestedImagePaths[path] === true) {
+                continue
+            }
+
+            root.requestedImagePaths[path] = true
+            core.requestImage(path)
+        }
+    }
+
+    function paint () {
         canvas.requestPaint()
     }
 }

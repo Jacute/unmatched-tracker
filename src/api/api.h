@@ -10,7 +10,7 @@ class Api {
   private:
     QString baseUrl_;
 
-    Rc get(const QString& path, QByteArray& out, QString& contentType) const;
+    Rc get(const QString& path, QByteArray& out, QString& contentType, int& statusCode) const;
 
   public:
     Api(const QString& baseUrl);

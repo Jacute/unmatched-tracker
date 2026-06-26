@@ -19,6 +19,10 @@ void ImageRounded::setSrc(QString s) {
     if (s.startsWith("qrc:/")) {
         s.remove(0, 3);
     }
+    if (s.startsWith("file://")) {
+        s.remove(0, 7);
+    }
+
     ldebug(componentName) << "load image with source " << s;
     if (src_ == s) {
         return;
@@ -27,7 +31,7 @@ void ImageRounded::setSrc(QString s) {
 
     QImage image(s);
     if (image.isNull()) {
-        ldebug(componentName) << "image " << src_ << " cannon be imported";
+        ldebug(componentName) << "image " << src_ << " can't be imported";
         return;
     }
     img_ = image;

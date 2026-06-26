@@ -52,6 +52,7 @@ set(plain_qml_files
     ${QML_DIR}/components/GameMap.qml
     ${QML_DIR}/components/Notif.qml
     ${QML_DIR}/components/Btn.qml
+    ${QML_DIR}/components/ImagePlaceholder.qml
     ${QML_DIR}/components/LoadImage.qml
     ${QML_DIR}/components/ico/MenuIco.qml
     ${QML_DIR}/components/ico/BackIco.qml

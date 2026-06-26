@@ -5,6 +5,8 @@ QtObject {
     readonly property color primary: "#202030" // Main app color
     readonly property color bgColor: "#1B1B29"
     readonly property color secondary: "#313244"
+    readonly property color imagePlaceholder: "#27283A"
+    readonly property color imagePlaceholderSoft: "#3B3C52"
     
     readonly property color shadow2: "#181825"
     readonly property color shadow1: "#11111B"
@@ -35,7 +37,7 @@ QtObject {
     readonly property string mapFormat: setPrefix + "/%1/maps/%2.webp"
     
     readonly property string fontsPrefix: assetsPrefix + "/fonts"
-    readonly property string avatarPlug: "qrc:/qt/qml/Tracker/ui/assets/img/ui/avatar_plug.png"
+    readonly property string avatarPlug: "/img/ui/avatar_plug.png"
     readonly property var plugHero: ({
         name: "Plug",
         img_path: avatarPlug

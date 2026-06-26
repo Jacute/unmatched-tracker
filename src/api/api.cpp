@@ -11,7 +11,7 @@
 #include <QUrl>
 
 namespace {
-constexpr int requestTimeoutMs = 30000;
+constexpr int requestTimeoutMs = 4000;
 
 QUrl buildUrl(const QString& baseUrl, const QString& path) {
     const QUrl absoluteUrl(path);
@@ -45,7 +45,7 @@ Api::Api(const QString& baseUrl)
 
 Api::~Api() = default;
 
-Rc Api::get(const QString& path, QByteArray& out, QString& contentType) const {
+Rc Api::get(const QString& path, QByteArray& out, QString& contentType, int& statusCode) const {
     const char op[] = "Api::get";
     const QUrl url = buildUrl(baseUrl_, path);
     if (!url.isValid() || url.scheme().isEmpty()) {
@@ -79,8 +79,8 @@ Rc Api::get(const QString& path, QByteArray& out, QString& contentType) const {
     }
     timeout.stop();
 
-    const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-    if (reply->error() != QNetworkReply::NoError || (statusCode != 0 && statusCode >= 400)) {
+    statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+    if (reply->error() != QNetworkReply::NoError) {
         lwarn(op) << "request failed: " << url.toString() << "status: " << statusCode
                   << "error: " << reply->errorString();
         reply->deleteLater();
@@ -98,9 +98,13 @@ Rc Api::get(const QString& path, QByteArray& out, QString& contentType) const {
 
 Rc Api::getAsset(const QString& path, QByteArray& out) const {
     QString contentType;
-    Rc rc = get(path, out, contentType);
+    int statusCode;
+    Rc rc = get(path, out, contentType, statusCode);
     if (rc != Rc::Ok) {
         return rc;
+    }
+    if (statusCode != 200) {
+        return Rc::ErrInvalidStatusCode;
     }
 
     if (!isValidImageContentType(contentType)) {
