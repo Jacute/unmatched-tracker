@@ -363,6 +363,36 @@ QVariantMap Core::createGameRecord(const QVariantMap& game) const {
     return result;
 }
 
+QVariantMap Core::deleteGameRecord(const QString& id) const {
+    const char op[] = "Core::deleteGameRecord";
+    QVariantMap result;
+    result["ok"] = false;
+
+    const QString trimmedId = id.trimmed();
+    if (trimmedId.isEmpty()) {
+        lwarn(op) << "game record id is empty";
+        result["error"] = err_game::InvalidData;
+        return result;
+    }
+
+    Rc rc = db_.deleteGameRecord(trimmedId);
+    switch (rc) {
+    case Rc::Ok:
+        result["ok"] = true;
+        result["error"] = err::None;
+        break;
+    case Rc::ErrNotFound:
+        lerr(op) << "game record not found: " << trimmedId;
+        result["error"] = err_game::NotFound;
+        break;
+    default:
+        result["error"] = err::DbError;
+        break;
+    }
+
+    return result;
+}
+
 QString Core::getImage(const QString& path) const {
     const char op[] = "Core::getImage";
     QString sourceUrl;

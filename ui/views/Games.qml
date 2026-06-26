@@ -257,19 +257,53 @@ Rectangle {
                 border.width: 1
                 border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
 
+                Btn {
+                    id: deleteGameBtn
+                    anchors {
+                        top: parent.top
+                        right: parent.right
+                        topMargin: root.fieldSpacing
+                        rightMargin: root.fieldSpacing
+                    }
+                    width: root.controlHeight * 0.48
+                    height: width
+                    radius: width / 2
+                    text: "×"
+                    fontSize: height * 0.55
+                    bgColor: Common.error
+                    bgColorPressed: Qt.lighter(Common.error, 1.15)
+                    borderWidth: 0
+                    txtColor: Common.textColor
+
+                    onClicked: {
+                        deleteConfirmPopup.gameId = game.modelData.id
+                        deleteConfirmPopup.gameText = qsTr("%1 vs %2")
+                            .arg(root.playerHistoryText(
+                                game.modelData.player1_profile_name,
+                                game.modelData.player1_hero_name
+                            ))
+                            .arg(root.playerHistoryText(
+                                game.modelData.player2_profile_name,
+                                game.modelData.player2_hero_name
+                            ))
+                        deleteConfirmPopup.open()
+                    }
+                }
+
                 ColumnLayout {
                     id: historyContent
                     anchors {
                         left: parent.left
-                        right: parent.right
+                        right: deleteGameBtn.left
                         verticalCenter: parent.verticalCenter
                         margins: root.fieldSpacing
+                        rightMargin: root.fieldSpacing * 1.5
                     }
                     spacing: 3
 
                     Text {
                         Layout.fillWidth: true
-                        text: root.historyDateText(game.modelData.played_at, game.modelData.created_at)
+                        text: root.valueText(game.modelData.played_at, "Date not specified")
                         color: Common.textHint
                         font.pixelSize: Common.defaultFontSize * 0.82
                         elide: Text.ElideRight
@@ -335,6 +369,96 @@ Rectangle {
             color: Common.textHint
             font.pixelSize: Common.defaultFontSize
             horizontalAlignment: Text.AlignHCenter
+        }
+    }
+
+    Popup {
+        property string gameId: ""
+        property string gameText: ""
+
+        id: deleteConfirmPopup
+        modal: true
+        focus: true
+        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+        parent: Overlay.overlay
+        anchors.centerIn: parent
+        width: Math.min(root.width * 0.86, 360)
+        height: confirmContent.implicitHeight
+        padding: 0
+
+        background: Rectangle {
+            color: Common.secondary
+            radius: Common.defaultRadius
+            border.width: 1
+            border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
+        }
+
+        contentItem: ColumnLayout {
+            id: confirmContent
+            spacing: root.fieldSpacing * 1.2
+
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.fieldSpacing
+            }
+
+            Text {
+                Layout.fillWidth: true
+                Layout.leftMargin: root.fieldSpacing * 1.8
+                Layout.rightMargin: root.fieldSpacing * 1.8
+                text: qsTr("Delete game?")
+                color: Common.textColor
+                font.pixelSize: Common.defaultFontSize * 1.12
+                font.bold: true
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+
+            Text {
+                Layout.fillWidth: true
+                Layout.leftMargin: root.fieldSpacing * 1.8
+                Layout.rightMargin: root.fieldSpacing * 1.8
+                text: deleteConfirmPopup.gameText
+                color: Common.textSecondary
+                font.pixelSize: Common.defaultFontSize * 0.9
+                horizontalAlignment: Text.AlignHCenter
+                wrapMode: Text.WordWrap
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: root.fieldSpacing * 1.8
+                Layout.rightMargin: root.fieldSpacing * 1.8
+                Layout.bottomMargin: root.fieldSpacing * 1.8
+                spacing: root.fieldSpacing
+
+                Btn {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root.controlHeight * 0.82
+                    radius: Common.defaultRadius
+                    text: qsTr("Cancel")
+                    fontSize: Common.defaultFontSize
+
+                    onClicked: deleteConfirmPopup.close()
+                }
+
+                Btn {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: root.controlHeight * 0.82
+                    radius: Common.defaultRadius
+                    text: qsTr("Delete")
+                    fontSize: Common.defaultFontSize
+                    bgColor: Common.error
+                    bgColorPressed: Qt.lighter(Common.error, 1.15)
+                    borderWidth: 0
+
+                    onClicked: {
+                        const gameId = deleteConfirmPopup.gameId
+                        deleteConfirmPopup.close()
+                        root.deleteGameRecord(gameId)
+                    }
+                }
+            }
         }
     }
 
@@ -510,16 +634,31 @@ Rectangle {
         loadHistory()
     }
 
+    function deleteGameRecord(gameId) {
+        const result = core.deleteGameRecord(gameId)
+        if (!result.ok) {
+            switch (result.error) {
+            case Common.gameErrNotFound:
+                statusText.text = qsTr("Game has already been deleted")
+                break
+            default:
+                statusText.text = qsTr("Could not delete game")
+                break
+            }
+            loadHistory()
+            return
+        }
+
+        statusText.text = ""
+        loadHistory()
+    }
+
     function valueText(value, fallback) {
         return value === undefined || value === null || value === "" ? fallback : value
     }
 
     function playerHistoryText(profileName, heroName) {
         return qsTr("%1 (%2)").arg(profileName).arg(heroName)
-    }
-
-    function historyDateText(playedAt, createdAt) {
-        return root.valueText(playedAt, createdAt)
     }
 
     function historyMetaText(mapName, hp1, hp2) {

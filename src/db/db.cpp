@@ -291,26 +291,25 @@ Rc Database::getGameHistory(QVector<models::GameRecord>& games, const QString& s
 
     QString orderBy = "gr.created_at DESC";
     if (sortBy == "played_at") {
-        orderBy = "CASE WHEN gr.played_at IS NULL OR gr.played_at = '' THEN 1 ELSE 0 END, "
-                  "gr.played_at DESC, gr.created_at DESC";
+        orderBy = "gr.played_at DESC";
     }
 
     QSqlQuery query;
     bool ok = query.exec(QString("SELECT "
-                                  "gr.id, "
-                                  "gr.player1_profile_id, p1.name, gr.player1_hero_id, h1.name, "
-                                  "gr.player2_profile_id, p2.name, gr.player2_hero_id, h2.name, "
-                                  "gr.map_id, m.name, "
-                                  "gr.player1_won, "
-                                  "gr.hero1_remaining_hp, gr.hero2_remaining_hp, "
-                                  "gr.played_at, gr.created_at "
-                                  "FROM game_records gr "
-                                  "JOIN player_profiles p1 ON p1.id = gr.player1_profile_id "
-                                  "JOIN heroes h1 ON h1.id = gr.player1_hero_id "
-                                  "JOIN player_profiles p2 ON p2.id = gr.player2_profile_id "
-                                  "JOIN heroes h2 ON h2.id = gr.player2_hero_id "
-                                  "LEFT JOIN maps m ON m.id = gr.map_id "
-                                  "ORDER BY %1")
+                                 "gr.id, "
+                                 "gr.player1_profile_id, p1.name, gr.player1_hero_id, h1.name, "
+                                 "gr.player2_profile_id, p2.name, gr.player2_hero_id, h2.name, "
+                                 "gr.map_id, m.name, "
+                                 "gr.player1_won, "
+                                 "gr.hero1_remaining_hp, gr.hero2_remaining_hp, "
+                                 "gr.played_at, gr.created_at "
+                                 "FROM game_records gr "
+                                 "JOIN player_profiles p1 ON p1.id = gr.player1_profile_id "
+                                 "JOIN heroes h1 ON h1.id = gr.player1_hero_id "
+                                 "JOIN player_profiles p2 ON p2.id = gr.player2_profile_id "
+                                 "JOIN heroes h2 ON h2.id = gr.player2_hero_id "
+                                 "LEFT JOIN maps m ON m.id = gr.map_id "
+                                 "ORDER BY %1")
                              .arg(orderBy));
     if (!ok) {
         lwarn(op) << "sql error: " << query.lastError().text();
@@ -379,5 +378,27 @@ Rc Database::createGameRecord(const models::GameRecordInput& game) {
         return Rc::ErrExecQuery;
     }
 
+    return Rc::Ok;
+}
+
+Rc Database::deleteGameRecord(const QString& id) {
+    const char op[] = "Database::deleteGameRecord";
+
+    QSqlQuery query;
+    bool ok = query.prepare("DELETE FROM game_records WHERE id = :id");
+    if (!ok) {
+        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        return Rc::ErrPrepareQuery;
+    }
+
+    query.bindValue(":id", id);
+    if (!query.exec()) {
+        lwarn(op) << "sql exec error: " << query.lastError().text();
+        return Rc::ErrExecQuery;
+    }
+    if (query.numRowsAffected() == 0) {
+        lwarn(op) << "game record not found: " << id;
+        return Rc::ErrNotFound;
+    }
     return Rc::Ok;
 }

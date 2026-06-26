@@ -55,4 +55,8 @@ QtObject {
     readonly property string profileErrDuplicateName: "duplicate_name"
     readonly property string profileErrNotFound: "not_found"
     readonly property string profileErrDbError: "db_error"
+
+    // core game history errors
+    readonly property string gameErrNotFound: "not_found"
+    readonly property string gameErrDbError: "db_error"
 }

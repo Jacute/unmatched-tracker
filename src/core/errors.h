@@ -10,6 +10,7 @@ constexpr const char *NotFound = "not_found";
 
 namespace err_game {
 constexpr const char *InvalidData = "invalid_data";
+constexpr const char *NotFound = "not_found";
 } // namespace err_game
 
 namespace err {
