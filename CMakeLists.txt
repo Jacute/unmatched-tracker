@@ -40,6 +40,7 @@ set(plain_qml_files
     ${QML_DIR}/views/set/hero/tabs/Matchups.qml
     ${QML_DIR}/views/Random.qml
     ${QML_DIR}/views/Profiles.qml
+    ${QML_DIR}/views/Games.qml
     ${QML_DIR}/components/Card.qml
     ${QML_DIR}/components/CardGrid.qml
     ${QML_DIR}/components/BigImagePopup.qml
@@ -48,6 +49,8 @@ set(plain_qml_files
     ${QML_DIR}/components/RandomWheel.qml
     ${QML_DIR}/components/RandomFilter.qml
     ${QML_DIR}/components/MultiSelectDropdown.qml
+    ${QML_DIR}/components/FieldBox.qml
+    ${QML_DIR}/components/ThemedComboBox.qml
     ${QML_DIR}/components/VS.qml
     ${QML_DIR}/components/GameMap.qml
     ${QML_DIR}/components/Notif.qml

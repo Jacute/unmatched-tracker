@@ -8,6 +8,10 @@ constexpr const char *DuplicateName = "duplicate_name";
 constexpr const char *NotFound = "not_found";
 } // namespace err_profile
 
+namespace err_game {
+constexpr const char *InvalidData = "invalid_data";
+} // namespace err_game
+
 namespace err {
 constexpr const char *None = "";
 constexpr const char *DbError = "db_error";

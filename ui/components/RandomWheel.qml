@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Timeline
 
 import Tracker
 import "./RandomWheel.js" as Wheel

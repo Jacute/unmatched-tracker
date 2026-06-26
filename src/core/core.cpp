@@ -2,9 +2,12 @@
 #include "../log.h"
 #include "errors.h"
 
+#include <QDate>
 #include <QPointer>
 
 constexpr int imgThreadCount = 8;
+constexpr const char* dbDateFormat = "yyyy-MM-dd";
+constexpr const char* displayDateFormat = "dd-MM-yyyy";
 
 Core::Core(Database& db, FileProvider* fp)
     : db_(db),
@@ -25,6 +28,35 @@ static QVariantList mapHeroesQml(const QVector<models::Hero>& heroes) {
         list.append(std::move(obj));
     }
     return list;
+}
+
+static QString displayDateFromDb(const QVariant& value) {
+    const QString dateText = value.toString().trimmed();
+    if (dateText.isEmpty()) {
+        return {};
+    }
+
+    const QDate dbDate = QDate::fromString(dateText, dbDateFormat);
+    if (dbDate.isValid()) {
+        return dbDate.toString(displayDateFormat);
+    }
+
+    const QDate displayDate = QDate::fromString(dateText, displayDateFormat);
+    if (displayDate.isValid()) {
+        return dateText;
+    }
+
+    return dateText;
+}
+
+static QString dbDateFromDisplay(const QString& value) {
+    const QString dateText = value.trimmed();
+    if (dateText.isEmpty()) {
+        return {};
+    }
+
+    const QDate date = QDate::fromString(dateText, displayDateFormat);
+    return date.isValid() ? date.toString(dbDateFormat) : QString();
 }
 
 QVariantList Core::getHeroes() const {
@@ -244,6 +276,90 @@ QVariantMap Core::deleteProfile(quint64 id) const {
         break;
     }
 
+    return result;
+}
+
+QVariantList Core::getGameHistory(const QString& sortBy) const {
+    const char op[] = "Core::getGameHistory";
+
+    QVector<models::GameRecord> games;
+    Rc rc = db_.getGameHistory(games, sortBy);
+    if (rc != Rc::Ok) {
+        lerr(op) << "error getting game history: " << rc2str(rc);
+        return QVariantList{};
+    }
+
+    QVariantList list;
+    for (const auto& game : games) {
+        QVariantMap obj;
+        obj["id"] = game.id;
+        obj["player1_profile_id"] = game.player1.profileId;
+        obj["player1_profile_name"] = game.player1.profileName;
+        obj["player1_hero_id"] = game.player1.heroId;
+        obj["player1_hero_name"] = game.player1.heroName;
+        obj["player2_profile_id"] = game.player2.profileId;
+        obj["player2_profile_name"] = game.player2.profileName;
+        obj["player2_hero_id"] = game.player2.heroId;
+        obj["player2_hero_name"] = game.player2.heroName;
+        obj["map_id"] = game.mapId;
+        obj["map_name"] = game.mapName;
+        obj["player1_won"] = game.player1Won;
+        obj["hero1_remaining_hp"] = game.player1.heroRemainingHp;
+        obj["hero2_remaining_hp"] = game.player2.heroRemainingHp;
+        obj["played_at"] = displayDateFromDb(game.playedAt);
+        obj["created_at"] = game.createdAt;
+        list.append(std::move(obj));
+    }
+
+    return list;
+}
+
+QVariantMap Core::createGameRecord(const QVariantMap& game) const {
+    const char op[] = "Core::createGameRecord";
+    QVariantMap result;
+    result["ok"] = false;
+
+    const quint64 player1ProfileId = game.value("player1_profile_id").toULongLong();
+    const quint64 player1HeroId = game.value("player1_hero_id").toULongLong();
+    const quint64 player2ProfileId = game.value("player2_profile_id").toULongLong();
+    const quint64 player2HeroId = game.value("player2_hero_id").toULongLong();
+    const QVariant player1Won = game.value("player1_won");
+
+    if (player1ProfileId == 0 || player1HeroId == 0 || player2ProfileId == 0 || player2HeroId == 0 ||
+        !player1Won.isValid()) {
+        lwarn(op) << "invalid game record data";
+        result["error"] = err_game::InvalidData;
+        return result;
+    }
+
+    models::GameRecordInput input;
+    input.player1.profileId = player1ProfileId;
+    input.player1.heroId = player1HeroId;
+    input.player2.profileId = player2ProfileId;
+    input.player2.heroId = player2HeroId;
+    input.mapId = game.value("map_id");
+    input.player1Won = player1Won.toBool();
+    input.player1.heroRemainingHp = game.value("hero1_remaining_hp");
+    input.player2.heroRemainingHp = game.value("hero2_remaining_hp");
+    const QString playedAt = game.value("played_at").toString().trimmed();
+    if (!playedAt.isEmpty()) {
+        input.playedAt = dbDateFromDisplay(playedAt);
+        if (input.playedAt.isEmpty()) {
+            lwarn(op) << "invalid played_at date: " << playedAt;
+            result["error"] = err_game::InvalidData;
+            return result;
+        }
+    }
+
+    Rc rc = db_.createGameRecord(input);
+    if (rc != Rc::Ok) {
+        lerr(op) << "error creating game record: " << rc2str(rc);
+        result["error"] = err::DbError;
+        return result;
+    }
+
+    result["ok"] = true;
+    result["error"] = err::None;
     return result;
 }
 

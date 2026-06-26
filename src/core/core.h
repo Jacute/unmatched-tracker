@@ -29,6 +29,8 @@ class Core : public QObject {
     Q_INVOKABLE QVariantList getProfiles() const;
     Q_INVOKABLE QVariantMap createProfile(const QString& name) const;
     Q_INVOKABLE QVariantMap deleteProfile(quint64 id) const;
+    Q_INVOKABLE QVariantList getGameHistory(const QString& sortBy) const;
+    Q_INVOKABLE QVariantMap createGameRecord(const QVariantMap& game) const;
 
     Q_INVOKABLE QString getImage(const QString& path) const;
     Q_INVOKABLE void requestImage(const QString& path);

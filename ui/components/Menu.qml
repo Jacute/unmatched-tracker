@@ -56,6 +56,10 @@ Drawer {
                 {
                     text: qsTr("Player Profiles"),
                     page: Common.pageProfiles
+                },
+                {
+                    text: qsTr("Game History"),
+                    page: Common.pageGames
                 }
             ]
 

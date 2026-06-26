@@ -11,7 +11,7 @@
 #include <QUrl>
 
 namespace {
-constexpr int requestTimeoutMs = 4000;
+constexpr int requestTimeoutMs = 30000;
 
 QUrl buildUrl(const QString& baseUrl, const QString& path) {
     const QUrl absoluteUrl(path);

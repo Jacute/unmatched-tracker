@@ -54,6 +54,8 @@ ApplicationWindow {
                 return qsTr("Randomizer")
             case Common.pageProfiles:
                 return qsTr("Player Profiles")
+            case Common.pageGames:
+                return qsTr("Game History")
             default:
                 return qsTr("Unmatched Tracker")
             }
@@ -92,6 +94,12 @@ ApplicationWindow {
             anchors.fill: parent
             visible: root.page === Common.pageProfiles
         }
+
+        Games {
+            id: gamesPage
+            anchors.fill: parent
+            visible: root.page === Common.pageGames
+        }
     }
 
     onClosing: (close) => {
@@ -110,6 +118,8 @@ ApplicationWindow {
         case Common.pageRandom:
             break
         case Common.pageProfiles:
+            break
+        case Common.pageGames:
             break
         }
     }

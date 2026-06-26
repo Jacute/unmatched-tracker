@@ -1,0 +1,530 @@
+pragma ComponentBehavior: Bound
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Layouts
+
+import Tracker
+import "../components"
+
+Rectangle {
+    id: root
+    color: Common.bgColor
+
+    readonly property real pageMargin: width * 0.04
+    readonly property real controlHeight: Common.defaultFontSize * 3.8
+    readonly property real fieldSpacing: height * 0.01
+
+    ColumnLayout {
+        anchors {
+            fill: parent
+            margins: root.pageMargin
+        }
+        spacing: root.fieldSpacing
+
+        ColumnLayout {
+            id: contentColumn
+            Layout.fillWidth: true
+            Layout.preferredHeight: Math.min(contentColumn.implicitHeight, root.height * 0.48)
+            spacing: root.fieldSpacing
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.fieldSpacing
+
+                FieldBox {
+                    Layout.fillWidth: true
+                    label: qsTr("Player 1")
+                    ThemedComboBox {
+                        id: player1Profile
+                        anchors.fill: parent
+                        model: profilesModel
+                        textRole: "name"
+                    }
+                }
+
+                FieldBox {
+                    Layout.fillWidth: true
+                    label: qsTr("Hero 1")
+                    ThemedComboBox {
+                        id: player1Hero
+                        anchors.fill: parent
+                        model: heroesModel
+                        textRole: "name"
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.fieldSpacing
+
+                FieldBox {
+                    Layout.fillWidth: true
+                    label: qsTr("Player 2")
+                    ThemedComboBox {
+                        id: player2Profile
+                        anchors.fill: parent
+                        model: profilesModel
+                        textRole: "name"
+                    }
+                }
+
+                FieldBox {
+                    Layout.fillWidth: true
+                    label: qsTr("Hero 2")
+                    ThemedComboBox {
+                        id: player2Hero
+                        anchors.fill: parent
+                        model: heroesModel
+                        textRole: "name"
+                    }
+                }
+            }
+
+            FieldBox {
+                Layout.fillWidth: true
+                label: qsTr("Map")
+                ThemedComboBox {
+                    id: mapSelect
+                    anchors.fill: parent
+                    model: mapsInputModel
+                    textRole: "name"
+                }
+            }
+
+            FieldBox {
+                Layout.fillWidth: true
+                label: qsTr("Result")
+                ThemedComboBox {
+                    id: resultSelect
+                    anchors.fill: parent
+                    model: [
+                        qsTr("Player 1 victory"),
+                        qsTr("Player 1 defeat")
+                    ]
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: root.fieldSpacing
+
+                FieldBox {
+                    Layout.fillWidth: true
+                    label: qsTr("Hero 1 HP")
+                    TextField {
+                        id: hero1HpInput
+                        anchors.fill: parent
+                        color: Common.textColor
+                        placeholderText: activeFocus || text != "" ? "" : qsTr("Optional")
+                        placeholderTextColor: Common.textHint
+                        selectionColor: Common.accent
+                        selectedTextColor: Common.primary
+                        font.pixelSize: Common.defaultFontSize
+                        topPadding: 0
+                        bottomPadding: 0
+                        leftPadding: 0
+                        rightPadding: 0
+                        validator: IntValidator { bottom: 0; top: 99 }
+                        inputMethodHints: Qt.ImhDigitsOnly
+                        background: null
+                        verticalAlignment: TextInput.AlignVCenter
+                    }
+                }
+
+                FieldBox {
+                    Layout.fillWidth: true
+                    label: qsTr("Hero 2 HP")
+                    TextField {
+                        id: hero2HpInput
+                        anchors.fill: parent
+                        color: Common.textColor
+                        placeholderText: activeFocus || text != "" ? "" : qsTr("Optional")
+                        placeholderTextColor: Common.textHint
+                        selectionColor: Common.accent
+                        selectedTextColor: Common.primary
+                        font.pixelSize: Common.defaultFontSize
+                        topPadding: 0
+                        bottomPadding: 0
+                        leftPadding: 0
+                        rightPadding: 0
+                        validator: IntValidator { bottom: 0; top: 99 }
+                        inputMethodHints: Qt.ImhDigitsOnly
+                        background: null
+                        verticalAlignment: TextInput.AlignVCenter
+                    }
+                }
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.preferredHeight: root.controlHeight
+                spacing: root.fieldSpacing
+
+                FieldBox {
+                    Layout.fillWidth: true
+                    label: qsTr("Played at")
+                    TextField {
+                        id: playedAtInput
+                        anchors.fill: parent
+                        color: Common.textColor
+                        placeholderText: activeFocus || text != "" ? "" : qsTr("DD-MM-YYYY")
+                        placeholderTextColor: Common.textHint
+                        selectionColor: Common.accent
+                        selectedTextColor: Common.primary
+                        font.pixelSize: Common.defaultFontSize
+                        topPadding: 0
+                        bottomPadding: 0
+                        leftPadding: 0
+                        rightPadding: 0
+                        inputMask: ""
+                        background: null
+                        verticalAlignment: TextInput.AlignVCenter
+
+                        onActiveFocusChanged: {
+                            if (activeFocus) {
+                                inputMask = "00-00-0000;_"
+                                return
+                            }
+
+                            if (root.isMaskedDateEmpty(text)) {
+                                inputMask = ""
+                                text = ""
+                            }
+                        }
+                    }
+                }
+
+                Btn {
+                    Layout.preferredWidth: root.width * 0.3
+                    Layout.preferredHeight: root.controlHeight
+                    Layout.alignment: Qt.AlignVCenter
+                    radius: Common.defaultRadius
+                    text: qsTr("Add game")
+                    fontSize: Common.defaultFontSize
+                    onClicked: root.createGame()
+                }
+            }
+        }
+
+        Text {
+            id: statusText
+            Layout.fillWidth: true
+            visible: text.length > 0
+            color: Common.warning
+            font.pixelSize: Common.defaultFontSize
+            horizontalAlignment: Text.AlignHCenter
+            wrapMode: Text.WordWrap
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            color: Common.secondary
+        }
+
+        FieldBox {
+            Layout.fillWidth: true
+            label: qsTr("History sort")
+            ThemedComboBox {
+                id: historySortSelect
+                anchors.fill: parent
+                model: historySortModel
+                textRole: "name"
+
+                onCurrentIndexChanged: root.loadHistory()
+            }
+        }
+
+        ListView {
+            id: historyList
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
+            model: historyModel
+            spacing: root.fieldSpacing
+
+            delegate: Rectangle {
+                required property var modelData
+
+                id: game
+                readonly property bool player1Won: Boolean(modelData.player1_won)
+
+                width: historyList.width
+                height: historyContent.implicitHeight + root.fieldSpacing * 2
+                color: Common.secondary
+                radius: Common.defaultRadius
+                border.width: 1
+                border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
+
+                ColumnLayout {
+                    id: historyContent
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        verticalCenter: parent.verticalCenter
+                        margins: root.fieldSpacing
+                    }
+                    spacing: 3
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: root.historyDateText(game.modelData.played_at, game.modelData.created_at)
+                        color: Common.textHint
+                        font.pixelSize: Common.defaultFontSize * 0.82
+                        elide: Text.ElideRight
+                    }
+
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: 6
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: root.playerHistoryText(
+                                game.modelData.player1_profile_name,
+                                game.modelData.player1_hero_name
+                            )
+                            color: game.player1Won ? Common.success : Common.error
+                            font.pixelSize: Common.defaultFontSize
+                            font.bold: true
+                            wrapMode: Text.WordWrap
+                        }
+
+                        Text {
+                            text: qsTr("vs")
+                            color: Common.textHint
+                            font.pixelSize: Common.defaultFontSize * 0.86
+                            Layout.alignment: Qt.AlignTop
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: root.playerHistoryText(
+                                game.modelData.player2_profile_name,
+                                game.modelData.player2_hero_name
+                            )
+                            color: game.player1Won ? Common.error : Common.success
+                            font.pixelSize: Common.defaultFontSize
+                            font.bold: true
+                            horizontalAlignment: Text.AlignRight
+                            wrapMode: Text.WordWrap
+                        }
+                    }
+
+                    Text {
+                        Layout.fillWidth: true
+                        text: root.historyMetaText(
+                            game.modelData.map_name,
+                            game.modelData.hero1_remaining_hp,
+                            game.modelData.hero2_remaining_hp
+                        )
+                        color: Common.textSecondary
+                        font.pixelSize: Common.defaultFontSize * 0.86
+                        wrapMode: Text.WordWrap
+                    }
+                }
+            }
+        }
+
+        Text {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            visible: historyModel.count === 0
+            text: qsTr("No games yet")
+            color: Common.textHint
+            font.pixelSize: Common.defaultFontSize
+            horizontalAlignment: Text.AlignHCenter
+        }
+    }
+
+    ListModel { id: profilesModel }
+    ListModel { id: heroesModel }
+    ListModel { id: mapsInputModel }
+    ListModel {
+        id: historySortModel
+        ListElement {
+            key: "created_at"
+            name: qsTr("Created time")
+        }
+        ListElement {
+            key: "played_at"
+            name: qsTr("Played date")
+        }
+    }
+    ListModel {
+        id: historyModel
+        dynamicRoles: true
+    }
+
+    Component.onCompleted: {
+        if (visible) {
+            loadData()
+        }
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            loadData()
+        }
+    }
+
+    function loadData() {
+        loadProfiles()
+        loadHeroes()
+        loadMaps()
+        loadHistory()
+    }
+
+    function loadProfiles() {
+        profilesModel.clear()
+        const profiles = core.getProfiles()
+        for (let i = 0; i < profiles.length; i++) {
+            profilesModel.append({
+                id: profiles[i].id,
+                name: profiles[i].name
+            })
+        }
+    }
+
+    function loadHeroes() {
+        heroesModel.clear()
+        const heroes = core.getHeroes()
+        for (let i = 0; i < heroes.length; i++) {
+            heroesModel.append({
+                id: heroes[i].id,
+                name: heroes[i].name
+            })
+        }
+    }
+
+    function loadMaps() {
+        mapsInputModel.clear()
+        mapsInputModel.append({ id: 0, name: qsTr("Not specified") })
+        const maps = core.getMaps()
+        for (let i = 0; i < maps.length; i++) {
+            mapsInputModel.append({
+                id: maps[i].id,
+                name: maps[i].name
+            })
+        }
+    }
+
+    function loadHistory() {
+        historyModel.clear()
+        const history = core.getGameHistory(root.selectedHistorySort())
+        for (let i = 0; i < history.length; i++) {
+            historyModel.append(history[i])
+        }
+    }
+
+    function selectedHistorySort() {
+        if (historySortSelect.currentIndex < 0 || historySortSelect.currentIndex >= historySortModel.count) {
+            return "created_at"
+        }
+        return historySortModel.get(historySortSelect.currentIndex).key
+    }
+
+    function selectedId(model, index) {
+        if (index < 0 || index >= model.count) {
+            return 0
+        }
+        return model.get(index).id
+    }
+
+    function optionalSelectedId(model, index) {
+        const id = selectedId(model, index)
+        return id > 0 ? id : undefined
+    }
+
+    function optionalInt(text) {
+        const value = text.trim()
+        return value.length > 0 ? parseInt(value, 10) : undefined
+    }
+
+    function isMaskedDateEmpty(text) {
+        return text.replace(/[-_]/g, "").trim().length === 0
+    }
+
+    function normalizedPlayedAt() {
+        const value = playedAtInput.text.trim()
+        return root.isMaskedDateEmpty(value) ? "" : value
+    }
+
+    function createGame() {
+        if (profilesModel.count < 2) {
+            statusText.text = qsTr("Create at least two player profiles")
+            return
+        }
+        if (heroesModel.count === 0) {
+            statusText.text = qsTr("No heroes available")
+            return
+        }
+
+        const payload = {
+            player1_profile_id: root.selectedId(profilesModel, player1Profile.currentIndex),
+            player1_hero_id: root.selectedId(heroesModel, player1Hero.currentIndex),
+            player2_profile_id: root.selectedId(profilesModel, player2Profile.currentIndex),
+            player2_hero_id: root.selectedId(heroesModel, player2Hero.currentIndex),
+            player1_won: resultSelect.currentIndex === 0
+        }
+
+        if (payload.player1_profile_id === payload.player2_profile_id) {
+            statusText.text = qsTr("Choose two different players")
+            return
+        }
+
+        const mapId = root.optionalSelectedId(mapsInputModel, mapSelect.currentIndex)
+        if (mapId !== undefined) {
+            payload.map_id = mapId
+        }
+
+        const hero1Hp = root.optionalInt(hero1HpInput.text)
+        if (hero1Hp !== undefined) {
+            payload.hero1_remaining_hp = hero1Hp
+        }
+
+        const hero2Hp = root.optionalInt(hero2HpInput.text)
+        if (hero2Hp !== undefined) {
+            payload.hero2_remaining_hp = hero2Hp
+        }
+
+        const playedAt = root.normalizedPlayedAt()
+        if (playedAt.length > 0) {
+            if (!/^\d{2}-\d{2}-\d{4}$/.test(playedAt)) {
+                statusText.text = qsTr("Enter full played date or leave it empty")
+                return
+            }
+            payload.played_at = playedAt
+        }
+
+        const result = core.createGameRecord(payload)
+        if (!result.ok) {
+            statusText.text = qsTr("Could not add game")
+            return
+        }
+
+        statusText.text = ""
+        hero1HpInput.text = ""
+        hero2HpInput.text = ""
+        loadHistory()
+    }
+
+    function valueText(value, fallback) {
+        return value === undefined || value === null || value === "" ? fallback : value
+    }
+
+    function playerHistoryText(profileName, heroName) {
+        return qsTr("%1 (%2)").arg(profileName).arg(heroName)
+    }
+
+    function historyDateText(playedAt, createdAt) {
+        return root.valueText(playedAt, createdAt)
+    }
+
+    function historyMetaText(mapName, hp1, hp2) {
+        const mapText = root.valueText(mapName, qsTr("Map not specified"))
+        const hpText = qsTr("HP: %1 / %2").arg(root.valueText(hp1, "-")).arg(root.valueText(hp2, "-"))
+        return qsTr("%1 · %2").arg(mapText).arg(hpText)
+    }
+}

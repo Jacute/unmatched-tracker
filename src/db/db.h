@@ -44,6 +44,8 @@ class Database : public QObject {
     Rc getProfiles(QVector<models::PlayerProfile> &profiles);
     Rc createProfile(const QString &name);
     Rc deleteProfile(quint64 id);
+    Rc getGameHistory(QVector<models::GameRecord> &games, const QString &sortBy);
+    Rc createGameRecord(const models::GameRecordInput &game);
 
   private:
     Rc executeSqlFile(const QString &path);
