@@ -13,6 +13,7 @@ Rectangle {
     readonly property real pageMargin: width * 0.04
     readonly property real controlHeight: Common.defaultFontSize * 3.8
     readonly property real fieldSpacing: height * 0.01
+    property int participantRevision: 0
 
     ColumnLayout {
         anchors {
@@ -24,31 +25,38 @@ Rectangle {
         ColumnLayout {
             id: contentColumn
             Layout.fillWidth: true
-            Layout.preferredHeight: Math.min(contentColumn.implicitHeight, root.height * 0.48)
+            Layout.preferredHeight: contentColumn.implicitHeight
             spacing: root.fieldSpacing
 
-            RowLayout {
+            FieldBox {
                 Layout.fillWidth: true
-                spacing: root.fieldSpacing
+                label: qsTr("Game mode")
 
-                GameParticipantInput {
-                    id: player1Input
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: implicitHeight
-                    title: qsTr("Player 1")
-                    markerColor: Common.accent
-                    profileOptions: profilesModel
-                    heroOptions: heroesModel
+                ThemedComboBox {
+                    id: modeSelect
+                    anchors.fill: parent
+                    model: gameModesModel
+                    textRole: "name"
+
+                    onActivated: root.changeGameMode()
                 }
+            }
+
+            Repeater {
+                id: participantRepeater
+                model: root.selectedPlayerCount()
 
                 GameParticipantInput {
-                    id: player2Input
+                    required property int index
+
                     Layout.fillWidth: true
                     Layout.preferredHeight: implicitHeight
-                    title: qsTr("Player 2")
-                    markerColor: Common.accentHover
+                    title: root.participantTitle(index)
+                    markerColor: root.teamColor(root.teamForParticipant(index))
                     profileOptions: profilesModel
                     heroOptions: heroesModel
+
+                    onProfileSelectionChanged: root.participantRevision++
                 }
             }
 
@@ -73,13 +81,7 @@ Rectangle {
                     ThemedComboBox {
                         id: winner
                         anchors.fill: parent
-                        model: {
-                            if (player1Input.profileIndex !== -1
-                                    && player2Input.profileIndex !== -1) {
-                                return [player1Input.profileName, player2Input.profileName]
-                            }
-                            return []
-                        }
+                        model: root.winnerOptions()
                     }
                 }
             }
@@ -175,10 +177,6 @@ Rectangle {
 
                 id: game
                 readonly property var participants: modelData.participants
-                readonly property var player1: root.participantAt(participants, 0)
-                readonly property var player2: root.participantAt(participants, 1)
-                readonly property bool player1Won: Number(root.participantValue(player1, "team", 0))
-                                                   === Number(modelData.winning_team)
 
                 width: historyList.width
                 height: historyContent.implicitHeight + root.fieldSpacing * 2
@@ -207,9 +205,7 @@ Rectangle {
 
                     onClicked: {
                         deleteConfirmPopup.gameId = game.modelData.id
-                        deleteConfirmPopup.gameText = qsTr("%1 vs %2")
-                            .arg(root.participantHistoryText(game.player1))
-                            .arg(root.participantHistoryText(game.player2))
+                        deleteConfirmPopup.gameText = root.gameHistoryTitle(game.participants)
                         deleteConfirmPopup.open()
                     }
                 }
@@ -233,34 +229,33 @@ Rectangle {
                         elide: Text.ElideRight
                     }
 
-                    RowLayout {
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: 6
+                        spacing: 2
 
-                        Text {
-                            Layout.fillWidth: true
-                            text: root.participantHistoryText(game.player1)
-                            color: game.player1Won ? Common.success : Common.error
-                            font.pixelSize: Common.defaultFontSize
-                            font.bold: true
-                            wrapMode: Text.WordWrap
-                        }
+                        Repeater {
+                            model: root.participantCount(game.participants)
 
-                        Text {
-                            text: qsTr("vs")
-                            color: Common.textHint
-                            font.pixelSize: Common.defaultFontSize * 0.86
-                            Layout.alignment: Qt.AlignTop
-                        }
+                            Text {
+                                required property int index
+                                readonly property var participant: root.participantAt(
+                                                                       game.participants,
+                                                                       index)
 
-                        Text {
-                            Layout.fillWidth: true
-                            text: root.participantHistoryText(game.player2)
-                            color: game.player1Won ? Common.error : Common.success
-                            font.pixelSize: Common.defaultFontSize
-                            font.bold: true
-                            horizontalAlignment: Text.AlignRight
-                            wrapMode: Text.WordWrap
+                                Layout.fillWidth: true
+                                text: root.historyParticipantLabel(
+                                    game.modelData.mode,
+                                    index,
+                                    participant
+                                )
+                                color: Number(root.participantValue(participant, "team", 0))
+                                       === Number(game.modelData.winning_team)
+                                    ? Common.success
+                                    : Common.error
+                                font.pixelSize: Common.defaultFontSize
+                                font.bold: true
+                                wrapMode: Text.WordWrap
+                            }
                         }
                     }
 
@@ -268,8 +263,7 @@ Rectangle {
                         Layout.fillWidth: true
                         text: root.historyMetaText(
                             game.modelData.map_name,
-                            root.participantValue(game.player1, "hero_remaining_hp"),
-                            root.participantValue(game.player2, "hero_remaining_hp")
+                            game.participants
                         )
                         color: Common.textSecondary
                         font.pixelSize: Common.defaultFontSize * 0.86
@@ -380,6 +374,13 @@ Rectangle {
         }
     }
 
+    ListModel {
+        id: gameModesModel
+        ListElement { code: "1v1"; name: "1 vs 1"; playerCount: 2; teamCount: 2 }
+        ListElement { code: "1v1v1"; name: "1 vs 1 vs 1"; playerCount: 3; teamCount: 3 }
+        ListElement { code: "1v1v1v1"; name: "1 vs 1 vs 1 vs 1"; playerCount: 4; teamCount: 4 }
+        ListElement { code: "2v2"; name: "2 vs 2"; playerCount: 4; teamCount: 2 }
+    }
     ListModel { id: profilesModel }
     ListModel { id: heroesModel }
     ListModel { id: mapsInputModel }
@@ -480,6 +481,98 @@ Rectangle {
         return id > 0 ? id : undefined
     }
 
+    function selectedModeValue(role, fallback) {
+        if (modeSelect.currentIndex < 0 || modeSelect.currentIndex >= gameModesModel.count) {
+            return fallback
+        }
+        return gameModesModel.get(modeSelect.currentIndex)[role]
+    }
+
+    function selectedModeCode() {
+        return root.selectedModeValue("code", "1v1")
+    }
+
+    function selectedPlayerCount() {
+        return root.selectedModeValue("playerCount", 2)
+    }
+
+    function selectedTeamCount() {
+        return root.selectedModeValue("teamCount", 2)
+    }
+
+    function teamForParticipant(index) {
+        return root.selectedModeCode() === "2v2" ? index % 2 + 1 : index + 1
+    }
+
+    function participantTitle(index) {
+        if (root.selectedModeCode() === "2v2") {
+            return qsTr("P%1\nTeam %2")
+                .arg(Math.floor(index / 2) + 1)
+                .arg(root.teamForParticipant(index))
+        }
+        return qsTr("Player %1").arg(index + 1)
+    }
+
+    function teamColor(team) {
+        switch (team) {
+        case 1: return Common.team1Color
+        case 2: return Common.team2Color
+        case 3: return Common.team3Color
+        default: return Common.team4Color
+        }
+    }
+
+    function participantInputAt(index) {
+        return index >= 0 && index < participantRepeater.count
+            ? participantRepeater.itemAt(index)
+            : null
+    }
+
+    function winnerOptions() {
+        root.participantRevision
+        const participants = []
+        for (let i = 0; i < participantRepeater.count; i++) {
+            const input = root.participantInputAt(i)
+            if (!input || input.profileIndex < 0) {
+                return []
+            }
+            participants.push({
+                name: input.profileName,
+                team: root.teamForParticipant(i)
+            })
+        }
+
+        if (root.selectedModeCode() !== "2v2") {
+            return participants.map(participant => participant.name)
+        }
+
+        const teams = [[], []]
+        for (let i = 0; i < participants.length; i++) {
+            teams[participants[i].team - 1].push(participants[i].name)
+        }
+        return [
+            qsTr("Team 1: %1").arg(teams[0].join(", ")),
+            qsTr("Team 2: %1").arg(teams[1].join(", "))
+        ]
+    }
+
+    function clearParticipants() {
+        for (let i = 0; i < participantRepeater.count; i++) {
+            const input = root.participantInputAt(i)
+            if (input) {
+                input.clear()
+            }
+        }
+        root.participantRevision++
+    }
+
+    function changeGameMode() {
+        statusText.text = ""
+        winner.currentIndex = -1
+        root.participantRevision++
+        Qt.callLater(root.clearParticipants)
+    }
+
     function isMaskedDateEmpty(text) {
         return text.replace(/[-_]/g, "").trim().length === 0
     }
@@ -490,66 +583,76 @@ Rectangle {
     }
 
     function createGame() {
-        if (profilesModel.count < 2) {
-            statusText.text = qsTr("Create at least two player profiles")
-            return
-        }
-        if (heroesModel.count === 0) {
-            statusText.text = qsTr("No heroes available")
+        const playerCount = root.selectedPlayerCount()
+        if (profilesModel.count < playerCount) {
+            statusText.text = qsTr("Create at least %1 player profiles").arg(playerCount)
             return
         }
 
-        const player1 = {
-            position: 1,
-            team: 1,
-            profile_id: player1Input.profileId,
-            hero_id: player1Input.heroId,
-            hero_remaining_hp: 0
+        if (winner.currentIndex < 0) {
+            statusText.text = qsTr("Choose the winner")
+            return
         }
-        const player2 = {
-            position: 2,
-            team: 2,
-            profile_id: player2Input.profileId,
-            hero_id: player2Input.heroId,
-            hero_remaining_hp: 0
+
+        const participants = []
+        const profileIds = ({})
+        const winningTeam = winner.currentIndex + 1
+        let winningHpSpecified = false
+        for (let i = 0; i < playerCount; i++) {
+            const input = root.participantInputAt(i)
+            if (!input || input.profileId === 0) {
+                statusText.text = qsTr("Choose a profile for %1").arg(root.participantTitle(i))
+                return
+            }
+
+            const profileKey = String(input.profileId)
+            if (profileIds[profileKey]) {
+                statusText.text = qsTr("Choose different player profiles")
+                return
+            }
+            profileIds[profileKey] = true
+
+            const hp = input.hpResult()
+            if (!hp.valid) {
+                statusText.text = hp.error
+                return
+            }
+
+            const participant = {
+                position: i + 1,
+                team: root.teamForParticipant(i),
+                profile_id: input.profileId,
+                hero_id: input.heroId,
+                hero_remaining_hp: hp.specified ? hp.value : null
+            }
+            if (participant.team === winningTeam && hp.specified) {
+                winningHpSpecified = true
+            }
+            if (participant.team !== winningTeam && hp.specified && hp.value > 0) {
+                statusText.text = qsTr("Only the winning side can have remaining HP")
+                return
+            }
+            participants.push(participant)
         }
+
+        for (let i = 0; i < participants.length; i++) {
+            if (!winningHpSpecified) {
+                participants[i].hero_remaining_hp = null
+            } else if (participants[i].team !== winningTeam
+                       && participants[i].hero_remaining_hp === null) {
+                participants[i].hero_remaining_hp = 0
+            }
+        }
+
         const payload = {
-            mode: "1v1",
-            participants: [player1, player2],
-            winning_team: winner.currentIndex + 1
-        }
-
-        if (player1.profile_id === player2.profile_id) {
-            statusText.text = qsTr("Choose two different players")
-            return
+            mode: root.selectedModeCode(),
+            participants: participants,
+            winning_team: winningTeam
         }
 
         const mapId = root.optionalSelectedId(mapsInputModel, mapSelect.currentIndex)
         if (mapId !== undefined) {
             payload.map_id = mapId
-        }
-
-        const hero1Hp = player1Input.hpResult()
-        if (!hero1Hp.valid) {
-            statusText.text = hero1Hp.error
-            return
-        }
-        if (hero1Hp.value !== undefined) {
-            player1.hero_remaining_hp = hero1Hp.value
-        }
-
-        const hero2Hp = player2Input.hpResult()
-        if (!hero2Hp.valid) {
-            statusText.text = hero2Hp.error
-            return
-        }
-        if (hero2Hp.value !== undefined) {
-            player2.hero_remaining_hp = hero2Hp.value
-        }
-
-        if (player1.hero_remaining_hp != 0 && player2.hero_remaining_hp != 0) {
-            statusText.text = "Both heroes cannot have more than 0 hp"
-            return
         }
 
         const playedAt = root.normalizedPlayedAt()
@@ -608,6 +711,15 @@ Rectangle {
         return participant || {}
     }
 
+    function participantCount(participants) {
+        if (!participants) {
+            return 0
+        }
+        return typeof participants.count === "number"
+            ? participants.count
+            : participants.length
+    }
+
     function participantValue(participant, key, fallback) {
         if (!participant || participant[key] === undefined || participant[key] === null) {
             return fallback
@@ -622,21 +734,46 @@ Rectangle {
         )
     }
 
+    function historyParticipantLabel(mode, index, participant) {
+        const playerText = root.participantHistoryText(participant)
+        if (mode === "2v2") {
+            return qsTr("Team %1 · %2")
+                .arg(root.participantValue(participant, "team", "-"))
+                .arg(playerText)
+        }
+        return qsTr("Player %1 · %2").arg(index + 1).arg(playerText)
+    }
+
+    function gameHistoryTitle(participants) {
+        const names = []
+        for (let i = 0; i < root.participantCount(participants); i++) {
+            names.push(root.participantHistoryText(root.participantAt(participants, i)))
+        }
+        return names.join(qsTr(" vs "))
+    }
+
     function playerHistoryText(profileName, heroName) {
         return qsTr("%1 (%2)").arg(profileName).arg(heroName)
     }
 
-    function historyMetaText(mapName, hp1, hp2) {
+    function historyMetaText(mapName, participants) {
         const mapText = root.valueText(mapName, qsTr("Map not specified"))
-        const hpText = qsTr("HP: %1 / %2").arg(root.valueText(hp1, "-")).arg(root.valueText(hp2, "-"))
+        const hpValues = []
+        for (let i = 0; i < root.participantCount(participants); i++) {
+            const participant = root.participantAt(participants, i)
+            hpValues.push(root.valueText(
+                root.participantValue(participant, "hero_remaining_hp"),
+                "-"
+            ))
+        }
+        const hpText = qsTr("HP: %1").arg(hpValues.join(" / "))
         return qsTr("%1 · %2").arg(mapText).arg(hpText)
     }
 
     function clearFields() {
         statusText.text = ""
         playedAtInput.text = ""
-        player1Input.clear()
-        player2Input.clear()
+        root.clearParticipants()
         winner.currentIndex = -1
     }
 }

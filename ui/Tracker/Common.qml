@@ -22,6 +22,11 @@ QtObject {
     readonly property color error: "#B65C72"
     readonly property color success: "#6FA86F"
 
+    readonly property color team1Color: "#4CC9F0"
+    readonly property color team2Color: "#FF6B6B"
+    readonly property color team3Color: "#FFD166"
+    readonly property color team4Color: "#C77DFF"
+
     readonly property int defaultFontSize: 16
     readonly property int defaultRadius: 10
     readonly property real borderLightFactor: 1.25

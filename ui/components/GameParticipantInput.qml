@@ -11,6 +11,7 @@ Rectangle {
     required property var heroOptions
     property string title: ""
     property color markerColor: Common.accent
+    signal profileSelectionChanged
 
     readonly property int profileIndex: profileSelect.currentIndex
     readonly property int heroIndex: heroSelect.currentIndex
@@ -18,7 +19,7 @@ Rectangle {
     readonly property int heroId: root.modelId(heroOptions, heroIndex)
     readonly property string profileName: root.modelName(profileOptions, profileIndex)
 
-    implicitHeight: content.implicitHeight + Common.defaultFontSize * 1.2
+    implicitHeight: content.implicitHeight + Common.defaultFontSize * 0.8
     color: Common.secondary
     radius: Common.defaultRadius
     border.width: 1
@@ -36,24 +37,26 @@ Rectangle {
         color: root.markerColor
     }
 
-    ColumnLayout {
+    RowLayout {
         id: content
         anchors {
             fill: parent
-            leftMargin: Common.defaultFontSize * 0.8
+            leftMargin: Common.defaultFontSize * 0.7
             rightMargin: Common.defaultFontSize * 0.55
-            topMargin: Common.defaultFontSize * 0.55
-            bottomMargin: Common.defaultFontSize * 0.55
+            topMargin: Common.defaultFontSize * 0.4
+            bottomMargin: Common.defaultFontSize * 0.4
         }
         spacing: 6
 
         Text {
-            Layout.fillWidth: true
+            Layout.preferredWidth: Common.defaultFontSize * 3.4
             text: root.title
             color: Common.textSecondary
-            font.pixelSize: Common.defaultFontSize
+            font.pixelSize: Common.defaultFontSize * 0.86
             font.bold: true
             horizontalAlignment: Text.AlignLeft
+            verticalAlignment: Text.AlignVCenter
+            wrapMode: Text.WordWrap
         }
 
         FieldBox {
@@ -65,6 +68,8 @@ Rectangle {
                 anchors.fill: parent
                 model: root.profileOptions
                 textRole: "name"
+
+                onCurrentIndexChanged: root.profileSelectionChanged()
             }
         }
 
@@ -83,8 +88,8 @@ Rectangle {
         }
 
         FieldBox {
-            Layout.fillWidth: true
-            label: qsTr("Remaining HP")
+            Layout.preferredWidth: Math.max(Common.defaultFontSize * 4.2, root.width * 0.2)
+            label: qsTr("HP")
 
             TextField {
                 id: hpInput
@@ -132,7 +137,7 @@ Rectangle {
     function hpResult() {
         const value = hpInput.text.trim()
         if (value.length === 0) {
-            return { valid: true, value: 0 }
+            return { valid: true, specified: false, value: null }
         }
         if (!hpInput.acceptableInput || !/^\d+$/.test(value)) {
             return {
@@ -142,7 +147,7 @@ Rectangle {
                     .arg(root.selectedHeroHp())
             }
         }
-        return { valid: true, value: parseInt(value, 10) }
+        return { valid: true, specified: true, value: parseInt(value, 10) }
     }
 
     function clear() {
