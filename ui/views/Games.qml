@@ -142,8 +142,8 @@ Rectangle {
                         padding: 0
                         enabled: player1Hero.currentIndex != -1
                         validator: IntValidator {
-                            bottom: 0;
-                            top: heroesModel.get(player1Hero.currentIndex).hp
+                            bottom: 0
+                            top: root.selectedHeroHp(player1Hero.currentIndex)
                         }
                         inputMethodHints: Qt.ImhDigitsOnly
                         background: null
@@ -166,8 +166,8 @@ Rectangle {
                         padding: 0
                         enabled: player2Hero.currentIndex != -1
                         validator: IntValidator {
-                            bottom: 0;
-                            top: heroesModel.get(player2Hero.currentIndex).hp
+                            bottom: 0
+                            top: root.selectedHeroHp(player2Hero.currentIndex)
                         }
                         inputMethodHints: Qt.ImhDigitsOnly
                         background: null
@@ -539,9 +539,9 @@ Rectangle {
         for (let i = 0; i < heroes.length; i++) {
             heroesModel.append({
                 id: heroes[i].id,
-                name: heroes[i].name
+                name: heroes[i].name,
+                hp: heroes[i].hp
             })
-            console.log(heroes[i].hp)
         }
     }
 
@@ -584,9 +584,29 @@ Rectangle {
         return id > 0 ? id : undefined
     }
 
-    function optionalInt(text) {
-        const value = text.trim()
-        return value.length > 0 ? parseInt(value, 10) : undefined
+    function selectedHeroHp(index) {
+        if (index < 0 || index >= heroesModel.count) {
+            return 0
+        }
+        return heroesModel.get(index).hp
+    }
+
+    function optionalHp(field, heroNumber) {
+        const value = field.text.trim()
+        if (value.length === 0) {
+            return { valid: true }
+        }
+        if (!field.acceptableInput || !/^\d+$/.test(value)) {
+            return {
+                valid: false,
+                error: qsTr("Hero %1 HP must be between 0 and %2")
+                    .arg(heroNumber)
+                    .arg(root.selectedHeroHp(heroNumber === 1
+                                             ? player1Hero.currentIndex
+                                             : player2Hero.currentIndex))
+            }
+        }
+        return { valid: true, value: parseInt(value, 10) }
     }
 
     function isMaskedDateEmpty(text) {
@@ -626,14 +646,22 @@ Rectangle {
             payload.map_id = mapId
         }
 
-        const hero1Hp = root.optionalInt(hero1HpInput.text)
-        if (hero1Hp !== undefined) {
-            payload.hero1_remaining_hp = hero1Hp
+        const hero1Hp = root.optionalHp(hero1HpInput, 1)
+        if (!hero1Hp.valid) {
+            statusText.text = hero1Hp.error
+            return
+        }
+        if (hero1Hp.value !== undefined) {
+            payload.hero1_remaining_hp = hero1Hp.value
         }
 
-        const hero2Hp = root.optionalInt(hero2HpInput.text)
-        if (hero2Hp !== undefined) {
-            payload.hero2_remaining_hp = hero2Hp
+        const hero2Hp = root.optionalHp(hero2HpInput, 2)
+        if (!hero2Hp.valid) {
+            statusText.text = hero2Hp.error
+            return
+        }
+        if (hero2Hp.value !== undefined) {
+            payload.hero2_remaining_hp = hero2Hp.value
         }
 
         const playedAt = root.normalizedPlayedAt()

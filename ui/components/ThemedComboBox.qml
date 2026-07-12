@@ -52,7 +52,6 @@ ComboBox {
     }
 
     delegate: ItemDelegate {
-        required property var model
         required property int index
 
         id: item
@@ -62,7 +61,7 @@ ComboBox {
         highlighted: combo.highlightedIndex === index
 
         contentItem: Text {
-            text: combo.textRole ? model[combo.textRole] : modelData
+            text: combo.textAt(item.index)
             color: item.highlighted ? Common.primary : Common.textColor
             font.pixelSize: Common.defaultFontSize
             verticalAlignment: Text.AlignVCenter
