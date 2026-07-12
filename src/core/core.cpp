@@ -304,11 +304,17 @@ QVariantMap Core::deleteProfile(quint64 id) const {
     return result;
 }
 
-QVariantList Core::getGameHistory(const QString& sortBy) const {
+QVariantList Core::getGameHistory(const QString& sortBy, quint32 limit, quint32 offset) const {
     const char op[] = "Core::getGameHistory";
 
+    constexpr quint32 maxPageSize = 100;
+    if (limit == 0 || limit > maxPageSize) {
+        lwarn(op) << "invalid history page size: " << limit;
+        return {};
+    }
+
     QVector<models::GameRecord> games;
-    Rc rc = db_.getGameHistory(games, sortBy);
+    Rc rc = db_.getGameHistory(games, sortBy, limit, offset);
     if (rc != Rc::Ok) {
         lerr(op) << "error getting game history: " << rc2str(rc);
         return QVariantList{};
@@ -334,6 +340,7 @@ QVariantList Core::getGameHistory(const QString& sortBy) const {
             participantObj["profile_name"] = participant.profileName;
             participantObj["hero_id"] = participant.heroId;
             participantObj["hero_name"] = participant.heroName;
+            participantObj["hero_img_path"] = participant.heroImgPath;
             participantObj["hero_remaining_hp"] = participant.heroRemainingHp;
             participants.append(std::move(participantObj));
         }

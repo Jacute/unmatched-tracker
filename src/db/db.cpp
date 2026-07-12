@@ -326,30 +326,46 @@ Rc Database::deleteProfile(quint64 id) {
     return Rc::Ok;
 }
 
-Rc Database::getGameHistory(QVector<models::GameRecord>& games, const QString& sortBy) {
+Rc Database::getGameHistory(QVector<models::GameRecord>& games,
+                            const QString& sortBy,
+                            quint32 limit,
+                            quint32 offset) {
     const char op[] = "Database::getGameHistory";
 
-    QString orderBy = "gr.created_at DESC";
+    QString orderColumn = "created_at";
     if (sortBy == "played_at") {
-        orderBy = "gr.played_at DESC";
+        orderColumn = "played_at";
     }
 
-    QSqlQuery query;
-    bool ok = query.exec(QString("SELECT "
-                                 "gr.id, gr.mode, gr.winning_team, "
-                                 "gr.map_id, m.name, gr.played_at, gr.created_at, "
+    QSqlQuery query(db);
+    bool ok = query.prepare(QString("WITH history_page AS ("
+                                    "SELECT id, mode, winning_team, map_id, played_at, created_at "
+                                    "FROM game_records "
+                                    "ORDER BY %1 DESC, id "
+                                    "LIMIT :limit OFFSET :offset"
+                                    ") "
+                                 "SELECT "
+                                 "hp.id, hp.mode, hp.winning_team, "
+                                 "hp.map_id, m.name, hp.played_at, hp.created_at, "
                                  "grp.position, grp.team, "
                                  "grp.profile_id, pp.name, "
-                                 "grp.hero_id, h.name, grp.hero_remaining_hp "
-                                 "FROM game_records gr "
-                                 "JOIN game_record_participants grp ON grp.game_id = gr.id "
+                                 "grp.hero_id, h.name, h.img_path, grp.hero_remaining_hp "
+                                 "FROM history_page hp "
+                                 "JOIN game_record_participants grp ON grp.game_id = hp.id "
                                  "JOIN player_profiles pp ON pp.id = grp.profile_id "
                                  "LEFT JOIN heroes h ON h.id = grp.hero_id "
-                                 "LEFT JOIN maps m ON m.id = gr.map_id "
-                                 "ORDER BY %1, gr.id, grp.position")
-                             .arg(orderBy));
+                                 "LEFT JOIN maps m ON m.id = hp.map_id "
+                                 "ORDER BY hp.%1 DESC, hp.id, grp.position")
+                                .arg(orderColumn));
     if (!ok) {
-        lwarn(op) << "sql error: " << query.lastError().text();
+        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        return Rc::ErrPrepareQuery;
+    }
+
+    query.bindValue(":limit", limit);
+    query.bindValue(":offset", offset);
+    if (!query.exec()) {
+        lwarn(op) << "sql exec error: " << query.lastError().text();
         return Rc::ErrExecQuery;
     }
 
@@ -374,7 +390,8 @@ Rc Database::getGameHistory(QVector<models::GameRecord>& games, const QString& s
         participant.profileName = query.value(10).toString();
         participant.heroId = query.value(11).toULongLong();
         participant.heroName = query.value(12).toString();
-        participant.heroRemainingHp = query.value(13);
+        participant.heroImgPath = query.value(13).toString();
+        participant.heroRemainingHp = query.value(14);
         games.last().participants.append(std::move(participant));
     }
 

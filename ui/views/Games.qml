@@ -13,7 +13,11 @@ Rectangle {
     readonly property real pageMargin: width * 0.04
     readonly property real controlHeight: Common.defaultFontSize * 3.8
     readonly property real fieldSpacing: height * 0.01
+    readonly property int historyPageSize: 12
     property int participantRevision: 0
+    property int historyOffset: 0
+    property bool historyHasMore: false
+    property bool historyLoading: false
 
     ColumnLayout {
         anchors {
@@ -171,6 +175,13 @@ Rectangle {
             clip: true
             model: historyModel
             spacing: root.fieldSpacing
+            cacheBuffer: height * 0.6
+
+            onMovementEnded: {
+                if (contentY + height >= contentHeight - height * 0.5) {
+                    root.loadNextHistoryPage()
+                }
+            }
 
             delegate: Rectangle {
                 required property var modelData
@@ -236,25 +247,49 @@ Rectangle {
                         Repeater {
                             model: root.participantCount(game.participants)
 
-                            Text {
+                            RowLayout {
                                 required property int index
                                 readonly property var participant: root.participantAt(
                                                                        game.participants,
                                                                        index)
 
+                                id: participantRow
                                 Layout.fillWidth: true
-                                text: root.historyParticipantLabel(
-                                    game.modelData.mode,
-                                    index,
-                                    participant
-                                )
-                                color: Number(root.participantValue(participant, "team", 0))
-                                       === Number(game.modelData.winning_team)
-                                    ? Common.success
-                                    : Common.error
-                                font.pixelSize: Common.defaultFontSize
-                                font.bold: true
-                                wrapMode: Text.WordWrap
+                                spacing: 8
+
+                                Rectangle {
+                                    Layout.preferredWidth: Common.defaultFontSize * 2.35
+                                    Layout.preferredHeight: Common.defaultFontSize * 2.35
+                                    radius: Common.defaultRadius * 0.5
+                                    color: Common.imagePlaceholder
+                                    clip: true
+
+                                    LoadImage {
+                                        anchors.fill: parent
+                                        imgPath: root.participantValue(
+                                            participantRow.participant,
+                                            "hero_img_path",
+                                            ""
+                                        )
+                                        fillMode: Image.PreserveAspectCrop
+                                    }
+                                }
+
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: root.historyParticipantLabel(
+                                        game.modelData.mode,
+                                        index,
+                                        participantRow.participant
+                                    )
+                                    color: Number(root.participantValue(participantRow.participant, "team", 0))
+                                           === Number(game.modelData.winning_team)
+                                        ? Common.success
+                                        : Common.error
+                                    font.pixelSize: Common.defaultFontSize
+                                    font.bold: true
+                                    wrapMode: Text.WordWrap
+                                }
                             }
                         }
                     }
@@ -456,10 +491,28 @@ Rectangle {
 
     function loadHistory() {
         historyModel.clear()
-        const history = core.getGameHistory(root.selectedHistorySort())
+        root.historyOffset = 0
+        root.historyHasMore = true
+        root.loadNextHistoryPage()
+    }
+
+    function loadNextHistoryPage() {
+        if (root.historyLoading || !root.historyHasMore) {
+            return
+        }
+
+        root.historyLoading = true
+        const history = core.getGameHistory(
+            root.selectedHistorySort(),
+            root.historyPageSize,
+            root.historyOffset
+        )
         for (let i = 0; i < history.length; i++) {
             historyModel.append(history[i])
         }
+        root.historyOffset += history.length
+        root.historyHasMore = history.length === root.historyPageSize
+        root.historyLoading = false
     }
 
     function selectedHistorySort() {

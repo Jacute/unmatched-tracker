@@ -79,6 +79,7 @@ struct GameRecordParticipant {
     QString profileName;
     quint64 heroId;
     QString heroName;
+    QString heroImgPath;
     QVariant heroRemainingHp;
 };
 
