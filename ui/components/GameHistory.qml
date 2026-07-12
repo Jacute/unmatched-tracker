@@ -11,7 +11,7 @@ Item {
 
     property real fieldSpacing: 8
     property real controlHeight: Common.defaultFontSize * 3.8
-    readonly property int pageSize: 12
+    readonly property int pageSize: 5
     property int pageOffset: 0
     property bool hasMore: false
     property bool loading: false

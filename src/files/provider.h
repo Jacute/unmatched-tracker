@@ -14,5 +14,9 @@ class File : public FileProvider {
     File(const FileCache&, const Api&);
     ~File() = default;
 
+    //
     Rc get(const QString& path, QString& sourceUrl) override;
+
+  private:
+    Rc getCached(const QString& path, QString& sourceUrl) const;
 };

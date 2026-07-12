@@ -1,4 +1,5 @@
 #include "provider.h"
+#include "../log.h"
 
 namespace {
 void normalizeQmlUrl(QString& path) {
@@ -15,21 +16,31 @@ File::File(const FileCache& cache, const Api& api)
       api_(api) {
 }
 
-Rc File::get(const QString& path, QString& sourceUrl) {
-    if (cache_.exists(path)) {
-        sourceUrl = cache_.fileUrl(path).toString();
-    } else {
-        QByteArray data;
-        Rc rc = api_.getAsset(path, data);
-        if (rc != Rc::Ok) {
-            return rc;
-        }
-        rc = cache_.write(path, data);
-        if (rc != Rc::Ok) {
-            return rc;
-        }
-        sourceUrl = cache_.fileUrl(path).toString();
+Rc File::getCached(const QString& path, QString& sourceUrl) const {
+    if (!cache_.exists(path)) {
+        return Rc::ErrNotFound;
     }
+
+    sourceUrl = cache_.fileUrl(path).toString();
+    normalizeQmlUrl(sourceUrl);
+    return Rc::Ok;
+}
+
+Rc File::get(const QString& path, QString& sourceUrl) {
+    if (getCached(path, sourceUrl) == Rc::Ok) {
+        return Rc::Ok;
+    }
+
+    QByteArray data;
+    Rc rc = api_.getAsset(path, data);
+    if (rc != Rc::Ok) {
+        return rc;
+    }
+    rc = cache_.write(path, data);
+    if (rc != Rc::Ok) {
+        return rc;
+    }
+    sourceUrl = cache_.fileUrl(path).toString();
     normalizeQmlUrl(sourceUrl);
     return Rc::Ok;
 }

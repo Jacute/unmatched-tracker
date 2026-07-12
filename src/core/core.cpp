@@ -494,6 +494,15 @@ QString Core::getImage(const QString& path) const {
 }
 
 void Core::requestImage(const QString& path) {
+    if (path.isEmpty()) {
+        return;
+    }
+
+    if (pendingImages_.contains(path)) {
+        return;
+    }
+    pendingImages_.insert(path);
+
     QPointer<Core> self(this);
     FileProvider* provider = provider_;
 
@@ -512,6 +521,8 @@ void Core::requestImage(const QString& path) {
                     return;
                 }
 
+                self->pendingImages_.remove(path);
+
                 if (rc != Rc::Ok) {
                     lerr("Core::requestImage")
                         << "error getting image: " << path << " rc=" << rc2str(rc);
@@ -527,6 +538,7 @@ void Core::requestImage(const QString& path) {
 }
 
 QVariantMap Core::exportDb(const QUrl& to) const {
+    const char op[] = "Core::exportDb";
     QVariantMap result;
     Rc rc = dbExporter_.exportDb(db_, to);
     if (rc == Rc::Ok) {
@@ -534,6 +546,7 @@ QVariantMap Core::exportDb(const QUrl& to) const {
     } else {
         result["ok"] = false;
         result["error"] = rc2str(rc);
+        lerr(op) << result["error"];
     }
     return result;
 }

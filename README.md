@@ -41,14 +41,28 @@ source ~/.bashrc
 
 3. Configure project for platform android-33 and arch arm64-v8a
 
+Configuration for **develop** build:
 ```bash
 $QT_CMAKE \
 	-DANDROID_SDK_ROOT=$ANDROID_SDK \
 	-DANDROID_NDK_ROOT=$ANDROID_NDK \
 	-DANDROID_ABI=arm64-v8a \
 	-DANDROID_PLATFORM=android-33 \
-	-DAPI_URL=http://lolcathost \
 	-S . -B ./build \
+	-GNinja
+```
+
+Configuration for **develop** build:
+```bash
+$QT_CMAKE \
+	-DANDROID_SDK_ROOT=$ANDROID_SDK \
+	-DANDROID_NDK_ROOT=$ANDROID_NDK \
+	-DANDROID_ABI=arm64-v8a \
+	-DANDROID_PLATFORM=android-33 \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG" \
+	-S . \
+	-B ./build \
 	-GNinja
 ```
 
