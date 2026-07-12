@@ -41,9 +41,6 @@ Rectangle {
                         anchors.fill: parent
                         model: profilesModel
                         textRole: "name"
-                        onActivated: {
-                            root.checkSameProfiles(player1Profile)
-                        }
                     }
                 }
 
@@ -74,9 +71,6 @@ Rectangle {
                         anchors.fill: parent
                         model: profilesModel
                         textRole: "name"
-                        onActivated: {
-                            root.checkSameProfiles(player2Profile)
-                        }
                     }
                 }
 
@@ -266,7 +260,11 @@ Rectangle {
                 required property var modelData
 
                 id: game
-                readonly property bool player1Won: Boolean(modelData.player1_won)
+                readonly property var participants: modelData.participants
+                readonly property var player1: root.participantAt(participants, 0)
+                readonly property var player2: root.participantAt(participants, 1)
+                readonly property bool player1Won: Number(root.participantValue(player1, "team", 0))
+                                                   === Number(modelData.winning_team)
 
                 width: historyList.width
                 height: historyContent.implicitHeight + root.fieldSpacing * 2
@@ -296,14 +294,8 @@ Rectangle {
                     onClicked: {
                         deleteConfirmPopup.gameId = game.modelData.id
                         deleteConfirmPopup.gameText = qsTr("%1 vs %2")
-                            .arg(root.playerHistoryText(
-                                game.modelData.player1_profile_name,
-                                game.modelData.player1_hero_name
-                            ))
-                            .arg(root.playerHistoryText(
-                                game.modelData.player2_profile_name,
-                                game.modelData.player2_hero_name
-                            ))
+                            .arg(root.participantHistoryText(game.player1))
+                            .arg(root.participantHistoryText(game.player2))
                         deleteConfirmPopup.open()
                     }
                 }
@@ -333,10 +325,7 @@ Rectangle {
 
                         Text {
                             Layout.fillWidth: true
-                            text: root.playerHistoryText(
-                                game.modelData.player1_profile_name,
-                                game.modelData.player1_hero_name
-                            )
+                            text: root.participantHistoryText(game.player1)
                             color: game.player1Won ? Common.success : Common.error
                             font.pixelSize: Common.defaultFontSize
                             font.bold: true
@@ -352,10 +341,7 @@ Rectangle {
 
                         Text {
                             Layout.fillWidth: true
-                            text: root.playerHistoryText(
-                                game.modelData.player2_profile_name,
-                                game.modelData.player2_hero_name
-                            )
+                            text: root.participantHistoryText(game.player2)
                             color: game.player1Won ? Common.error : Common.success
                             font.pixelSize: Common.defaultFontSize
                             font.bold: true
@@ -368,8 +354,8 @@ Rectangle {
                         Layout.fillWidth: true
                         text: root.historyMetaText(
                             game.modelData.map_name,
-                            game.modelData.hero1_remaining_hp,
-                            game.modelData.hero2_remaining_hp
+                            root.participantValue(game.player1, "hero_remaining_hp"),
+                            root.participantValue(game.player2, "hero_remaining_hp")
                         )
                         color: Common.textSecondary
                         font.pixelSize: Common.defaultFontSize * 0.86
@@ -478,10 +464,6 @@ Rectangle {
                 }
             }
         }
-    }
-
-    Notif {
-        id: notifier
     }
 
     ListModel { id: profilesModel }
@@ -628,15 +610,27 @@ Rectangle {
             return
         }
 
+        const player1 = {
+            position: 1,
+            team: 1,
+            profile_id: root.selectedId(profilesModel, player1Profile.currentIndex),
+            hero_id: root.selectedId(heroesModel, player1Hero.currentIndex),
+            hero_remaining_hp: 0
+        }
+        const player2 = {
+            position: 2,
+            team: 2,
+            profile_id: root.selectedId(profilesModel, player2Profile.currentIndex),
+            hero_id: root.selectedId(heroesModel, player2Hero.currentIndex),
+            hero_remaining_hp: 0
+        }
         const payload = {
-            player1_profile_id: root.selectedId(profilesModel, player1Profile.currentIndex),
-            player1_hero_id: root.selectedId(heroesModel, player1Hero.currentIndex),
-            player2_profile_id: root.selectedId(profilesModel, player2Profile.currentIndex),
-            player2_hero_id: root.selectedId(heroesModel, player2Hero.currentIndex),
-            player1_won: winner.currentIndex === 0
+            mode: "1v1",
+            participants: [player1, player2],
+            winning_team: winner.currentIndex + 1
         }
 
-        if (payload.player1_profile_id === payload.player2_profile_id) {
+        if (player1.profile_id === player2.profile_id) {
             statusText.text = qsTr("Choose two different players")
             return
         }
@@ -652,7 +646,7 @@ Rectangle {
             return
         }
         if (hero1Hp.value !== undefined) {
-            payload.hero1_remaining_hp = hero1Hp.value
+            player1.hero_remaining_hp = hero1Hp.value
         }
 
         const hero2Hp = root.optionalHp(hero2HpInput, 2)
@@ -661,7 +655,12 @@ Rectangle {
             return
         }
         if (hero2Hp.value !== undefined) {
-            payload.hero2_remaining_hp = hero2Hp.value
+            player2.hero_remaining_hp = hero2Hp.value
+        }
+
+        if (player1.hero_remaining_hp != 0 && player2.hero_remaining_hp != 0) {
+            statusText.text = "Both heroes cannot have more than 0 hp"
+            return
         }
 
         const playedAt = root.normalizedPlayedAt()
@@ -706,6 +705,34 @@ Rectangle {
         return value === undefined || value === null || value === "" ? fallback : value
     }
 
+    function participantAt(participants, index) {
+        if (!participants) {
+            return {}
+        }
+
+        if (typeof participants.get === "function") {
+            const participant = index < participants.count ? participants.get(index) : null
+            return participant || {}
+        }
+
+        const participant = index < participants.length ? participants[index] : null
+        return participant || {}
+    }
+
+    function participantValue(participant, key, fallback) {
+        if (!participant || participant[key] === undefined || participant[key] === null) {
+            return fallback
+        }
+        return participant[key]
+    }
+
+    function participantHistoryText(participant) {
+        return root.playerHistoryText(
+            root.participantValue(participant, "profile_name", ""),
+            root.participantValue(participant, "hero_name", "")
+        )
+    }
+
     function playerHistoryText(profileName, heroName) {
         return qsTr("%1 (%2)").arg(profileName).arg(heroName)
     }
@@ -726,15 +753,5 @@ Rectangle {
         player2Profile.currentIndex = -1
         player2Hero.currentIndex = -1
         winner.currentIndex = -1
-    }
-
-    function checkSameProfiles(changedComboBox) {
-        if (player1Profile.currentIndex === -1 || player2Profile.currentIndex === -1)
-            return
-
-        if (player1Profile.currentIndex === player2Profile.currentIndex) {
-            notifier.show("Players can't have same profiles")
-            changedComboBox.currentIndex = -1
-        }
     }
 }

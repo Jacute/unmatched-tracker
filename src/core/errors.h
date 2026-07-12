@@ -9,7 +9,7 @@ constexpr const char* NotFound = "not_found";
 } // namespace err_profile
 
 namespace err_game {
-constexpr const char* InvalidData = "Invalid date";
+constexpr const char* InvalidData = "Invalid data";
 constexpr const char* NotFound = "not_found";
 } // namespace err_game
 

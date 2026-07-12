@@ -4,6 +4,7 @@
 
 #include <QDate>
 #include <QPointer>
+#include <QSet>
 
 constexpr int imgThreadCount = 8;
 constexpr const char* dbDateFormat = "yyyy-MM-dd";
@@ -59,6 +60,25 @@ static QString dbDateFromDisplay(const QString& value) {
 
     const QDate date = QDate::fromString(dateText, displayDateFormat);
     return date.isValid() ? date.toString(dbDateFormat) : QString();
+}
+
+static bool gameModeSpec(const QString& mode, int& playerCount, int& teamCount) {
+    if (mode == "1v1") {
+        playerCount = 2;
+        teamCount = 2;
+    } else if (mode == "1v1v1") {
+        playerCount = 3;
+        teamCount = 3;
+    } else if (mode == "1v1v1v1") {
+        playerCount = 4;
+        teamCount = 4;
+    } else if (mode == "2v2") {
+        playerCount = 4;
+        teamCount = 2;
+    } else {
+        return false;
+    }
+    return true;
 }
 
 QVariantList Core::getHeroes() const {
@@ -297,21 +317,26 @@ QVariantList Core::getGameHistory(const QString& sortBy) const {
     for (const auto& game : games) {
         QVariantMap obj;
         obj["id"] = game.id;
-        obj["player1_profile_id"] = game.player1.profileId;
-        obj["player1_profile_name"] = game.player1.profileName;
-        obj["player1_hero_id"] = game.player1.heroId;
-        obj["player1_hero_name"] = game.player1.heroName;
-        obj["player2_profile_id"] = game.player2.profileId;
-        obj["player2_profile_name"] = game.player2.profileName;
-        obj["player2_hero_id"] = game.player2.heroId;
-        obj["player2_hero_name"] = game.player2.heroName;
+        obj["mode"] = game.mode;
         obj["map_id"] = game.mapId;
         obj["map_name"] = game.mapName;
-        obj["player1_won"] = game.player1Won;
-        obj["hero1_remaining_hp"] = game.player1.heroRemainingHp;
-        obj["hero2_remaining_hp"] = game.player2.heroRemainingHp;
+        obj["winning_team"] = game.winningTeam;
         obj["played_at"] = displayDateFromDb(game.playedAt);
         obj["created_at"] = game.createdAt;
+
+        QVariantList participants;
+        for (const auto& participant : game.participants) {
+            QVariantMap participantObj;
+            participantObj["position"] = participant.position;
+            participantObj["team"] = participant.team;
+            participantObj["profile_id"] = participant.profileId;
+            participantObj["profile_name"] = participant.profileName;
+            participantObj["hero_id"] = participant.heroId;
+            participantObj["hero_name"] = participant.heroName;
+            participantObj["hero_remaining_hp"] = participant.heroRemainingHp;
+            participants.append(std::move(participantObj));
+        }
+        obj["participants"] = participants;
         list.append(std::move(obj));
     }
 
@@ -323,28 +348,78 @@ QVariantMap Core::createGameRecord(const QVariantMap& game) const {
     QVariantMap result;
     result["ok"] = false;
 
-    const quint64 player1ProfileId = game.value("player1_profile_id").toULongLong();
-    const quint64 player1HeroId = game.value("player1_hero_id").toULongLong();
-    const quint64 player2ProfileId = game.value("player2_profile_id").toULongLong();
-    const quint64 player2HeroId = game.value("player2_hero_id").toULongLong();
-    const QVariant player1Won = game.value("player1_won");
+    const QString mode = game.value("mode").toString();
+    const QVariantList participants = game.value("participants").toList();
+    const int winningTeam = game.value("winning_team").toInt();
+    int playerCount = 0;
+    int teamCount = 0;
 
-    if (player1ProfileId == 0 || player1HeroId == 0 || player2ProfileId == 0 ||
-        player2HeroId == 0 || !player1Won.isValid()) {
+    if (!gameModeSpec(mode, playerCount, teamCount) || participants.size() != playerCount ||
+        winningTeam < 1 || winningTeam > teamCount) {
         lwarn(op) << "invalid game record data";
         result["error"] = err_game::InvalidData;
         return result;
     }
 
     models::GameRecordInput input;
-    input.player1.profileId = player1ProfileId;
-    input.player1.heroId = player1HeroId;
-    input.player2.profileId = player2ProfileId;
-    input.player2.heroId = player2HeroId;
+    input.mode = mode;
     input.mapId = game.value("map_id");
-    input.player1Won = player1Won.toBool();
-    input.player1.heroRemainingHp = game.value("hero1_remaining_hp");
-    input.player2.heroRemainingHp = game.value("hero2_remaining_hp");
+    input.winningTeam = winningTeam;
+
+    QSet<int> positions;
+    QSet<quint64> profileIds;
+    QVector<int> teamSizes(teamCount + 1, 0);
+    for (const QVariant& participantValue : participants) {
+        const QVariantMap participantMap = participantValue.toMap();
+        models::GameRecordParticipantInput participant;
+        participant.position = participantMap.value("position").toUInt();
+        participant.team = participantMap.value("team").toUInt();
+        participant.profileId = participantMap.value("profile_id").toULongLong();
+        participant.heroId = participantMap.value("hero_id").toULongLong();
+        participant.heroRemainingHp = participantMap.value("hero_remaining_hp");
+
+        // participant validation
+        if (participant.position < 1 || participant.position > playerCount) {
+            lwarn(op) << "invalid position in game participant data: " << participant;
+            result["error"] = err_game::InvalidData;
+            return result;
+        }
+        if (participant.team < 1 || participant.team > teamCount) {
+            lwarn(op) << "invalid team in game participant data: " << participant;
+            result["error"] = err_game::InvalidData;
+            return result;
+        }
+        if (participant.profileId == 0) {
+            lwarn(op) << "zero profileId in game participant data: " << participant;
+            result["error"] = err_game::InvalidData;
+            return result;
+        }
+        if (positions.contains(participant.position)) {
+            lwarn(op) << "duplicate of position in game participant data: " << participant;
+            result["error"] = err_game::InvalidData;
+            return result;
+        }
+        if (profileIds.contains(participant.profileId)) {
+            lwarn(op) << "duplicate of profileId in game participant data: " << participant;
+            result["error"] = err_game::InvalidData;
+            return result;
+        }
+
+        positions.insert(participant.position);
+        profileIds.insert(participant.profileId);
+        teamSizes[participant.team]++;
+        input.participants.append(std::move(participant));
+    }
+
+    const int expectedTeamSize = playerCount / teamCount;
+    for (int team = 1; team <= teamCount; ++team) {
+        if (teamSizes[team] != expectedTeamSize) {
+            lwarn(op) << "invalid team size for mode " << mode;
+            result["error"] = err_game::InvalidData;
+            return result;
+        }
+    }
+
     const QString playedAt = game.value("played_at").toString().trimmed();
     if (!playedAt.isEmpty()) {
         input.playedAt = dbDateFromDisplay(playedAt);

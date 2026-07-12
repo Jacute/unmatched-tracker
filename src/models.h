@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <QDate>
+#include <QDebug>
 #include <QString>
 #include <QVariant>
 #include <QVector>
@@ -53,13 +54,27 @@ struct PlayerProfile {
     QString createdAt;
 };
 
-struct GameRecordPlayerInput {
+struct GameRecordParticipantInput {
+    quint8 position;
+    quint8 team;
     quint64 profileId;
     quint64 heroId;
     QVariant heroRemainingHp;
 };
 
-struct GameRecordPlayer {
+inline QDebug operator<<(QDebug debug, const GameRecordParticipantInput& participant) {
+    QDebugStateSaver saver(debug);
+    debug.nospace() << "GameRecordParticipantInput(position="
+                    << static_cast<quint32>(participant.position)
+                    << ", team=" << static_cast<quint32>(participant.team)
+                    << ", profileId=" << participant.profileId << ", heroId=" << participant.heroId
+                    << ", heroRemainingHp=" << participant.heroRemainingHp << ')';
+    return debug;
+}
+
+struct GameRecordParticipant {
+    quint8 position;
+    quint8 team;
     quint64 profileId;
     QString profileName;
     quint64 heroId;
@@ -68,20 +83,20 @@ struct GameRecordPlayer {
 };
 
 struct GameRecordInput {
-    GameRecordPlayerInput player1;
-    GameRecordPlayerInput player2;
+    QString mode;
+    QVector<GameRecordParticipantInput> participants;
     QVariant mapId;
-    QVariant player1Won;
+    quint8 winningTeam;
     QString playedAt;
 };
 
 struct GameRecord {
     QString id;
-    GameRecordPlayer player1;
-    GameRecordPlayer player2;
+    QString mode;
+    QVector<GameRecordParticipant> participants;
     QVariant mapId;
     QVariant mapName;
-    QVariant player1Won;
+    quint8 winningTeam;
     QVariant playedAt;
     QString createdAt;
 };

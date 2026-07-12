@@ -23,6 +23,13 @@ Rc Database::open() {
         return Rc::ErrCreateDb;
     }
 
+    QSqlQuery foreignKeysQuery(db);
+    if (!foreignKeysQuery.exec("PRAGMA foreign_keys = ON")) {
+        qDebug() << "Can't enable foreign keys:" << foreignKeysQuery.lastError().text();
+        db.close();
+        return Rc::ErrExecQuery;
+    }
+
     qDebug() << "Database path:" << dbPath_;
 
     return Rc::Ok;
@@ -306,20 +313,17 @@ Rc Database::getGameHistory(QVector<models::GameRecord>& games, const QString& s
 
     QSqlQuery query;
     bool ok = query.exec(QString("SELECT "
-                                 "gr.id, "
-                                 "gr.player1_profile_id, p1.name, gr.player1_hero_id, h1.name, "
-                                 "gr.player2_profile_id, p2.name, gr.player2_hero_id, h2.name, "
-                                 "gr.map_id, m.name, "
-                                 "gr.player1_won, "
-                                 "gr.hero1_remaining_hp, gr.hero2_remaining_hp, "
-                                 "gr.played_at, gr.created_at "
+                                 "gr.id, gr.mode, gr.winning_team, "
+                                 "gr.map_id, m.name, gr.played_at, gr.created_at, "
+                                 "grp.position, grp.team, "
+                                 "grp.profile_id, pp.name, "
+                                 "grp.hero_id, h.name, grp.hero_remaining_hp "
                                  "FROM game_records gr "
-                                 "JOIN player_profiles p1 ON p1.id = gr.player1_profile_id "
-                                 "JOIN heroes h1 ON h1.id = gr.player1_hero_id "
-                                 "JOIN player_profiles p2 ON p2.id = gr.player2_profile_id "
-                                 "JOIN heroes h2 ON h2.id = gr.player2_hero_id "
+                                 "JOIN game_record_participants grp ON grp.game_id = gr.id "
+                                 "JOIN player_profiles pp ON pp.id = grp.profile_id "
+                                 "LEFT JOIN heroes h ON h.id = grp.hero_id "
                                  "LEFT JOIN maps m ON m.id = gr.map_id "
-                                 "ORDER BY %1")
+                                 "ORDER BY %1, gr.id, grp.position")
                              .arg(orderBy));
     if (!ok) {
         lwarn(op) << "sql error: " << query.lastError().text();
@@ -327,24 +331,28 @@ Rc Database::getGameHistory(QVector<models::GameRecord>& games, const QString& s
     }
 
     while (query.next()) {
-        models::GameRecord game;
-        game.id = query.value(0).toString();
-        game.player1.profileId = query.value(1).toULongLong();
-        game.player1.profileName = query.value(2).toString();
-        game.player1.heroId = query.value(3).toULongLong();
-        game.player1.heroName = query.value(4).toString();
-        game.player2.profileId = query.value(5).toULongLong();
-        game.player2.profileName = query.value(6).toString();
-        game.player2.heroId = query.value(7).toULongLong();
-        game.player2.heroName = query.value(8).toString();
-        game.mapId = query.value(9);
-        game.mapName = query.value(10);
-        game.player1Won = query.value(11);
-        game.player1.heroRemainingHp = query.value(12);
-        game.player2.heroRemainingHp = query.value(13);
-        game.playedAt = query.value(14);
-        game.createdAt = query.value(15).toString();
-        games.append(std::move(game));
+        const QString gameId = query.value(0).toString();
+        if (games.isEmpty() || games.constLast().id != gameId) {
+            models::GameRecord game;
+            game.id = gameId;
+            game.mode = query.value(1).toString();
+            game.winningTeam = query.value(2).toUInt();
+            game.mapId = query.value(3);
+            game.mapName = query.value(4);
+            game.playedAt = query.value(5);
+            game.createdAt = query.value(6).toString();
+            games.append(std::move(game));
+        }
+
+        models::GameRecordParticipant participant;
+        participant.position = query.value(7).toUInt();
+        participant.team = query.value(8).toUInt();
+        participant.profileId = query.value(9).toULongLong();
+        participant.profileName = query.value(10).toString();
+        participant.heroId = query.value(11).toULongLong();
+        participant.heroName = query.value(12).toString();
+        participant.heroRemainingHp = query.value(13);
+        games.last().participants.append(std::move(participant));
     }
 
     return Rc::Ok;
@@ -352,39 +360,71 @@ Rc Database::getGameHistory(QVector<models::GameRecord>& games, const QString& s
 
 Rc Database::createGameRecord(const models::GameRecordInput& game) {
     const char op[] = "Database::createGameRecord";
+    const QString gameId = QUuid::createUuid().toString(QUuid::WithoutBraces);
 
-    QSqlQuery query;
+    if (!db.transaction()) {
+        lwarn(op) << "can't start transaction: " << db.lastError().text();
+        return Rc::ErrExecQuery;
+    }
+
+    QSqlQuery query(db);
     bool ok = query.prepare("INSERT INTO game_records ("
-                            "id, "
-                            "player1_profile_id, player1_hero_id, "
-                            "player2_profile_id, player2_hero_id, "
-                            "map_id, player1_won, "
-                            "hero1_remaining_hp, hero2_remaining_hp, played_at"
+                            "id, mode, map_id, winning_team, played_at"
                             ") VALUES ("
-                            ":id, "
-                            ":player1_profile_id, :player1_hero_id, "
-                            ":player2_profile_id, :player2_hero_id, "
-                            ":map_id, :player1_won, "
-                            ":hero1_remaining_hp, :hero2_remaining_hp, :played_at"
+                            ":id, :mode, :map_id, :winning_team, :played_at"
                             ")");
     if (!ok) {
         lwarn(op) << "sql prepare error: " << query.lastError().text();
+        db.rollback();
         return Rc::ErrPrepareQuery;
     }
 
-    query.bindValue(":id", QUuid::createUuid().toString(QUuid::WithoutBraces));
-    query.bindValue(":player1_profile_id", game.player1.profileId);
-    query.bindValue(":player1_hero_id", game.player1.heroId);
-    query.bindValue(":player2_profile_id", game.player2.profileId);
-    query.bindValue(":player2_hero_id", game.player2.heroId);
+    query.bindValue(":id", gameId);
+    query.bindValue(":mode", game.mode);
     query.bindValue(":map_id", game.mapId);
-    query.bindValue(":player1_won", game.player1Won);
-    query.bindValue(":hero1_remaining_hp", game.player1.heroRemainingHp);
-    query.bindValue(":hero2_remaining_hp", game.player2.heroRemainingHp);
+    query.bindValue(":winning_team", game.winningTeam);
     query.bindValue(":played_at", game.playedAt.isEmpty() ? QVariant() : QVariant(game.playedAt));
 
     if (!query.exec()) {
         lwarn(op) << "sql exec error: " << query.lastError().text();
+        db.rollback();
+        return Rc::ErrExecQuery;
+    }
+
+    QSqlQuery participantQuery(db);
+    ok = participantQuery.prepare(
+        "INSERT INTO game_record_participants ("
+        "game_id, position, team, profile_id, hero_id, hero_remaining_hp"
+        ") VALUES ("
+        ":game_id, :position, :team, :profile_id, :hero_id, :hero_remaining_hp"
+        ")");
+    if (!ok) {
+        lwarn(op) << "participant sql prepare error: " << participantQuery.lastError().text();
+        db.rollback();
+        return Rc::ErrPrepareQuery;
+    }
+
+    for (const auto& participant : game.participants) {
+        participantQuery.bindValue(":game_id", gameId);
+        participantQuery.bindValue(":position", participant.position);
+        participantQuery.bindValue(":team", participant.team);
+        participantQuery.bindValue(":profile_id", participant.profileId);
+        if (participant.heroId != 0) {
+            participantQuery.bindValue(":hero_id", participant.heroId);
+        } else {
+            participantQuery.bindValue(":hero_id", QVariant());
+        }
+        participantQuery.bindValue(":hero_remaining_hp", participant.heroRemainingHp);
+        if (!participantQuery.exec()) {
+            lwarn(op) << "participant sql exec error: " << participantQuery.lastError().text();
+            db.rollback();
+            return Rc::ErrExecQuery;
+        }
+    }
+
+    if (!db.commit()) {
+        lwarn(op) << "can't commit game record: " << db.lastError().text();
+        db.rollback();
         return Rc::ErrExecQuery;
     }
 
