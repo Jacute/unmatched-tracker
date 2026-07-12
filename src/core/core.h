@@ -2,6 +2,7 @@
 
 #include "../db/db.h"
 #include "../models.h"
+#include "db_exporter.h"
 #include "fileprovider.h"
 
 #include <QObject>
@@ -13,7 +14,7 @@ class Core : public QObject {
     Q_OBJECT
 
   public:
-    explicit Core(Database&, FileProvider*);
+    explicit Core(Database&, DbExporter&, FileProvider*);
     ~Core() = default;
     Core(Core&) = delete;
     Core& operator=(Core&) = delete;
@@ -36,12 +37,15 @@ class Core : public QObject {
     Q_INVOKABLE QString getImage(const QString& path) const;
     Q_INVOKABLE void requestImage(const QString& path);
 
+    Q_INVOKABLE QVariantMap exportDb(const QUrl& to) const;
+
   signals:
     void imageReady(const QString& path, const QString& sourceUrl);
     void imageFailed(const QString& path);
 
   private:
     Database& db_;
+    DbExporter& dbExporter_;
     FileProvider* provider_;
     QThreadPool imageThreadPool_;
 };

@@ -60,6 +60,10 @@ Drawer {
                 {
                     text: qsTr("Game History"),
                     page: Common.pageGames
+                },
+                {
+                    text: qsTr("Settings"),
+                    page: Common.pageSettings
                 }
             ]
 

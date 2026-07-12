@@ -10,8 +10,9 @@ constexpr int imgThreadCount = 8;
 constexpr const char* dbDateFormat = "yyyy-MM-dd";
 constexpr const char* displayDateFormat = "dd-MM-yyyy";
 
-Core::Core(Database& db, FileProvider* fp)
+Core::Core(Database& db, DbExporter& dbExporter, FileProvider* fp)
     : db_(db),
+      dbExporter_(dbExporter),
       provider_(fp),
       QObject(nullptr) {
     imageThreadPool_.setMaxThreadCount(imgThreadCount);
@@ -516,4 +517,16 @@ void Core::requestImage(const QString& path) {
             },
             Qt::QueuedConnection);
     });
+}
+
+QVariantMap Core::exportDb(const QUrl& to) const {
+    QVariantMap result;
+    Rc rc = dbExporter_.exportDb(db_, to);
+    if (rc == Rc::Ok) {
+        result["ok"] = true;
+    } else {
+        result["ok"] = false;
+        result["error"] = rc2str(rc);
+    }
+    return result;
 }

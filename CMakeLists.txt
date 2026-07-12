@@ -22,6 +22,7 @@ qt_add_executable(${TARGET}
     ${SRC_DIR}/db/db.cpp
     ${SRC_DIR}/db/migrator.cpp
     ${SRC_DIR}/core/core.cpp
+    ${SRC_DIR}/core/db_exporter.cpp
     ${SRC_DIR}/files/filecache.cpp
     ${SRC_DIR}/files/provider.cpp
     ${SRC_DIR}/components/render/imagerounded.cpp
@@ -41,6 +42,7 @@ set(plain_qml_files
     ${QML_DIR}/views/Random.qml
     ${QML_DIR}/views/Profiles.qml
     ${QML_DIR}/views/Games.qml
+    ${QML_DIR}/views/Settings.qml
     ${QML_DIR}/components/Card.qml
     ${QML_DIR}/components/CardGrid.qml
     ${QML_DIR}/components/BigImagePopup.qml

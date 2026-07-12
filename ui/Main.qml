@@ -56,6 +56,8 @@ ApplicationWindow {
                 return qsTr("Player Profiles")
             case Common.pageGames:
                 return qsTr("Game History")
+            case Common.pageSettings:
+                return qsTr("Settings")
             default:
                 return qsTr("Unmatched Tracker")
             }
@@ -100,6 +102,12 @@ ApplicationWindow {
             anchors.fill: parent
             visible: root.page === Common.pageGames
         }
+
+        Settings {
+            id: settingsPage
+            anchors.fill: parent
+            visible: root.page === Common.pageSettings
+        }
     }
 
     onClosing: (close) => {
@@ -120,6 +128,8 @@ ApplicationWindow {
         case Common.pageProfiles:
             break
         case Common.pageGames:
+            break
+        case Common.pageSettings:
             break
         }
     }

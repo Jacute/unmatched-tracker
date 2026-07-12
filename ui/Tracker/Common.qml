@@ -48,6 +48,7 @@ QtObject {
     readonly property string pageRandom: "random"
     readonly property string pageProfiles: "profiles"
     readonly property string pageGames: "games"
+    readonly property string pageSettings: "settings"
 
     // core profile creation errors
     readonly property string profileErrEmptyName: "empty_name"

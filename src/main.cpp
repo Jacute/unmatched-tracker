@@ -2,6 +2,7 @@
 #include "components/render/imagerounded.h"
 #include "config.h"
 #include "core/core.h"
+#include "core/db_exporter.h"
 #include "db/db.h"
 #include "files/filecache.h"
 #include "files/provider.h"
@@ -58,6 +59,7 @@ int main(int argc, char* argv[]) {
     QDir().mkpath(path);
     const QString dbPath = path + "/app.db";
     Database db(dbPath, cfg.db.dbName_);
+    DbExporter dbExporter;
     db.open();
     db.migrate(cfg.db.migrationFiles);
 
@@ -66,7 +68,7 @@ int main(int argc, char* argv[]) {
     FileCache cache;
     File fileProvider(cache, api);
 
-    Core core(db, &fileProvider);
+    Core core(db, dbExporter, &fileProvider);
 
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, [&op](const QUrl& url) {
         ldebug(op) << "object creation failed:" << url;

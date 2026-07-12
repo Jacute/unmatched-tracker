@@ -15,8 +15,14 @@ Database::Database(const QString& dbPath, const QString& dbName)
 }
 
 Rc Database::open() {
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(dbPath_);
+    if (!db.isValid()) {
+        db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName(dbPath_);
+    }
+
+    if (db.isOpen()) {
+        return Rc::Ok;
+    }
 
     if (!db.open()) {
         qDebug() << "DB error:" << db.lastError().text();
@@ -37,6 +43,23 @@ Rc Database::open() {
 
 void Database::close() {
     db.close();
+}
+
+QString Database::path() const {
+    return dbPath_;
+}
+
+ScopedDatabaseClose::ScopedDatabaseClose(Database& db)
+    : db_(db) {
+    db_.close();
+}
+
+ScopedDatabaseClose::~ScopedDatabaseClose() {
+    const char op[] = "ScopedDatabaseClose::~ScopedDatabaseClose";
+    const Rc rc = db_.open();
+    if (rc != Rc::Ok) {
+        lerr(op) << "can't reopen database: " << rc2str(rc);
+    }
 }
 
 Rc Database::getHeroes(QVector<models::Hero>& heroes) {
