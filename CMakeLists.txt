@@ -55,6 +55,7 @@ set(plain_qml_files
     ${QML_DIR}/components/ThemedComboBox.qml
     ${QML_DIR}/components/VS.qml
     ${QML_DIR}/components/GameMap.qml
+    ${QML_DIR}/components/GameHistory.qml
     ${QML_DIR}/components/GameParticipantInput.qml
     ${QML_DIR}/components/Notif.qml
     ${QML_DIR}/components/Btn.qml
