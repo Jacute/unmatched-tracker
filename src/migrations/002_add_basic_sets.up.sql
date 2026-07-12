@@ -29,102 +29,169 @@ VALUES
 ON CONFLICT(name) DO UPDATE SET
     img_path = excluded.img_path;
 
-INSERT INTO heroes (name, set_id, img_path)
+INSERT INTO heroes (name, hp, move, set_id, img_path)
 VALUES
 -- Battle of Legends, Volume One
 (
     'Medusa',
+    16,
+    3,
     (SELECT id FROM sets WHERE name = 'Battle of Legends, Volume One'),
     '/img/set/battle_of_legends1/heroes/medusa/avatar.webp'
 ),
 (
     'Sinbad',
+    15,
+    2,
     (SELECT id FROM sets WHERE name = 'Battle of Legends, Volume One'),
     '/img/set/battle_of_legends1/heroes/sinbad/avatar.webp'
 ),
 (
     'King Arthur',
+    18,
+    2,
     (SELECT id FROM sets WHERE name = 'Battle of Legends, Volume One'),
     '/img/set/battle_of_legends1/heroes/king_arthur/avatar.webp'
 ),
 (
     'Alice',
+    13,
+    2,
     (SELECT id FROM sets WHERE name = 'Battle of Legends, Volume One'),
     '/img/set/battle_of_legends1/heroes/alice/avatar.webp'
 ),
 -- Cobble & Fog
 (
     'Dracula',
+    13,
+    2,
     (SELECT id FROM sets WHERE name = 'Cobble & Fog'),
     '/img/set/cobble_fog/heroes/dracula/avatar.webp'
 ),
 (
     'Sherlock Holmes',
+    16,
+    2,
     (SELECT id FROM sets WHERE name = 'Cobble & Fog'),
     '/img/set/cobble_fog/heroes/sherlock_holmes/avatar.webp'
 ),
 (
     'Jekyll & Hyde',
+    16,
+    2,
     (SELECT id FROM sets WHERE name = 'Cobble & Fog'),
     '/img/set/cobble_fog/heroes/jekyll_hyde/avatar.webp'
 ),
 (
     'Invisible man',
+    15,
+    2,
     (SELECT id FROM sets WHERE name = 'Cobble & Fog'),
     '/img/set/cobble_fog/heroes/invisible_man/avatar.webp'
 ),
 -- The Witcher - Steel & Silver
 (
     'Geralt of Rivia',
+    16,
+    2,
     (SELECT id FROM sets WHERE name = 'The Witcher - Steel & Silver'),
     '/img/set/the_witcher_steel_silver/heroes/geralt_of_rivia/avatar.webp'
 ),
 (
     'Ciri',
+    15,
+    2,
     (SELECT id FROM sets WHERE name = 'The Witcher - Steel & Silver'),
     '/img/set/the_witcher_steel_silver/heroes/ciri/avatar.webp'
 ),
 (
     'Ancient Leshen',
+    13,
+    1,
     (SELECT id FROM sets WHERE name = 'The Witcher - Steel & Silver'),
     '/img/set/the_witcher_steel_silver/heroes/ancient_leshen/avatar.webp'
 ),
 -- The Witcher - Realms Fall
 (
     'Philippa',
+    12,
+    2,
     (SELECT id FROM sets WHERE name = 'The Witcher - Realms Fall'),
     '/img/set/the_witcher_realms_fall/heroes/philippa/avatar.webp'
 ),
 (
     'Yennefer & Triss',
+    14,
+    2,
     (SELECT id FROM sets WHERE name = 'The Witcher - Realms Fall'),
     '/img/set/the_witcher_realms_fall/heroes/yen/avatar.webp'
 ),
 (
     'Eredin',
+    14,
+    2,
     (SELECT id FROM sets WHERE name = 'The Witcher - Realms Fall'),
     '/img/set/the_witcher_realms_fall/heroes/eredin/avatar.webp'
 ),
+-- TMNT
 (
     'Raphael',
+    17,
+    2,
     (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
     '/img/set/adventures/teenage_mutant_ninja_turtles/heroes/raphael/avatar.webp'
 ),
 (
     'Michelangelo',
+    14,
+    3,
     (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
     '/img/set/adventures/teenage_mutant_ninja_turtles/heroes/michelangelo/avatar.webp'
 ),
 (
     'Leonardo',
+    16,
+    2,
     (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
     '/img/set/adventures/teenage_mutant_ninja_turtles/heroes/leonardo/avatar.webp'
 ),
 (
     'Donatello',
+    14,
+    2,
     (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
     '/img/set/adventures/teenage_mutant_ninja_turtles/heroes/donatello/avatar.webp'
+),
+-- Robin Hood VS Big Foot
+(
+    'Bigfoot',
+    16,
+    3,
+    (SELECT id FROM sets WHERE name = 'Robin Hood vs Bigfoot'),
+    '/img/set/robin_hood_vs_bigfoot/heroes/bigfoot/avatar.webp'
+),
+(
+    'Robin Hood',
+    13,
+    2,
+    (SELECT id FROM sets WHERE name = 'Robin Hood vs Bigfoot'),
+    '/img/set/robin_hood_vs_bigfoot/heroes/robin_hood/avatar.webp'
+),
+(
+    'Robert Muldoon',
+    14,
+    3,
+    (SELECT id FROM sets WHERE name = 'Jurassic Park - Ingen vs Raptors'),
+    '/img/set/jurassic_park_ingen_vs_raptors/heroes/robert_muldoon/avatar.webp'
+),
+(
+    'Raptors',
+    14,
+    3,
+    (SELECT id FROM sets WHERE name = 'Jurassic Park - Ingen vs Raptors'),
+    '/img/set/jurassic_park_ingen_vs_raptors/heroes/raptors/avatar.webp'
 )
+-- Bruce Lee VS Muhammad Ali
 ON CONFLICT(name) DO UPDATE SET
     set_id = excluded.set_id,
     img_path = excluded.img_path;

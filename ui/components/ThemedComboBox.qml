@@ -1,3 +1,5 @@
+pragma ComponentBehavior: Bound
+
 import QtQuick
 import QtQuick.Controls
 
@@ -53,20 +55,22 @@ ComboBox {
         required property var model
         required property int index
 
+        id: item
+
         width: combo.width
         height: Math.max(42, Common.defaultFontSize * 2.6)
         highlighted: combo.highlightedIndex === index
 
         contentItem: Text {
             text: combo.textRole ? model[combo.textRole] : modelData
-            color: highlighted ? Common.primary : Common.textColor
+            color: item.highlighted ? Common.primary : Common.textColor
             font.pixelSize: Common.defaultFontSize
             verticalAlignment: Text.AlignVCenter
             elide: Text.ElideRight
         }
 
         background: Rectangle {
-            color: highlighted ? Common.accent : Common.secondary
+            color: item.highlighted ? Common.accent : Common.secondary
         }
     }
 

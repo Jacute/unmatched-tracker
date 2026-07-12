@@ -22,6 +22,8 @@ static QVariantList mapHeroesQml(const QVector<models::Hero>& heroes) {
         QVariantMap obj;
         obj["id"] = h.id;
         obj["name"] = std::move(h.name);
+        obj["hp"] = h.hp;
+        obj["move"] = h.move;
         obj["img_path"] = std::move(h.imgPath);
         obj["set_id"] = h.setId;
 
@@ -153,6 +155,8 @@ QVariantList Core::getSHM() const {
         for (const auto& h : s.heroes) {
             QVariantMap hObj;
             hObj["id"] = h.id;
+            hObj["hp"] = h.hp;
+            hObj["move"] = h.move;
             hObj["name"] = std::move(h.name);
             hObj["img_path"] = std::move(h.imgPath);
             heroes.append(std::move(hObj));
@@ -325,8 +329,8 @@ QVariantMap Core::createGameRecord(const QVariantMap& game) const {
     const quint64 player2HeroId = game.value("player2_hero_id").toULongLong();
     const QVariant player1Won = game.value("player1_won");
 
-    if (player1ProfileId == 0 || player1HeroId == 0 || player2ProfileId == 0 || player2HeroId == 0 ||
-        !player1Won.isValid()) {
+    if (player1ProfileId == 0 || player1HeroId == 0 || player2ProfileId == 0 ||
+        player2HeroId == 0 || !player1Won.isValid()) {
         lwarn(op) << "invalid game record data";
         result["error"] = err_game::InvalidData;
         return result;
@@ -426,7 +430,8 @@ void Core::requestImage(const QString& path) {
                 }
 
                 if (rc != Rc::Ok) {
-                    lerr("Core::requestImage") << "error getting image: " << path << " rc=" << rc2str(rc);
+                    lerr("Core::requestImage")
+                        << "error getting image: " << path << " rc=" << rc2str(rc);
                     emit self->imageFailed(path);
                     return;
                 }

@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS sets (
 CREATE TABLE IF NOT EXISTS heroes (
     id INTEGER PRIMARY KEY,
     name TEXT NOT NULL UNIQUE,
+    hp INTEGER NOT NULL,
+    move INTEGER NOT NULL,
     set_id INTEGER,
     img_path TEXT,
     FOREIGN KEY (set_id) REFERENCES sets(id)

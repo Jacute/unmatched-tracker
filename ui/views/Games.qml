@@ -27,10 +27,12 @@ Rectangle {
             Layout.preferredHeight: Math.min(contentColumn.implicitHeight, root.height * 0.48)
             spacing: root.fieldSpacing
 
+            // Player 1
             RowLayout {
                 Layout.fillWidth: true
                 spacing: root.fieldSpacing
 
+                // Profile
                 FieldBox {
                     Layout.fillWidth: true
                     label: qsTr("Player 1")
@@ -39,9 +41,13 @@ Rectangle {
                         anchors.fill: parent
                         model: profilesModel
                         textRole: "name"
+                        onActivated: {
+                            root.checkSameProfiles(player1Profile)
+                        }
                     }
                 }
 
+                // Hero
                 FieldBox {
                     Layout.fillWidth: true
                     label: qsTr("Hero 1")
@@ -54,10 +60,12 @@ Rectangle {
                 }
             }
 
+            // Player 2
             RowLayout {
                 Layout.fillWidth: true
                 spacing: root.fieldSpacing
 
+                // Profile
                 FieldBox {
                     Layout.fillWidth: true
                     label: qsTr("Player 2")
@@ -66,9 +74,13 @@ Rectangle {
                         anchors.fill: parent
                         model: profilesModel
                         textRole: "name"
+                        onActivated: {
+                            root.checkSameProfiles(player2Profile)
+                        }
                     }
                 }
 
+                // Hero
                 FieldBox {
                     Layout.fillWidth: true
                     label: qsTr("Hero 2")
@@ -94,17 +106,23 @@ Rectangle {
 
             FieldBox {
                 Layout.fillWidth: true
-                label: qsTr("Result")
+                label: qsTr("Winner")
                 ThemedComboBox {
-                    id: resultSelect
+                    id: winner
                     anchors.fill: parent
-                    model: [
-                        qsTr("Player 1 victory"),
-                        qsTr("Player 1 defeat")
-                    ]
+                    model: {
+                        if (player1Profile.currentIndex != -1 && player2Profile.currentIndex != -1) {
+                            return [
+                                profilesModel.get(player1Profile.currentIndex).name,
+                                profilesModel.get(player2Profile.currentIndex).name
+                            ]
+                        }
+                        return []
+                    }
                 }
             }
 
+            // HP
             RowLayout {
                 Layout.fillWidth: true
                 spacing: root.fieldSpacing
@@ -121,11 +139,12 @@ Rectangle {
                         selectionColor: Common.accent
                         selectedTextColor: Common.primary
                         font.pixelSize: Common.defaultFontSize
-                        topPadding: 0
-                        bottomPadding: 0
-                        leftPadding: 0
-                        rightPadding: 0
-                        validator: IntValidator { bottom: 0; top: 99 }
+                        padding: 0
+                        enabled: player1Hero.currentIndex != -1
+                        validator: IntValidator {
+                            bottom: 0;
+                            top: heroesModel.get(player1Hero.currentIndex).hp
+                        }
                         inputMethodHints: Qt.ImhDigitsOnly
                         background: null
                         verticalAlignment: TextInput.AlignVCenter
@@ -144,11 +163,12 @@ Rectangle {
                         selectionColor: Common.accent
                         selectedTextColor: Common.primary
                         font.pixelSize: Common.defaultFontSize
-                        topPadding: 0
-                        bottomPadding: 0
-                        leftPadding: 0
-                        rightPadding: 0
-                        validator: IntValidator { bottom: 0; top: 99 }
+                        padding: 0
+                        enabled: player2Hero.currentIndex != -1
+                        validator: IntValidator {
+                            bottom: 0;
+                            top: heroesModel.get(player2Hero.currentIndex).hp
+                        }
                         inputMethodHints: Qt.ImhDigitsOnly
                         background: null
                         verticalAlignment: TextInput.AlignVCenter
@@ -156,6 +176,7 @@ Rectangle {
                 }
             }
 
+            // Game date
             RowLayout {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.controlHeight
@@ -173,10 +194,7 @@ Rectangle {
                         selectionColor: Common.accent
                         selectedTextColor: Common.primary
                         font.pixelSize: Common.defaultFontSize
-                        topPadding: 0
-                        bottomPadding: 0
-                        leftPadding: 0
-                        rightPadding: 0
+                        padding: 0
                         inputMask: ""
                         background: null
                         verticalAlignment: TextInput.AlignVCenter
@@ -462,6 +480,10 @@ Rectangle {
         }
     }
 
+    Notif {
+        id: notifier
+    }
+
     ListModel { id: profilesModel }
     ListModel { id: heroesModel }
     ListModel { id: mapsInputModel }
@@ -519,6 +541,7 @@ Rectangle {
                 id: heroes[i].id,
                 name: heroes[i].name
             })
+            console.log(heroes[i].hp)
         }
     }
 
@@ -590,7 +613,7 @@ Rectangle {
             player1_hero_id: root.selectedId(heroesModel, player1Hero.currentIndex),
             player2_profile_id: root.selectedId(profilesModel, player2Profile.currentIndex),
             player2_hero_id: root.selectedId(heroesModel, player2Hero.currentIndex),
-            player1_won: resultSelect.currentIndex === 0
+            player1_won: winner.currentIndex === 0
         }
 
         if (payload.player1_profile_id === payload.player2_profile_id) {
@@ -624,13 +647,11 @@ Rectangle {
 
         const result = core.createGameRecord(payload)
         if (!result.ok) {
-            statusText.text = qsTr("Could not add game")
+            statusText.text = result.error
             return
         }
 
-        statusText.text = ""
-        hero1HpInput.text = ""
-        hero2HpInput.text = ""
+        clearFields()
         loadHistory()
     }
 
@@ -665,5 +686,27 @@ Rectangle {
         const mapText = root.valueText(mapName, qsTr("Map not specified"))
         const hpText = qsTr("HP: %1 / %2").arg(root.valueText(hp1, "-")).arg(root.valueText(hp2, "-"))
         return qsTr("%1 · %2").arg(mapText).arg(hpText)
+    }
+
+    function clearFields() {
+        statusText.text = ""
+        hero1HpInput.text = ""
+        hero2HpInput.text = ""
+        playedAtInput.text = ""
+        player1Profile.currentIndex = -1
+        player1Hero.currentIndex = -1
+        player2Profile.currentIndex = -1
+        player2Hero.currentIndex = -1
+        winner.currentIndex = -1
+    }
+
+    function checkSameProfiles(changedComboBox) {
+        if (player1Profile.currentIndex === -1 || player2Profile.currentIndex === -1)
+            return
+
+        if (player1Profile.currentIndex === player2Profile.currentIndex) {
+            notifier.show("Players can't have same profiles")
+            changedComboBox.currentIndex = -1
+        }
     }
 }

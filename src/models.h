@@ -19,6 +19,8 @@ struct GameSetShort {
 struct Hero {
     quint64 id;
     QString name;
+    quint8 hp;
+    quint8 move;
     QString imgPath;
     quint64 setId;
 };
