@@ -27,145 +27,59 @@ Rectangle {
             Layout.preferredHeight: Math.min(contentColumn.implicitHeight, root.height * 0.48)
             spacing: root.fieldSpacing
 
-            // Player 1
             RowLayout {
                 Layout.fillWidth: true
                 spacing: root.fieldSpacing
 
-                // Profile
-                FieldBox {
+                GameParticipantInput {
+                    id: player1Input
                     Layout.fillWidth: true
-                    label: qsTr("Player 1")
-                    ThemedComboBox {
-                        id: player1Profile
-                        anchors.fill: parent
-                        model: profilesModel
-                        textRole: "name"
-                    }
+                    Layout.preferredHeight: implicitHeight
+                    title: qsTr("Player 1")
+                    markerColor: Common.accent
+                    profileOptions: profilesModel
+                    heroOptions: heroesModel
                 }
 
-                // Hero
-                FieldBox {
+                GameParticipantInput {
+                    id: player2Input
                     Layout.fillWidth: true
-                    label: qsTr("Hero 1")
-                    ThemedComboBox {
-                        id: player1Hero
-                        anchors.fill: parent
-                        model: heroesModel
-                        textRole: "name"
-                    }
+                    Layout.preferredHeight: implicitHeight
+                    title: qsTr("Player 2")
+                    markerColor: Common.accentHover
+                    profileOptions: profilesModel
+                    heroOptions: heroesModel
                 }
             }
 
-            // Player 2
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: root.fieldSpacing
-
-                // Profile
-                FieldBox {
-                    Layout.fillWidth: true
-                    label: qsTr("Player 2")
-                    ThemedComboBox {
-                        id: player2Profile
-                        anchors.fill: parent
-                        model: profilesModel
-                        textRole: "name"
-                    }
-                }
-
-                // Hero
-                FieldBox {
-                    Layout.fillWidth: true
-                    label: qsTr("Hero 2")
-                    ThemedComboBox {
-                        id: player2Hero
-                        anchors.fill: parent
-                        model: heroesModel
-                        textRole: "name"
-                    }
-                }
-            }
-
-            FieldBox {
-                Layout.fillWidth: true
-                label: qsTr("Map")
-                ThemedComboBox {
-                    id: mapSelect
-                    anchors.fill: parent
-                    model: mapsInputModel
-                    textRole: "name"
-                }
-            }
-
-            FieldBox {
-                Layout.fillWidth: true
-                label: qsTr("Winner")
-                ThemedComboBox {
-                    id: winner
-                    anchors.fill: parent
-                    model: {
-                        if (player1Profile.currentIndex != -1 && player2Profile.currentIndex != -1) {
-                            return [
-                                profilesModel.get(player1Profile.currentIndex).name,
-                                profilesModel.get(player2Profile.currentIndex).name
-                            ]
-                        }
-                        return []
-                    }
-                }
-            }
-
-            // HP
             RowLayout {
                 Layout.fillWidth: true
                 spacing: root.fieldSpacing
 
                 FieldBox {
                     Layout.fillWidth: true
-                    label: qsTr("Hero 1 HP")
-                    TextField {
-                        id: hero1HpInput
+                    label: qsTr("Map")
+                    ThemedComboBox {
+                        id: mapSelect
                         anchors.fill: parent
-                        color: Common.textColor
-                        placeholderText: activeFocus || text != "" ? "" : qsTr("Optional")
-                        placeholderTextColor: Common.textHint
-                        selectionColor: Common.accent
-                        selectedTextColor: Common.primary
-                        font.pixelSize: Common.defaultFontSize
-                        padding: 0
-                        enabled: player1Hero.currentIndex != -1
-                        validator: IntValidator {
-                            bottom: 0
-                            top: root.selectedHeroHp(player1Hero.currentIndex)
-                        }
-                        inputMethodHints: Qt.ImhDigitsOnly
-                        background: null
-                        verticalAlignment: TextInput.AlignVCenter
+                        model: mapsInputModel
+                        textRole: "name"
                     }
                 }
 
                 FieldBox {
                     Layout.fillWidth: true
-                    label: qsTr("Hero 2 HP")
-                    TextField {
-                        id: hero2HpInput
+                    label: qsTr("Winner")
+                    ThemedComboBox {
+                        id: winner
                         anchors.fill: parent
-                        color: Common.textColor
-                        placeholderText: activeFocus || text != "" ? "" : qsTr("Optional")
-                        placeholderTextColor: Common.textHint
-                        selectionColor: Common.accent
-                        selectedTextColor: Common.primary
-                        font.pixelSize: Common.defaultFontSize
-                        padding: 0
-                        enabled: player2Hero.currentIndex != -1
-                        validator: IntValidator {
-                            bottom: 0
-                            top: root.selectedHeroHp(player2Hero.currentIndex)
+                        model: {
+                            if (player1Input.profileIndex !== -1
+                                    && player2Input.profileIndex !== -1) {
+                                return [player1Input.profileName, player2Input.profileName]
+                            }
+                            return []
                         }
-                        inputMethodHints: Qt.ImhDigitsOnly
-                        background: null
-                        verticalAlignment: TextInput.AlignVCenter
                     }
                 }
             }
@@ -566,31 +480,6 @@ Rectangle {
         return id > 0 ? id : undefined
     }
 
-    function selectedHeroHp(index) {
-        if (index < 0 || index >= heroesModel.count) {
-            return 0
-        }
-        return heroesModel.get(index).hp
-    }
-
-    function optionalHp(field, heroNumber) {
-        const value = field.text.trim()
-        if (value.length === 0) {
-            return { valid: true }
-        }
-        if (!field.acceptableInput || !/^\d+$/.test(value)) {
-            return {
-                valid: false,
-                error: qsTr("Hero %1 HP must be between 0 and %2")
-                    .arg(heroNumber)
-                    .arg(root.selectedHeroHp(heroNumber === 1
-                                             ? player1Hero.currentIndex
-                                             : player2Hero.currentIndex))
-            }
-        }
-        return { valid: true, value: parseInt(value, 10) }
-    }
-
     function isMaskedDateEmpty(text) {
         return text.replace(/[-_]/g, "").trim().length === 0
     }
@@ -613,15 +502,15 @@ Rectangle {
         const player1 = {
             position: 1,
             team: 1,
-            profile_id: root.selectedId(profilesModel, player1Profile.currentIndex),
-            hero_id: root.selectedId(heroesModel, player1Hero.currentIndex),
+            profile_id: player1Input.profileId,
+            hero_id: player1Input.heroId,
             hero_remaining_hp: 0
         }
         const player2 = {
             position: 2,
             team: 2,
-            profile_id: root.selectedId(profilesModel, player2Profile.currentIndex),
-            hero_id: root.selectedId(heroesModel, player2Hero.currentIndex),
+            profile_id: player2Input.profileId,
+            hero_id: player2Input.heroId,
             hero_remaining_hp: 0
         }
         const payload = {
@@ -640,7 +529,7 @@ Rectangle {
             payload.map_id = mapId
         }
 
-        const hero1Hp = root.optionalHp(hero1HpInput, 1)
+        const hero1Hp = player1Input.hpResult()
         if (!hero1Hp.valid) {
             statusText.text = hero1Hp.error
             return
@@ -649,7 +538,7 @@ Rectangle {
             player1.hero_remaining_hp = hero1Hp.value
         }
 
-        const hero2Hp = root.optionalHp(hero2HpInput, 2)
+        const hero2Hp = player2Input.hpResult()
         if (!hero2Hp.valid) {
             statusText.text = hero2Hp.error
             return
@@ -745,13 +634,9 @@ Rectangle {
 
     function clearFields() {
         statusText.text = ""
-        hero1HpInput.text = ""
-        hero2HpInput.text = ""
         playedAtInput.text = ""
-        player1Profile.currentIndex = -1
-        player1Hero.currentIndex = -1
-        player2Profile.currentIndex = -1
-        player2Hero.currentIndex = -1
+        player1Input.clear()
+        player2Input.clear()
         winner.currentIndex = -1
     }
 }
