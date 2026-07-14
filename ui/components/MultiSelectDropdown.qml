@@ -9,6 +9,7 @@ Rectangle {
     property ListModel listdata
     property int itemHeight: 40
     property string text
+    signal selected(int index)
 
     id: root
     color: "transparent"
@@ -48,7 +49,8 @@ Rectangle {
             delegate: Item {
                 required property int index
                 required property string name
-                required override property bool enabled
+                required property var model
+
                 id: listItem
                 width: list.width
                 height: root.itemHeight
@@ -57,7 +59,7 @@ Rectangle {
                     anchors.fill: parent
 
                     CheckBox {
-                        checked: listItem.enabled
+                        checked: listItem.model.enabled
                     }
 
                     Text {
@@ -73,13 +75,7 @@ Rectangle {
                     hoverEnabled: true
                     cursorShape: Qt.PointingHandCursor
 
-                    onClicked: function(mouse) {
-                        root.listdata.setProperty(
-                            listItem.index,
-                            "enabled",
-                            !listItem.enabled
-                        )
-                    } 
+                    onClicked: root.selected(listItem.index)
                 }
             }
         }

@@ -25,6 +25,7 @@ Rectangle {
     Canvas {
         id: canvas
         anchors.centerIn: root
+        renderStrategy: Canvas.Threaded
         
         Component.onCompleted: {
             const size = Math.min(root.width, root.height)

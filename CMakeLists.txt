@@ -6,7 +6,6 @@ set(TARGET tracker)
 set(SRC_DIR src)
 set(QML_DIR ui)
 set(ASSETS_DIR ${QML_DIR}/assets)
-set(API_URL "")
 
 find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Sql Network)
 

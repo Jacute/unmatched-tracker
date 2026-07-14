@@ -5,8 +5,9 @@
 #include <QDate>
 #include <QPointer>
 #include <QSet>
+#include <QThread>
 
-constexpr int imgThreadCount = 8;
+const int imgThreadCount = QThread::idealThreadCount() / 2;
 constexpr const char* dbDateFormat = "yyyy-MM-dd";
 constexpr const char* displayDateFormat = "dd-MM-yyyy";
 
@@ -15,6 +16,7 @@ Core::Core(Database& db, DbExporter& dbExporter, FileProvider* fp)
       dbExporter_(dbExporter),
       provider_(fp),
       QObject(nullptr) {
+    linfo("Core::Core") << "initialize core with " << imgThreadCount << " img threads";
     imageThreadPool_.setMaxThreadCount(imgThreadCount);
 };
 

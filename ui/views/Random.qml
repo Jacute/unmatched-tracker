@@ -77,10 +77,12 @@ Rectangle {
             }
 
             RandomFilter {
+                id: randomFilter
                 anchors.fill: parent
                 heroes: heroesModel
                 maps: mapsModel
                 sets: setModel
+                onFiltersChanged: root.updateWheelHeroes()
             }
         }
     }
@@ -177,23 +179,19 @@ Rectangle {
                 onRandomHeroChanged: {
                     if (root.hero1.img_path === Common.avatarPlug) {
                         root.hero1 = randomHero
-                        let idx = root.modelFind(heroesModel, "id", randomHero)
-                        heroesModel.setProperty(idx, "enabled", false)
+                        root.updateWheelHeroes()
                         return
                     }
                     if (root.hero2.img_path === Common.avatarPlug) {
                         root.hero2 = randomHero
-                        for (let i = 0; i < heroesModel.count; i++) {
-                            heroesModel.setProperty(i, "enabled", true)
-                        }
+                        root.updateWheelHeroes()
                         return
                     }
                     root.hero1 = randomHero
-                    let idx = root.modelFind(heroesModel, "id", randomHero)
-                    heroesModel.setProperty(idx, "enabled", false)
                     root.hero2 = Common.plugHero
                     gm.visible = false
                     rndMap.visible = true
+                    root.updateWheelHeroes()
                 }
                 layer.enabled: true
                 scale: Math.min(
@@ -230,25 +228,11 @@ Rectangle {
         }
     }
 
-    ListModel {
-        id: heroesModel
-
-        onDataChanged: {
-            rw.heroes = root.getEnabledHeroes()
-            rw.paint()
-        }
-    }
+    ListModel { id: heroesModel }
     ListModel {
         id: mapsModel
     }
-    ListModel {
-        id: setModel
-
-        onDataChanged: {
-            rw.heroes = root.getEnabledHeroes()
-            rw.paint()
-        }
-    }
+    ListModel { id: setModel }
 
     Component.onCompleted: {
         loadData()
@@ -264,6 +248,7 @@ Rectangle {
                 id: backHeroes[i].id,
                 name: backHeroes[i].name,
                 img_path: backHeroes[i].img_path,
+                set_id: backHeroes[i].set_id,
                 enabled: true
             })
         }
@@ -276,6 +261,7 @@ Rectangle {
                 id: backMaps[i].id,
                 name: backMaps[i].name,
                 img_path: backMaps[i].img_path,
+                set_id: backMaps[i].set_id,
                 enabled: true
             })
         }
@@ -283,48 +269,25 @@ Rectangle {
         root.requestMapImages()
 
         setModel.clear()
-        let backSets = core.getSHM()   
+        let backSets = core.getSets()
         for (let i = 0; i < backSets.length; i++) {
             setModel.append({
                 id: backSets[i].id,
                 name: backSets[i].name,
                 img_path: backSets[i].img_path,
-                heroes: backSets[i].heroes,
-                maps: backSets[i].maps,
                 enabled: true
             })
         }
+        randomFilter.syncSetStates()
         console.debug("sets loaded " + setModel)
-    }
-
-    function modelFind(model, field, value) {
-        let idx = -1
-
-        for (let i = 0; i < model.count; ++i) {
-            if (model.get(i)[field] === value[field]) {
-                idx = i
-                break
-            }
-        }
-        return idx
     }
 
     function getEnabledMaps() {
         let maps = []
-        for (let i = 0; i < setModel.count; ++i) {
-            const set = setModel.get(i)
-            if (set.enabled) {
-                const setMaps = set.maps
-                for (let j = 0; j < setMaps.count; ++j) {
-                    maps.push(setMaps.get(j))
-                }
-            }
-        }
-
         for (let i = 0; i < mapsModel.count; ++i) {
             const map = mapsModel.get(i)
-            if (!map.enabled) {
-                maps = maps.filter(x => x.id != map.id)
+            if (map.enabled) {
+                maps.push(map)
             }
         }
 
@@ -345,21 +308,24 @@ Rectangle {
     
     function getEnabledHeroes() {
         let heroes = []
-        for (let i = 0; i < setModel.count; ++i) {
-            if (setModel.get(i).enabled) {
-                const heroesModel = setModel.get(i).heroes
-                for (let j = 0; j < heroesModel.count; ++j) {
-                    heroes.push(heroesModel.get(j))
-                }
-            }
-        }
-
         for (let i = 0; i < heroesModel.count; ++i) {
-            if (!heroesModel.get(i).enabled) {
-                heroes = heroes.filter(x => x.id != heroesModel.get(i).id)
+            const hero = heroesModel.get(i)
+            if (hero.enabled) {
+                heroes.push(hero)
             }
         }
 
         return heroes
+    }
+
+    function updateWheelHeroes() {
+        let heroes = root.getEnabledHeroes()
+        if (root.hero1.img_path !== Common.avatarPlug
+                && root.hero2.img_path === Common.avatarPlug) {
+            heroes = heroes.filter(hero => hero.id !== root.hero1.id)
+        }
+
+        rw.heroes = heroes
+        rw.paint()
     }
 }

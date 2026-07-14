@@ -737,37 +737,37 @@ VALUES
     'Santa''s Workshop',
     (SELECT id FROM sets WHERE name = 'Battle of Legends, Volume Three'),
     '/img/set/battle_of_legends3/maps/santas_workshop.webp'
-),
-(
-    'Technodrome',
-    (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
-    '/img/set/adventures/teenage_mutant_ninja_turtles/maps/technodrome.webp'
-),
-(
-    'New York City',
-    (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
-    '/img/set/adventures/teenage_mutant_ninja_turtles/maps/new_york_city.webp'
-),
-(
-    'Thrilla In Manilla',
-    (SELECT id FROM sets WHERE name = 'Muhammad Ali vs Bruce Lee'),
-    '/img/set/muhammad_ali_vs_bruce_lee/maps/thrilla_in_manilla.webp'
-),
-(
-    'Tsing Shan Monastery',
-    (SELECT id FROM sets WHERE name = 'Muhammad Ali vs Bruce Lee'),
-    '/img/set/muhammad_ali_vs_bruce_lee/maps/tsing_shan_monastery.webp'
-),
-(
-    'The Alamo',
-    (SELECT id FROM sets WHERE name = 'Stars and Stripes'),
-    '/img/set/stars_and_stripes/maps/the_alamo.webp'
-),
-(
-    'The White House',
-    (SELECT id FROM sets WHERE name = 'Stars and Stripes'),
-    '/img/set/stars_and_stripes/maps/the_white_house.webp'
 )
+-- (
+--     'Technodrome',
+--     (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
+--     '/img/set/adventures/teenage_mutant_ninja_turtles/maps/technodrome.webp'
+-- ),
+-- (
+--     'New York City',
+--     (SELECT id FROM sets WHERE name = 'Adventures: Teenage Mutant Ninja Turtles'),
+--     '/img/set/adventures/teenage_mutant_ninja_turtles/maps/new_york_city.webp'
+-- ),
+-- (
+--     'Thrilla In Manilla',
+--     (SELECT id FROM sets WHERE name = 'Muhammad Ali vs Bruce Lee'),
+--     '/img/set/muhammad_ali_vs_bruce_lee/maps/thrilla_in_manilla.webp'
+-- ),
+-- (
+--     'Tsing Shan Monastery',
+--     (SELECT id FROM sets WHERE name = 'Muhammad Ali vs Bruce Lee'),
+--     '/img/set/muhammad_ali_vs_bruce_lee/maps/tsing_shan_monastery.webp'
+-- ),
+-- (
+--     'The Alamo',
+--     (SELECT id FROM sets WHERE name = 'Stars and Stripes'),
+--     '/img/set/stars_and_stripes/maps/the_alamo.webp'
+-- ),
+-- (
+--     'The White House',
+--     (SELECT id FROM sets WHERE name = 'Stars and Stripes'),
+--     '/img/set/stars_and_stripes/maps/the_white_house.webp'
+-- )
 ON CONFLICT (name) DO UPDATE SET
     set_id = excluded.set_id,
     img_path = excluded.img_path;

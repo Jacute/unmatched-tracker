@@ -1,10 +1,11 @@
-# Unmatched Tracker
+# <img src="docs/ico.png" width="24" height="24"> Unmatched Tracker
 
-Android app for tracking Unmatched activity
+Android app for tracking Unmatched activities
 
 Features:
 
 - Hero & map randomizer
+- Game history
 - Statistic tracker
 
 ## How to contribute
