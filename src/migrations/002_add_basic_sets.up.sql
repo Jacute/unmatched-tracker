@@ -337,14 +337,14 @@ VALUES
     13,
     2,
     (SELECT id FROM sets WHERE name = 'Jurassic Park - Sattler vs T-Rex'),
-    '/img/set/redemption_row/heroes/dr_sattler/avatar.webp'
+    '/img/set/jurassic_park_settler_vs_trex/heroes/dr_sattler/avatar.webp'
 ),
 (
     'T. Rex',
     27,
     1,
     (SELECT id FROM sets WHERE name = 'Jurassic Park - Sattler vs T-Rex'),
-    '/img/set/redemption_row/heroes/trex/avatar.webp'
+    '/img/set/jurassic_park_settler_vs_trex/heroes/trex/avatar.webp'
 ),
 -- Houdini vs The Genie
 (
@@ -563,6 +563,28 @@ VALUES
     2,
     (SELECT id FROM sets WHERE name = 'Adventures: Tales to Amaze'),
     '/img/set/adventures/tales_to_amaze/heroes/nikola_tesla/avatar.webp'
+),
+-- Brains and Brawn
+(
+    'Spiderman',
+    15,
+    3,
+    (SELECT id FROM sets WHERE name = 'Brains and Brawn'),
+    '/img/set/brains_and_brawn/heroes/spiderman/avatar.webp'
+),
+(
+    'Doctor Strange',
+    14,
+    2,
+    (SELECT id FROM sets WHERE name = 'Brains and Brawn'),
+    '/img/set/brains_and_brawn/heroes/doctor_strange/avatar.webp'
+),
+(
+    'She Hulk',
+    20,
+    2,
+    (SELECT id FROM sets WHERE name = 'Brains and Brawn'),
+    '/img/set/brains_and_brawn/heroes/she_hulk/avatar.webp'
 )
 ON CONFLICT(name) DO UPDATE SET
     set_id = excluded.set_id,
