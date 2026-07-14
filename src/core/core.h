@@ -50,6 +50,10 @@ class Core : public QObject {
     // @param[in] to Url where the file will be uploaded. Starts with content://
     Q_INVOKABLE QVariantMap exportDb(const QUrl& to) const;
 
+    Q_INVOKABLE QVariantMap saveRandomizerConfig(const QVariantList& heroes,
+                                                 const QVariantList& maps) const;
+    Q_INVOKABLE QVariantMap loadRandomizerConfig() const;
+
   signals:
     // @brief Signal of successfully loaded image
     // @param[out] path Http path of file in REST api

@@ -55,7 +55,20 @@ $QT_CMAKE \
 
 - b) Configuration for **release** build:
 
-Set envs:`QT_ANDROID_KEYSTORE_PATH`, `QT_ANDROID_KEYSTORE_KEY_PASS`, `QT_ANDROID_KEYSTORE_STORE_PASS`, `QT_ANDROID_KEYSTORE_ALIAS="upload"`
+Set and export signing variables in the same terminal where the build will run:
+
+```bash
+export QT_ANDROID_KEYSTORE_PATH="/path/to/upload.keystore"
+export QT_ANDROID_KEYSTORE_ALIAS="upload"
+
+read -rsp "Keystore password: " QT_ANDROID_KEYSTORE_STORE_PASS
+printf '\n'
+export QT_ANDROID_KEYSTORE_STORE_PASS
+
+read -rsp "Key password: " QT_ANDROID_KEYSTORE_KEY_PASS
+printf '\n'
+export QT_ANDROID_KEYSTORE_KEY_PASS
+```
 
 Run configuration command:
 ```bash

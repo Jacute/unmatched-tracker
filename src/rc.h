@@ -1,3 +1,5 @@
+// Errors in core module
+
 #pragma once
 
 #include <QString>

@@ -88,7 +88,10 @@ Rectangle {
                 heroes: heroesModel
                 maps: mapsModel
                 sets: setModel
-                onFiltersChanged: root.updateWheelHeroes()
+                onFiltersChanged: {
+                    root.updateWheelHeroes()
+                    root.saveRandomizerConfig()
+                }
             }
         }
     }
@@ -244,9 +247,7 @@ Rectangle {
     }
 
     ListModel { id: heroesModel }
-    ListModel {
-        id: mapsModel
-    }
+    ListModel { id: mapsModel }
     ListModel { id: setModel }
 
     Component.onCompleted: {
@@ -255,6 +256,13 @@ Rectangle {
     }
 
     function loadData() {
+        const config = core.loadRandomizerConfig()
+        if (!config.ok) {
+            console.error("[Random] can't load config: " + config.error)
+        }
+        const heroStates = config.ok && config.exists ? config.heroes : ({})
+        const mapStates = config.ok && config.exists ? config.maps : ({})
+
         heroesModel.clear()
         let backHeroes = core.getHeroes()
 
@@ -264,7 +272,7 @@ Rectangle {
                 name: backHeroes[i].name,
                 img_path: backHeroes[i].img_path,
                 set_id: backHeroes[i].set_id,
-                enabled: true
+                enabled: root.savedEnabled(heroStates, backHeroes[i].id)
             })
         }
         console.debug("heroes loaded " + heroesModel)
@@ -277,7 +285,7 @@ Rectangle {
                 name: backMaps[i].name,
                 img_path: backMaps[i].img_path,
                 set_id: backMaps[i].set_id,
-                enabled: true
+                enabled: root.savedEnabled(mapStates, backMaps[i].id)
             })
         }
         console.debug("maps loaded " + mapsModel)
@@ -295,6 +303,30 @@ Rectangle {
         }
         randomFilter.syncSetStates()
         console.debug("sets loaded " + setModel)
+    }
+
+    function savedEnabled(states, id) {
+        const enabled = states[String(id)]
+        return enabled === undefined ? true : enabled
+    }
+
+    function configItems(model) {
+        const items = []
+        for (let i = 0; i < model.count; ++i) {
+            const item = model.get(i)
+            items.push({ id: item.id, enabled: item.enabled })
+        }
+        return items
+    }
+
+    function saveRandomizerConfig() {
+        const result = core.saveRandomizerConfig(
+            root.configItems(heroesModel),
+            root.configItems(mapsModel)
+        )
+        if (!result.ok) {
+            console.error("[Random] can't save config: " + result.error)
+        }
     }
 
     function getEnabledMaps() {

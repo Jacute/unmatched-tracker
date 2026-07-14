@@ -3,13 +3,54 @@
 #include "errors.h"
 
 #include <QDate>
+#include <QDir>
+#include <QFile>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonParseError>
 #include <QPointer>
+#include <QSaveFile>
 #include <QSet>
+#include <QStandardPaths>
 #include <QThread>
 
 const int imgThreadCount = QThread::idealThreadCount() / 2;
 constexpr const char* dbDateFormat = "yyyy-MM-dd";
 constexpr const char* displayDateFormat = "dd-MM-yyyy";
+constexpr const char* randomizerConfigFileName = "randomizer.json";
+
+static QString randomizerConfigPath() {
+    const QString storagePath =
+        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (storagePath.isEmpty()) {
+        return {};
+    }
+    return QDir(storagePath).filePath(randomizerConfigFileName);
+}
+
+static bool enabledItemsToJson(const QVariantList& items, QJsonObject& result) {
+    for (const QVariant& item : items) {
+        const QVariantMap itemMap = item.toMap();
+        bool idOk = false;
+        const quint64 id = itemMap.value("id").toULongLong(&idOk);
+        if (!idOk || id == 0 || !itemMap.contains("enabled")) {
+            return false;
+        }
+        result.insert(QString::number(id), itemMap.value("enabled").toBool());
+    }
+    return true;
+}
+
+static bool isEnabledItemsJson(const QJsonObject& items) {
+    for (auto it = items.constBegin(); it != items.constEnd(); ++it) {
+        bool idOk = false;
+        const quint64 id = it.key().toULongLong(&idOk);
+        if (!idOk || id == 0 || !it.value().isBool()) {
+            return false;
+        }
+    }
+    return true;
+}
 
 Core::Core(Database& db, DbExporter& dbExporter, FileProvider* fp)
     : db_(db),
@@ -550,5 +591,99 @@ QVariantMap Core::exportDb(const QUrl& to) const {
         result["error"] = rc2str(rc);
         lerr(op) << result["error"];
     }
+    return result;
+}
+
+QVariantMap Core::saveRandomizerConfig(const QVariantList& heroes,
+                                       const QVariantList& maps) const {
+    const char op[] = "Core::saveRandomizerConfig";
+    QVariantMap result{{"ok", false}, {"error", err::None}};
+
+    const QString storagePath =
+        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+    if (storagePath.isEmpty() || !QDir().mkpath(storagePath)) {
+        lerr(op) << "can't create randomizer config directory: " << storagePath;
+        result["error"] = err_randomizer::StorageError;
+        return result;
+    }
+
+    QJsonObject heroStates;
+    QJsonObject mapStates;
+    if (!enabledItemsToJson(heroes, heroStates) || !enabledItemsToJson(maps, mapStates)) {
+        lwarn(op) << "invalid randomizer config data";
+        result["error"] = err_randomizer::InvalidData;
+        return result;
+    }
+
+    QJsonObject data;
+    data.insert("version", 1);
+    data.insert("heroes", heroStates);
+    data.insert("maps", mapStates);
+
+    QSaveFile file(randomizerConfigPath());
+    if (!file.open(QIODevice::WriteOnly)) {
+        lerr(op) << "can't open randomizer config: " << file.errorString();
+        result["error"] = err_randomizer::WriteError;
+        return result;
+    }
+
+    const QByteArray json = QJsonDocument(data).toJson(QJsonDocument::Indented);
+    if (file.write(json) != json.size() || !file.commit()) {
+        lerr(op) << "can't write randomizer config: " << file.errorString();
+        result["error"] = err_randomizer::WriteError;
+        return result;
+    }
+
+    result["ok"] = true;
+    return result;
+}
+
+QVariantMap Core::loadRandomizerConfig() const {
+    const char op[] = "Core::loadRandomizerConfig";
+    QVariantMap result{{"ok", true}, {"error", err::None}, {"exists", false}};
+
+    const QString configPath = randomizerConfigPath();
+    if (configPath.isEmpty()) {
+        lerr(op) << "randomizer config directory is unavailable";
+        result["ok"] = false;
+        result["error"] = err_randomizer::StorageError;
+        return result;
+    }
+
+    QFile file(configPath);
+    if (!file.exists()) {
+        return result;
+    }
+    if (!file.open(QIODevice::ReadOnly)) {
+        lerr(op) << "can't open randomizer config: " << file.errorString();
+        result["ok"] = false;
+        result["error"] = err_randomizer::ReadError;
+        return result;
+    }
+
+    QJsonParseError parseError;
+    const QJsonDocument document = QJsonDocument::fromJson(file.readAll(), &parseError);
+    if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
+        lerr(op) << "invalid randomizer config: " << parseError.errorString();
+        result["ok"] = false;
+        result["error"] = err_randomizer::InvalidConfig;
+        return result;
+    }
+
+    const QJsonObject data = document.object();
+    const QJsonObject heroStates = data.value("heroes").toObject();
+    const QJsonObject mapStates = data.value("maps").toObject();
+    if (data.value("version").toInt() != 1 || !data.value("heroes").isObject() ||
+        !data.value("maps").isObject() || !isEnabledItemsJson(heroStates) ||
+        !isEnabledItemsJson(mapStates)) {
+        lerr(op) << "unsupported randomizer config structure";
+        result["ok"] = false;
+        result["error"] = err_randomizer::InvalidConfig;
+        return result;
+    }
+
+    result["exists"] = true;
+    result["heroes"] = heroStates.toVariantMap();
+    result["maps"] = mapStates.toVariantMap();
     return result;
 }

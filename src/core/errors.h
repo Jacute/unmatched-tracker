@@ -14,6 +14,14 @@ constexpr const char* InvalidData = "Invalid data";
 constexpr const char* NotFound = "not_found";
 } // namespace err_game
 
+namespace err_randomizer {
+constexpr const char* InvalidData = "invalid_data";
+constexpr const char* InvalidConfig = "invalid_config";
+constexpr const char* StorageError = "storage_error";
+constexpr const char* ReadError = "read_error";
+constexpr const char* WriteError = "write_error";
+} // namespace err_randomizer
+
 namespace err {
 constexpr const char* None = "";
 constexpr const char* DbError = "db_error";
