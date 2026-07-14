@@ -155,4 +155,15 @@ Rectangle {
         heroSelect.currentIndex = -1
         hpInput.text = ""
     }
+
+    function selectHeroById(heroId) {
+        heroSelect.currentIndex = -1
+        for (let i = 0; i < heroOptions.count; ++i) {
+            if (heroOptions.get(i).id === heroId) {
+                heroSelect.currentIndex = i
+                break
+            }
+        }
+        hpInput.text = ""
+    }
 }

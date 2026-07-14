@@ -230,6 +230,15 @@ Rectangle {
         return id > 0 ? id : undefined
     }
 
+    function indexById(model, id) {
+        for (let i = 0; i < model.count; ++i) {
+            if (model.get(i).id === id) {
+                return i
+            }
+        }
+        return -1
+    }
+
     function selectedModeValue(role, fallback) {
         if (modeSelect.currentIndex < 0 || modeSelect.currentIndex >= gameModesModel.count) {
             return fallback
@@ -320,6 +329,27 @@ Rectangle {
         winner.currentIndex = -1
         root.participantRevision++
         Qt.callLater(root.clearParticipants)
+    }
+
+    function prefillFromRandomizer(hero1Id, hero2Id, mapId) {
+        modeSelect.currentIndex = 0
+        statusText.text = ""
+        playedAtInput.text = ""
+        winner.currentIndex = -1
+
+        Qt.callLater(function() {
+            root.clearParticipants()
+
+            const player1 = root.participantInputAt(0)
+            const player2 = root.participantInputAt(1)
+            if (player1) {
+                player1.selectHeroById(hero1Id)
+            }
+            if (player2) {
+                player2.selectHeroById(hero2Id)
+            }
+            mapSelect.currentIndex = root.indexById(mapsInputModel, mapId)
+        })
     }
 
     function isMaskedDateEmpty(text) {

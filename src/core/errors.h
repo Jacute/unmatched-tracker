@@ -1,5 +1,6 @@
-#ifndef ERRORS_H
-#define ERRORS_H
+// Errors which returns to ui
+
+#pragma once
 
 namespace err_profile {
 constexpr const char* EmptyName = "empty_name";
@@ -17,5 +18,3 @@ namespace err {
 constexpr const char* None = "";
 constexpr const char* DbError = "db_error";
 } // namespace err
-
-#endif

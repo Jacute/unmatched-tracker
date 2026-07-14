@@ -9,9 +9,15 @@ Rectangle {
 
     property var hero1: Common.plugHero
     property var hero2: Common.plugHero
+    property var selectedMap: null
     property bool filtersVisible: false
     property var mapImageUrls: ({})
     property var requestedMapImagePaths: ({})
+    readonly property bool canSaveResults: root.hero1.id !== undefined
+        && root.hero2.id !== undefined
+        && root.selectedMap !== null
+
+    signal saveResultsRequested(var hero1, var hero2, var gameMap)
 
     Rectangle {
         id: filtergroup
@@ -143,6 +149,7 @@ Rectangle {
                     }
 
                     const randomMap = enabledMaps[Math.floor(Math.random() * enabledMaps.length)]
+                    root.selectedMap = randomMap
                     gm.sourceUrl = root.mapImageUrls[randomMap.img_path]
                     gm.imgPath = randomMap.img_path
                     gm.visible = true
@@ -158,6 +165,13 @@ Rectangle {
             Layout.preferredHeight: root.height * 0.05
             radius: height
             text: qsTr("Save results")
+            enabled: root.canSaveResults
+            opacity: enabled ? 1 : 0.45
+            onClicked: root.saveResultsRequested(
+                root.hero1,
+                root.hero2,
+                root.selectedMap
+            )
         }
 
         Rectangle {
@@ -189,6 +203,7 @@ Rectangle {
                     }
                     root.hero1 = randomHero
                     root.hero2 = Common.plugHero
+                    root.selectedMap = null
                     gm.visible = false
                     rndMap.visible = true
                     root.updateWheelHeroes()

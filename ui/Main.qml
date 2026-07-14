@@ -89,6 +89,16 @@ ApplicationWindow {
             id: randomPage
             anchors.fill: parent
             visible: root.page === Common.pageRandom
+
+            onSaveResultsRequested: (hero1, hero2, gameMap) => {
+                root.page = Common.pageGames
+                Qt.callLater(
+                    gamesPage.prefillFromRandomizer,
+                    hero1.id,
+                    hero2.id,
+                    gameMap.id
+                )
+            }
         }
 
         Profiles {
