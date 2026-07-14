@@ -193,12 +193,12 @@ Rc Database::getSHM(QVector<models::GameSet>& sets) {
         QVector<models::Hero> heroes;
         while (heroQuery.next()) {
             models::Hero hero;
-            hero.id = query.value(0).toULongLong();
-            hero.name = query.value(1).toString();
-            hero.hp = query.value(2).toUInt();
-            hero.move = query.value(3).toUInt();
-            hero.setId = query.value(4).toUInt();
-            hero.imgPath = query.value(5).toString();
+            hero.id = heroQuery.value(0).toULongLong();
+            hero.name = heroQuery.value(1).toString();
+            hero.hp = heroQuery.value(2).toUInt();
+            hero.move = heroQuery.value(3).toUInt();
+            hero.setId = heroQuery.value(4).toULongLong();
+            hero.imgPath = heroQuery.value(5).toString();
             heroes.append(std::move(hero));
         }
         ldebug(op) << "set " << set.name << "heroes length " << heroes.size();
