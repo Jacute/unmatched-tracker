@@ -97,9 +97,26 @@ set_target_properties(${TARGET} PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-set_property(TARGET ${TARGET} PROPERTY
-    QT_ANDROID_PACKAGE_NAME "com.jacute.unmatched_tracker"
-)
+if(ANDROID)
+    math(EXPR ANDROID_VERSION_CODE
+        "${PROJECT_VERSION_MAJOR} * 10000 + ${PROJECT_VERSION_MINOR} * 100 + ${PROJECT_VERSION_PATCH}"
+    )
+
+    set_target_properties(${TARGET} PROPERTIES
+        QT_ANDROID_PACKAGE_SOURCE_DIR
+            "${CMAKE_CURRENT_SOURCE_DIR}/android"
+
+        QT_ANDROID_APP_ICON
+            "@drawable/ic_launcher"
+
+        QT_ANDROID_APP_NAME
+            "Unmatched Tracker"
+
+        QT_ANDROID_PACKAGE_NAME "com.jacute.unmatched_tracker"
+        QT_ANDROID_VERSION_NAME "${PROJECT_VERSION}"
+        QT_ANDROID_VERSION_CODE "${ANDROID_VERSION_CODE}"
+    )
+endif()
 target_compile_definitions(${TARGET} PRIVATE
     PACKAGE_NAME="${PACKAGE_NAME}"
     API_URL="${API_URL}"

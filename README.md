@@ -41,7 +41,7 @@ source ~/.bashrc
 
 3. Configure project for platform android-33 and arch arm64-v8a
 
-Configuration for **develop** build:
+- a) Configuration for **develop** build:
 ```bash
 $QT_CMAKE \
 	-DANDROID_SDK_ROOT=$ANDROID_SDK \
@@ -52,7 +52,11 @@ $QT_CMAKE \
 	-GNinja
 ```
 
-Configuration for **develop** build:
+- b) Configuration for **release** build:
+
+Set envs:`QT_ANDROID_KEYSTORE_PATH`, `QT_ANDROID_KEYSTORE_KEY_PASS`, `QT_ANDROID_KEYSTORE_STORE_PASS`, `QT_ANDROID_KEYSTORE_ALIAS="upload"`
+
+Run configuration command:
 ```bash
 $QT_CMAKE \
 	-DANDROID_SDK_ROOT=$ANDROID_SDK \
@@ -61,6 +65,7 @@ $QT_CMAKE \
 	-DANDROID_PLATFORM=android-33 \
 	-DCMAKE_BUILD_TYPE=Release \
 	-DCMAKE_CXX_FLAGS_RELEASE="-O2 -DNDEBUG" \
+	-DQT_ANDROID_SIGN_APK=ON \
 	-S . \
 	-B ./build \
 	-GNinja
