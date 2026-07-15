@@ -49,7 +49,7 @@ Rectangle {
         spacing: 6
 
         Text {
-            Layout.preferredWidth: Common.defaultFontSize * 3.4
+            Layout.preferredWidth: content.width * 0.12
             text: root.title
             color: Common.textSecondary
             font.pixelSize: Common.defaultFontSize * 0.86
@@ -90,15 +90,14 @@ Rectangle {
         }
 
         FieldBox {
-            Layout.preferredWidth: Math.max(Common.defaultFontSize * 4.2, root.width * 0.2)
+            Layout.preferredWidth: parent.width * 0.1
             label: qsTr("HP")
 
             TextField {
                 id: hpInput
                 anchors.fill: parent
                 color: Common.textColor
-                placeholderText: activeFocus || text !== "" ? "" : qsTr("Optional")
-                placeholderTextColor: Common.textHint
+                placeholderText: ""
                 selectionColor: Common.accent
                 selectedTextColor: Common.primary
                 font.pixelSize: Common.defaultFontSize

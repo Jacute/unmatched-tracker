@@ -183,9 +183,14 @@ Rectangle {
         gameHistory.reload()
     }
 
+    function sortAfterLoad(a, b) {
+        return a.name.localeCompare(b.name)
+    }
+
     function loadProfiles() {
         profilesModel.clear()
         const profiles = core.getProfiles()
+        profiles.sort(sortAfterLoad)
         for (let i = 0; i < profiles.length; i++) {
             profilesModel.append({
                 id: profiles[i].id,
@@ -197,6 +202,7 @@ Rectangle {
     function loadHeroes() {
         heroesModel.clear()
         const heroes = core.getHeroes()
+        heroes.sort(sortAfterLoad)
         for (let i = 0; i < heroes.length; i++) {
             heroesModel.append({
                 id: heroes[i].id,
@@ -210,6 +216,7 @@ Rectangle {
         mapsInputModel.clear()
         mapsInputModel.append({ id: 0, name: qsTr("Not specified") })
         const maps = core.getMaps()
+        maps.sort(sortAfterLoad)
         for (let i = 0; i < maps.length; i++) {
             mapsInputModel.append({
                 id: maps[i].id,
