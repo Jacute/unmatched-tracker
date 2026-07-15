@@ -6,6 +6,7 @@ import QtQuick.Controls
 import Tracker
 
 ComboBox {
+    property int popupWidth: width * 1
     id: combo
 
     font.pixelSize: Common.defaultFontSize
@@ -56,7 +57,7 @@ ComboBox {
 
         id: item
 
-        width: combo.width
+        width: combo.popupWidth
         height: Math.max(42, Common.defaultFontSize * 2.6)
         highlighted: combo.highlightedIndex === index
 
@@ -75,7 +76,7 @@ ComboBox {
 
     popup: Popup {
         y: combo.height + 4
-        width: combo.width
+        width: combo.popupWidth
         implicitHeight: Math.min(contentItem.implicitHeight, combo.height * 7)
         padding: 1
 

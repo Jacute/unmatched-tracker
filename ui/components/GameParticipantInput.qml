@@ -66,6 +66,7 @@ Rectangle {
             ThemedComboBox {
                 id: profileSelect
                 anchors.fill: parent
+                popupWidth: width * 1.5
                 model: root.profileOptions
                 textRole: "name"
 
@@ -80,6 +81,7 @@ Rectangle {
             ThemedComboBox {
                 id: heroSelect
                 anchors.fill: parent
+                popupWidth: width * 1.5
                 model: root.heroOptions
                 textRole: "name"
 
