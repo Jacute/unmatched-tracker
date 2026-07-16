@@ -12,7 +12,7 @@ Features:
 
 ### Development environment
 
-1. Download Qt sources (minimum version 6.4)
+1. Download Qt sources (minimum version 6.11)
 2. Build base Qt
 3. Download Android SDK 
 4. Configure Qt for your architecture (x86_64/x86/arm64-v8a/armeabi-v7a)

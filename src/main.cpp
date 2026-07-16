@@ -63,7 +63,8 @@ int main(int argc, char* argv[]) {
     db.open();
     db.migrate(cfg.db.migrationFiles);
 
-    const QString apiBaseUrl = cfg.assetsBaseUrl.isEmpty() ? QString(API_URL) : cfg.assetsBaseUrl;
+    const QString apiBaseUrl =
+        cfg.assetsBaseUrl.isEmpty() ? QStringLiteral(API_URL) : cfg.assetsBaseUrl;
     Api api(apiBaseUrl);
     FileCache cache;
     File fileProvider(cache, api);

@@ -7,7 +7,7 @@ set(SRC_DIR src)
 set(QML_DIR ui)
 set(ASSETS_DIR ${QML_DIR}/assets)
 
-find_package(Qt6 6.4 REQUIRED COMPONENTS Quick Sql Network)
+find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Sql Network)
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
