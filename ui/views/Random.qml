@@ -255,6 +255,10 @@ Rectangle {
         rw.heroes = root.getEnabledHeroes().sort(() => Math.random() - 0.5)
     }
 
+    function sortAfterLoad(a, b) {
+        return a.name.localeCompare(b.name)
+    }
+
     function loadData() {
         const config = core.loadRandomizerConfig()
         if (!config.ok) {
@@ -264,40 +268,42 @@ Rectangle {
         const mapStates = config.ok && config.exists ? config.maps : ({})
 
         heroesModel.clear()
-        let backHeroes = core.getHeroes()
-
-        for (let i = 0; i < backHeroes.length; i++) {
+        let heroes = core.getHeroes()
+        heroes.sort(sortAfterLoad)
+        for (let i = 0; i < heroes.length; i++) {
             heroesModel.append({
-                id: backHeroes[i].id,
-                name: backHeroes[i].name,
-                img_path: backHeroes[i].img_path,
-                set_id: backHeroes[i].set_id,
-                enabled: root.savedEnabled(heroStates, backHeroes[i].id)
+                id: heroes[i].id,
+                name: heroes[i].name,
+                img_path: heroes[i].img_path,
+                set_id: heroes[i].set_id,
+                enabled: root.savedEnabled(heroStates, heroes[i].id)
             })
         }
         console.debug("heroes loaded " + heroesModel)
 
         mapsModel.clear()
-        let backMaps = core.getMaps()
-        for (let i = 0; i < backMaps.length; i++) {
+        let maps = core.getMaps()
+        maps.sort(sortAfterLoad)
+        for (let i = 0; i < maps.length; i++) {
             mapsModel.append({
-                id: backMaps[i].id,
-                name: backMaps[i].name,
-                img_path: backMaps[i].img_path,
-                set_id: backMaps[i].set_id,
-                enabled: root.savedEnabled(mapStates, backMaps[i].id)
+                id: maps[i].id,
+                name: maps[i].name,
+                img_path: maps[i].img_path,
+                set_id: maps[i].set_id,
+                enabled: root.savedEnabled(mapStates, maps[i].id)
             })
         }
         console.debug("maps loaded " + mapsModel)
         root.requestMapImages()
 
         setModel.clear()
-        let backSets = core.getSets()
-        for (let i = 0; i < backSets.length; i++) {
+        let sets = core.getSets()
+        sets.sort(sortAfterLoad)
+        for (let i = 0; i < sets.length; i++) {
             setModel.append({
-                id: backSets[i].id,
-                name: backSets[i].name,
-                img_path: backSets[i].img_path,
+                id: sets[i].id,
+                name: sets[i].name,
+                img_path: sets[i].img_path,
                 enabled: true
             })
         }

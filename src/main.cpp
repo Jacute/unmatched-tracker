@@ -65,6 +65,7 @@ int main(int argc, char* argv[]) {
 
     const QString apiBaseUrl =
         cfg.assetsBaseUrl.isEmpty() ? QStringLiteral(API_URL) : cfg.assetsBaseUrl;
+
     Api api(apiBaseUrl);
     FileCache cache;
     File fileProvider(cache, api);
@@ -84,7 +85,7 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
-    ldebug(op) << "Application running successfully";
+    ldebug(op) << "Application running successfully with config: " << cfg;
 
     int rc = app.exec();
     if (rc != 0) {

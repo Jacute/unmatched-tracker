@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -15,4 +16,7 @@ class Config {
 
     DatabaseConfig db;
     QString assetsBaseUrl;
+    QString cachePath;
 };
+
+QDebug operator<<(QDebug debug, const Config& config);
