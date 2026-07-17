@@ -108,7 +108,7 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: unmatched-tracker-debug-arm64
+          name: unmatched-tracker-debug-arm64-v8a
           path: dist/*.apk
           if-no-files-found: error
           retention-days: 14
@@ -197,7 +197,7 @@ jobs:
       - name: Build signed APK and AAB
         env:
           QT_ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/upload-key.jks
-          QT_ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+          QT_ANDROID_KEYSTORE_ALIAS: ${{ vars.ANDROID_KEYSTORE_ALIAS }}
           QT_ANDROID_KEYSTORE_STORE_PASS: ${{ secrets.ANDROID_KEYSTORE_STORE_PASS }}
           QT_ANDROID_KEYSTORE_KEY_PASS: ${{ secrets.ANDROID_KEYSTORE_KEY_PASS }}
         run: |
@@ -224,7 +224,7 @@ jobs:
       - name: Upload release packages
         uses: actions/upload-artifact@v4
         with:
-          name: unmatched-tracker-${{ github.ref_name }}
+          name: unmatched-tracker-${{ github.ref_name }}-arm64-v8a
           path: |
             dist/*.apk
             dist/*.aab
