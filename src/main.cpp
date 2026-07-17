@@ -48,6 +48,8 @@ int main(int argc, char* argv[]) {
     const char op[] = "main";
 
     QGuiApplication app(argc, argv);
+    QCoreApplication::setOrganizationName("jacute");
+    QCoreApplication::setApplicationName("Unmatched Tracker");
     QQmlApplicationEngine engine;
 
     Config cfg(cfgPath);

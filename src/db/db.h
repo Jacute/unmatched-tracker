@@ -42,8 +42,11 @@ class Database : public QObject {
     // @return Return code
     Rc getCardsByHeroId(quint64 heroId, QVector<models::Card>& cards);
     Rc getProfiles(QVector<models::PlayerProfile>& profiles);
+    Rc getProfileStats(const QString& profileId,
+                       const QString& gameMode,
+                       models::ProfileStats& stats);
     Rc createProfile(const QString& name);
-    Rc deleteProfile(quint64 id);
+    Rc deleteProfile(const QString& id);
     Rc getGameHistory(QVector<models::GameRecord>& games,
                       const QString& sortBy,
                       quint32 limit,

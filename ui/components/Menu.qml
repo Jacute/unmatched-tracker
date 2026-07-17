@@ -46,6 +46,10 @@ Drawer {
             id: repeater
             model: [
                 {
+                    text: qsTr("Overview"),
+                    page: Common.pageHome
+                },
+                {
                     text: qsTr("Character Sets"),
                     page: Common.pageSet
                 },

@@ -29,6 +29,7 @@ qt_add_executable(${TARGET}
 
 set(plain_qml_files
     ${QML_DIR}/Main.qml
+    ${QML_DIR}/views/Home.qml
     ${QML_DIR}/views/set/SetStack.qml
     ${QML_DIR}/views/set/Set.qml
     ${QML_DIR}/views/set/hero/Hero.qml
@@ -52,6 +53,7 @@ set(plain_qml_files
     ${QML_DIR}/components/MultiSelectDropdown.qml
     ${QML_DIR}/components/FieldBox.qml
     ${QML_DIR}/components/ThemedComboBox.qml
+    ${QML_DIR}/components/StatTile.qml
     ${QML_DIR}/components/VS.qml
     ${QML_DIR}/components/GameMap.qml
     ${QML_DIR}/components/GameHistory.qml

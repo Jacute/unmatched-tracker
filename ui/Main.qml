@@ -10,7 +10,7 @@ import "./components"
 
 ApplicationWindow {
     readonly property bool isMobile: Qt.platform.os === "android" || Qt.platform.os === "ios"
-    property string page: Common.pageSet
+    property string page: Common.pageHome
     
     id: root
     width: isMobile ? Screen.width : 360
@@ -48,6 +48,8 @@ ApplicationWindow {
 
         function getHeaderText() {
             switch (root.page) {
+            case Common.pageHome:
+                return qsTr("Overview")
             case Common.pageSet:
                 return qsTr("Character Sets")
             case Common.pageRandom:
@@ -83,6 +85,14 @@ ApplicationWindow {
             id: setPage
             anchors.fill: parent
             visible: root.page === Common.pageSet
+        }
+
+        Home {
+            id: homePage
+            anchors.fill: parent
+            visible: root.page === Common.pageHome
+
+            onOpenProfilesRequested: root.page = Common.pageProfiles
         }
 
         Random {
@@ -127,6 +137,8 @@ ApplicationWindow {
 
         close.accepted = true
         switch (root.page) {
+        case Common.pageHome:
+            break
         case Common.pageSet:
             if (setPage.canPop()) {
                 close.accepted = false

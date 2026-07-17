@@ -93,7 +93,7 @@ Rectangle {
 
             delegate: Rectangle {
                 required property string name
-                required property int id
+                required property string id
 
                 width: profilesList.width
                 height: root.controlHeight

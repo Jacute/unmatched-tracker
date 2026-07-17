@@ -30,8 +30,12 @@ class Core : public QObject {
     Q_INVOKABLE QVariantList getSHM() const;
     Q_INVOKABLE QVariantList getCardsByHeroId(quint64 heroId) const;
     Q_INVOKABLE QVariantList getProfiles() const;
+    Q_INVOKABLE QVariantMap getProfileStats(const QString& profileId,
+                                            const QString& gameMode) const;
+    Q_INVOKABLE QString getDefaultProfileId() const;
+    Q_INVOKABLE QVariantMap setDefaultProfileId(const QString& profileId) const;
     Q_INVOKABLE QVariantMap createProfile(const QString& name) const;
-    Q_INVOKABLE QVariantMap deleteProfile(quint64 id) const;
+    Q_INVOKABLE QVariantMap deleteProfile(const QString& id) const;
     Q_INVOKABLE QVariantList getGameHistory(const QString& sortBy,
                                             quint32 limit,
                                             quint32 offset) const;

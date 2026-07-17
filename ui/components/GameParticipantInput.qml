@@ -15,7 +15,7 @@ Rectangle {
 
     readonly property int profileIndex: profileSelect.currentIndex
     readonly property int heroIndex: heroSelect.currentIndex
-    readonly property int profileId: root.modelId(profileOptions, profileIndex)
+    readonly property string profileId: root.modelStringId(profileOptions, profileIndex)
     readonly property int heroId: root.modelId(heroOptions, heroIndex)
     readonly property string profileName: root.modelName(profileOptions, profileIndex)
 
@@ -117,6 +117,13 @@ Rectangle {
     function modelId(model, index) {
         if (index < 0 || index >= model.count) {
             return 0
+        }
+        return model.get(index).id
+    }
+
+    function modelStringId(model, index) {
+        if (index < 0 || index >= model.count) {
+            return ""
         }
         return model.get(index).id
     }

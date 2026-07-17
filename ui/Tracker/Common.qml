@@ -49,6 +49,7 @@ QtObject {
     })
 
     // pages
+    readonly property string pageHome: "home"
     readonly property string pageSet: "set"
     readonly property string pageRandom: "random"
     readonly property string pageProfiles: "profiles"

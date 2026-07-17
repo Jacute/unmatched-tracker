@@ -11,13 +11,16 @@
 #include <QPointer>
 #include <QSaveFile>
 #include <QSet>
+#include <QSettings>
 #include <QStandardPaths>
 #include <QThread>
+#include <QUuid>
 
 const int imgThreadCount = QThread::idealThreadCount() / 2;
 constexpr const char* dbDateFormat = "yyyy-MM-dd";
 constexpr const char* displayDateFormat = "dd-MM-yyyy";
 constexpr const char* randomizerConfigFileName = "randomizer.json";
+constexpr const char* defaultProfileSettingsKey = "preferences/default_profile_id";
 
 static QString randomizerConfigPath() {
     const QString storagePath =
@@ -288,6 +291,99 @@ QVariantList Core::getProfiles() const {
     return list;
 }
 
+QVariantMap Core::getProfileStats(const QString& profileId, const QString& gameMode) const {
+    const char op[] = "Core::getProfileStats";
+    QVariantMap result{{"ok", false}, {"error", err::None}};
+
+    const QString trimmedId = profileId.trimmed();
+    if (trimmedId.isEmpty() || QUuid(trimmedId).isNull()) {
+        lwarn(op) << "invalid profile id: " << profileId;
+        result["error"] = err_profile::InvalidId;
+        return result;
+    }
+
+    int playerCount = 0;
+    int teamCount = 0;
+    if (!gameModeSpec(gameMode, playerCount, teamCount)) {
+        lwarn(op) << "invalid game mode: " << gameMode;
+        result["error"] = err_game::InvalidData;
+        return result;
+    }
+
+    models::ProfileStats stats;
+    const Rc rc = db_.getProfileStats(trimmedId, gameMode, stats);
+    if (rc == Rc::ErrNotFound) {
+        result["error"] = err_profile::NotFound;
+        return result;
+    }
+    if (rc != Rc::Ok) {
+        lerr(op) << "error getting profile stats: " << rc2str(rc);
+        result["error"] = err::DbError;
+        return result;
+    }
+
+    result["games_played"] = stats.gamesPlayed;
+    result["games_won"] = stats.gamesWon;
+    result["win_percentage"] = stats.gamesPlayed > 0
+                                   ? 100.0 * stats.gamesWon / stats.gamesPlayed
+                                   : 0.0;
+    result["average_winning_hp"] = stats.averageWinningHp;
+
+    QVariantMap favoriteHero;
+    if (stats.favoriteHeroId != 0) {
+        favoriteHero["id"] = stats.favoriteHeroId;
+        favoriteHero["name"] = stats.favoriteHeroName;
+        favoriteHero["img_path"] = stats.favoriteHeroImgPath;
+        favoriteHero["games_played"] = stats.favoriteHeroGames;
+        favoriteHero["games_won"] = stats.favoriteHeroWins;
+        favoriteHero["win_percentage"] = stats.favoriteHeroGames > 0
+                                               ? 100.0 * stats.favoriteHeroWins /
+                                                     stats.favoriteHeroGames
+                                               : 0.0;
+    }
+    result["favorite_hero"] = favoriteHero;
+
+    QVariantMap favoriteMap;
+    if (stats.favoriteMapId != 0) {
+        favoriteMap["id"] = stats.favoriteMapId;
+        favoriteMap["name"] = stats.favoriteMapName;
+        favoriteMap["img_path"] = stats.favoriteMapImgPath;
+        favoriteMap["games_played"] = stats.favoriteMapGames;
+    }
+    result["favorite_map"] = favoriteMap;
+    result["ok"] = true;
+    return result;
+}
+
+QString Core::getDefaultProfileId() const {
+    QSettings settings;
+    return settings.value(defaultProfileSettingsKey).toString();
+}
+
+QVariantMap Core::setDefaultProfileId(const QString& profileId) const {
+    const char op[] = "Core::setDefaultProfileId";
+    QVariantMap result{{"ok", false}, {"error", err::None}};
+
+    const QString trimmedId = profileId.trimmed();
+    if (trimmedId.isEmpty() || QUuid(trimmedId).isNull()) {
+        lwarn(op) << "invalid profile id: " << profileId;
+        result["error"] = err_profile::InvalidId;
+        return result;
+    }
+
+    QSettings settings;
+    settings.setValue(defaultProfileSettingsKey, trimmedId);
+    settings.sync();
+    if (settings.status() != QSettings::NoError) {
+        lerr(op) << "can't save default profile";
+        result["error"] = err::SettingsError;
+        return result;
+    }
+
+    result["ok"] = true;
+    return result;
+}
+
 QVariantMap Core::createProfile(const QString& name) const {
     const char op[] = "Core::createProfile";
     QVariantMap result;
@@ -322,7 +418,7 @@ QVariantMap Core::createProfile(const QString& name) const {
     return result;
 }
 
-QVariantMap Core::deleteProfile(quint64 id) const {
+QVariantMap Core::deleteProfile(const QString& id) const {
     const char op[] = "Core::deleteProfile";
     QVariantMap result;
     result["ok"] = false;
@@ -418,14 +514,14 @@ QVariantMap Core::createGameRecord(const QVariantMap& game) const {
     input.winningTeam = winningTeam;
 
     QSet<int> positions;
-    QSet<quint64> profileIds;
+    QSet<QString> profileIds;
     QVector<int> teamSizes(teamCount + 1, 0);
     for (const QVariant& participantValue : participants) {
         const QVariantMap participantMap = participantValue.toMap();
         models::GameRecordParticipantInput participant;
         participant.position = participantMap.value("position").toUInt();
         participant.team = participantMap.value("team").toUInt();
-        participant.profileId = participantMap.value("profile_id").toULongLong();
+        participant.profileId = participantMap.value("profile_id").toString().trimmed();
         participant.heroId = participantMap.value("hero_id").toULongLong();
         participant.heroRemainingHp = participantMap.value("hero_remaining_hp");
 
@@ -440,8 +536,8 @@ QVariantMap Core::createGameRecord(const QVariantMap& game) const {
             result["error"] = err_game::InvalidData;
             return result;
         }
-        if (participant.profileId == 0) {
-            lwarn(op) << "zero profileId in game participant data: " << participant;
+        if (participant.profileId.isEmpty() || QUuid(participant.profileId).isNull()) {
+            lwarn(op) << "invalid profileId in game participant data: " << participant;
             result["error"] = err_game::InvalidData;
             return result;
         }

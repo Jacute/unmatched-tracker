@@ -7,6 +7,7 @@ constexpr const char* EmptyName = "empty_name";
 constexpr const char* NameTooLong = "name_too_long";
 constexpr const char* DuplicateName = "duplicate_name";
 constexpr const char* NotFound = "not_found";
+constexpr const char* InvalidId = "invalid_id";
 } // namespace err_profile
 
 namespace err_game {
@@ -25,4 +26,5 @@ constexpr const char* WriteError = "write_error";
 namespace err {
 constexpr const char* None = "";
 constexpr const char* DbError = "db_error";
+constexpr const char* SettingsError = "settings_error";
 } // namespace err

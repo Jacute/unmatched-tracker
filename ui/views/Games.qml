@@ -386,7 +386,7 @@ Rectangle {
         let winningHpSpecified = false
         for (let i = 0; i < playerCount; i++) {
             const input = root.participantInputAt(i)
-            if (!input || input.profileId === 0) {
+            if (!input || input.profileId.length === 0) {
                 statusText.text = qsTr("Choose a profile for %1").arg(root.participantTitle(i))
                 return
             }

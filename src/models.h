@@ -49,15 +49,32 @@ struct Card {
 };
 
 struct PlayerProfile {
-    quint64 id;
+    QString id;
     QString name;
     QString createdAt;
+};
+
+struct ProfileStats {
+    quint64 gamesPlayed{};
+    quint64 gamesWon{};
+    QVariant averageWinningHp;
+
+    quint64 favoriteHeroId{};
+    QString favoriteHeroName;
+    QString favoriteHeroImgPath;
+    quint64 favoriteHeroGames{};
+    quint64 favoriteHeroWins{};
+
+    quint64 favoriteMapId{};
+    QString favoriteMapName;
+    QString favoriteMapImgPath;
+    quint64 favoriteMapGames{};
 };
 
 struct GameRecordParticipantInput {
     quint8 position;
     quint8 team;
-    quint64 profileId;
+    QString profileId;
     quint64 heroId;
     QVariant heroRemainingHp;
 };
@@ -75,7 +92,7 @@ inline QDebug operator<<(QDebug debug, const GameRecordParticipantInput& partici
 struct GameRecordParticipant {
     quint8 position;
     quint8 team;
-    quint64 profileId;
+    QString profileId;
     QString profileName;
     quint64 heroId;
     QString heroName;
