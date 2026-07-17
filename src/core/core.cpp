@@ -435,6 +435,10 @@ QVariantMap Core::deleteProfile(const QString& id) const {
         lerr(op) << "error profile not found: " << id;
         result["error"] = err_profile::NotFound;
         break;
+    case Rc::ErrReferenced:
+        lwarn(op) << "profile is used in game records: " << id;
+        result["error"] = err_profile::HasGameRecords;
+        break;
     default:
         result["error"] = err::DbError;
         break;

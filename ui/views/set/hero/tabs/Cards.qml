@@ -21,15 +21,16 @@ Item {
         CardGrid {
             model: root.currentCards
             width: view.availableWidth
-            columnSpacing: 15
-            rowSpacing: 5
+            columnSpacing: 0
+            rowSpacing: 0
             columns: 3
+            cellHeightRatio: 1.6
             labelPosition: "bottom"
-            pressedPopup: cardPopup
+            clickedPopup: cardPopup
 
             imgRadius: width / columns * 0.02
 
-            onModelLongPressed: (index) => {
+            onModelClicked: (index) => {
                 const card = root.currentCards[index]
                 if (!card) {
                     return

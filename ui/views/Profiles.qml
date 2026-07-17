@@ -134,7 +134,11 @@ Rectangle {
                     borderWidth: 0
                     txtColor: Common.textColor
 
-                    onClicked: root.deleteProfile(id)
+                    onClicked: {
+                        deleteConfirmPopup.profileId = id
+                        deleteConfirmPopup.profileName = name
+                        deleteConfirmPopup.open()
+                    }
                 }
             }
         }
@@ -148,6 +152,19 @@ Rectangle {
             font.pixelSize: Common.defaultFontSize
             horizontalAlignment: Text.AlignHCenter
         }
+    }
+
+    DeleteConfirmPopup {
+        property string profileId: ""
+        property string profileName: ""
+
+        id: deleteConfirmPopup
+        title: qsTr("Delete profile?")
+        message: profileName
+        fieldSpacing: root.itemSpacing
+        controlHeight: root.controlHeight
+
+        onConfirmed: root.deleteProfile(profileId)
     }
 
     ListModel {
@@ -200,6 +217,9 @@ Rectangle {
             switch (result.error) {
             case Common.profileErrNotFound:
                 statusText.text = qsTr("Profile has already been deleted")
+                break
+            case Common.profileErrHasGameRecords:
+                statusText.text = qsTr("Delete this profile's game records first")
                 break
             default:
                 statusText.text = qsTr("Could not delete profile")

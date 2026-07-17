@@ -200,94 +200,17 @@ Item {
         }
     }
 
-    Popup {
+    DeleteConfirmPopup {
         property string gameId: ""
         property string gameText: ""
 
         id: deleteConfirmPopup
-        modal: true
-        focus: true
-        closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
-        parent: Overlay.overlay
-        anchors.centerIn: parent
-        width: Math.min(root.width * 0.86, 360)
-        height: confirmContent.implicitHeight
-        padding: 0
+        title: qsTr("Delete game?")
+        message: gameText
+        fieldSpacing: root.fieldSpacing
+        controlHeight: root.controlHeight
 
-        background: Rectangle {
-            color: Common.secondary
-            radius: Common.defaultRadius
-            border.width: 1
-            border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
-        }
-
-        contentItem: ColumnLayout {
-            id: confirmContent
-            spacing: root.fieldSpacing * 1.2
-
-            Item {
-                Layout.fillWidth: true
-                Layout.preferredHeight: root.fieldSpacing
-            }
-
-            Text {
-                Layout.fillWidth: true
-                Layout.leftMargin: root.fieldSpacing * 1.8
-                Layout.rightMargin: root.fieldSpacing * 1.8
-                text: qsTr("Delete game?")
-                color: Common.textColor
-                font.pixelSize: Common.defaultFontSize * 1.12
-                font.bold: true
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WordWrap
-            }
-
-            Text {
-                Layout.fillWidth: true
-                Layout.leftMargin: root.fieldSpacing * 1.8
-                Layout.rightMargin: root.fieldSpacing * 1.8
-                text: deleteConfirmPopup.gameText
-                color: Common.textSecondary
-                font.pixelSize: Common.defaultFontSize * 0.9
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.WordWrap
-            }
-
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.leftMargin: root.fieldSpacing * 1.8
-                Layout.rightMargin: root.fieldSpacing * 1.8
-                Layout.bottomMargin: root.fieldSpacing * 1.8
-                spacing: root.fieldSpacing
-
-                Btn {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root.controlHeight * 0.82
-                    radius: Common.defaultRadius
-                    text: qsTr("Cancel")
-                    fontSize: Common.defaultFontSize
-
-                    onClicked: deleteConfirmPopup.close()
-                }
-
-                Btn {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: root.controlHeight * 0.82
-                    radius: Common.defaultRadius
-                    text: qsTr("Delete")
-                    fontSize: Common.defaultFontSize
-                    bgColor: Common.error
-                    bgColorPressed: Qt.lighter(Common.error, 1.15)
-                    borderWidth: 0
-
-                    onClicked: {
-                        const gameId = deleteConfirmPopup.gameId
-                        deleteConfirmPopup.close()
-                        root.deleteGame(gameId)
-                    }
-                }
-            }
-        }
+        onConfirmed: root.deleteGame(gameId)
     }
 
     ListModel {

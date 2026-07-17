@@ -10,6 +10,7 @@ Rectangle {
     property int fontSize: 14
     property string labelPosition: "top"
     property int imgRadius: 0
+    property Popup clickedPopup: null
     property Popup pressedPopup: null
 
     signal imgClicked()
@@ -74,6 +75,9 @@ Rectangle {
                         longPressTimer.stop()
                         console.debug("[Card] Short tap")
                         root.imgClicked()
+                        if (root.clickedPopup) {
+                            root.clickedPopup.open()
+                        }
                     }
                     img.scale = 1.0
                     img.isLongPressed = false
@@ -90,8 +94,8 @@ Rectangle {
                     running: false
                     onTriggered: {
                         img.isLongPressed = true
+                        root.imgLongPressed()
                         if (root.pressedPopup) {
-                            root.imgLongPressed()
                             root.pressedPopup.open()
                         }
                         img.scale = 1.0

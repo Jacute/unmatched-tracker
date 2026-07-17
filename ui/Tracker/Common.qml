@@ -61,6 +61,7 @@ QtObject {
     readonly property string profileErrNameTooLong: "name_too_long"
     readonly property string profileErrDuplicateName: "duplicate_name"
     readonly property string profileErrNotFound: "not_found"
+    readonly property string profileErrHasGameRecords: "has_game_records"
     readonly property string profileErrDbError: "db_error"
 
     // core game history errors

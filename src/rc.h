@@ -26,6 +26,7 @@ enum class Rc : uint16_t {
     ErrNetworkRequest = 16,
     ErrInvalidStatusCode = 17,
     ErrCreateFile = 18,
+    ErrReferenced = 19,
 };
 
 inline QString rc2str(Rc rc) {
@@ -68,6 +69,8 @@ inline QString rc2str(Rc rc) {
         return "invalid response status code";
     case Rc::ErrCreateFile:
         return "error create file";
+    case Rc::ErrReferenced:
+        return "error object is referenced";
     }
 
     return "error unknown";

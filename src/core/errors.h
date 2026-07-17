@@ -8,6 +8,7 @@ constexpr const char* NameTooLong = "name_too_long";
 constexpr const char* DuplicateName = "duplicate_name";
 constexpr const char* NotFound = "not_found";
 constexpr const char* InvalidId = "invalid_id";
+constexpr const char* HasGameRecords = "has_game_records";
 } // namespace err_profile
 
 namespace err_game {

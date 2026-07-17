@@ -407,8 +407,25 @@ Rc Database::createProfile(const QString& name) {
 Rc Database::deleteProfile(const QString& id) {
     const char op[] = "Database::deleteProfile";
 
-    QSqlQuery query;
-    bool ok = query.prepare("DELETE FROM player_profiles WHERE id = :id");
+    QSqlQuery referenceQuery(db);
+    bool ok = referenceQuery.prepare(
+        "SELECT 1 FROM game_record_participants WHERE profile_id = :id LIMIT 1");
+    if (!ok) {
+        lwarn(op) << "reference sql prepare error: " << referenceQuery.lastError().text();
+        return Rc::ErrPrepareQuery;
+    }
+
+    referenceQuery.bindValue(":id", id);
+    if (!referenceQuery.exec()) {
+        lwarn(op) << "reference sql exec error: " << referenceQuery.lastError().text();
+        return Rc::ErrExecQuery;
+    }
+    if (referenceQuery.next()) {
+        return Rc::ErrReferenced;
+    }
+
+    QSqlQuery query(db);
+    ok = query.prepare("DELETE FROM player_profiles WHERE id = :id");
     if (!ok) {
         lwarn(op) << "sql prepare error: " << query.lastError().text();
         return Rc::ErrPrepareQuery;
@@ -416,7 +433,12 @@ Rc Database::deleteProfile(const QString& id) {
 
     query.bindValue(":id", id);
     if (!query.exec()) {
-        lwarn(op) << "sql exec error: " << query.lastError().text();
+        const QSqlError error = query.lastError();
+        lwarn(op) << "sql exec error: " << error.text();
+        if (error.databaseText().contains("FOREIGN KEY constraint failed",
+                                          Qt::CaseInsensitive)) {
+            return Rc::ErrReferenced;
+        }
         return Rc::ErrExecQuery;
     }
     if (query.numRowsAffected() == 0) {

@@ -78,9 +78,10 @@ Rectangle {
                             anchors.fill: parent
                             source: modelData.path
                             visible: index === root.activeTabInd
+                            asynchronous: true
 
                             onLoaded: {
-                                console.debug("Hero subpage loaded: ", item)
+                                console.debug("Hero tab loaded: ", item)
                                 root.setLoadedSectionCtx(item, heroPage.modelData.id)
                             }
                         }

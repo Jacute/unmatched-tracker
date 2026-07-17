@@ -7,8 +7,10 @@ import Tracker
 Grid {
     property alias model: repeater.model
     property real imgRadius: 0
+    property real cellHeightRatio: 1.4
     property string labelPosition: "top"
     property Popup pressedPopup: null
+    property Popup clickedPopup: null
 
     signal modelClicked(int index)
     signal modelLongPressed(int index)
@@ -33,7 +35,7 @@ Grid {
             id: item
 
             width: root.cellWidth
-            height: width * 1.4
+            height: width * root.cellHeightRatio
 
             Card {
                 imgRadius: root.imgRadius
@@ -44,6 +46,7 @@ Grid {
                 fontSize: Common.defaultFontSize
                 labelPosition: root.labelPosition
                 pressedPopup: root.pressedPopup
+                clickedPopup: root.clickedPopup
 
                 onImgClicked: root.modelClicked(item.index)
                 onImgLongPressed: root.modelLongPressed(item.index)

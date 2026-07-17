@@ -35,6 +35,9 @@ Rectangle {
                 if (!root.pager) {
                     return
                 }
+                if (setModel.get(index).name == "Bruce Lee") {
+                    return // bruce lee set can't be open because set with ali contains him
+                }
 
                 root.pager.push(
                     "hero/Hero.qml", 

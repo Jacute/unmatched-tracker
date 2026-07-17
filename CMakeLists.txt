@@ -54,6 +54,7 @@ set(plain_qml_files
     ${QML_DIR}/components/FieldBox.qml
     ${QML_DIR}/components/ThemedComboBox.qml
     ${QML_DIR}/components/StatTile.qml
+    ${QML_DIR}/components/DeleteConfirmPopup.qml
     ${QML_DIR}/components/VS.qml
     ${QML_DIR}/components/GameMap.qml
     ${QML_DIR}/components/GameHistory.qml
