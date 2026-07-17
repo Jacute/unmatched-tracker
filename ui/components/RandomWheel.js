@@ -74,7 +74,7 @@ function draw(canvas, root) {
         ctx.textBaseline = "middle"
 
         ctx.fillStyle = String(root.sectorTextColor)
-        ctx.font = `bold ${Math.ceil(root.width * 0.03)}px sans-serif`
+        ctx.font = `bold ${Math.ceil(root.width * 0.05 - 0.0005 * heroes.length * root.width)}px sans-serif`
 
         ctx.fillText(heroes[i].name, radius * 0.6, 0)
 
@@ -87,7 +87,7 @@ function draw(canvas, root) {
         ctx.closePath()
 
         ctx.strokeStyle = String(root.sectorBorderColor)
-        ctx.lineWidth = 2
+        ctx.lineWidth = 1
         ctx.stroke()
     }
 }
