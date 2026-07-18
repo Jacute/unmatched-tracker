@@ -7,7 +7,8 @@
             ":/qt/qml/Tracker/src/migrations/003_add_cards.up.sql",
             ":/qt/qml/Tracker/src/migrations/004_add_profiles.up.sql",
             ":/qt/qml/Tracker/src/migrations/005_add_game_history.up.sql",
-            ":/qt/qml/Tracker/src/migrations/006_profiles_uuid.up.sql"
+            ":/qt/qml/Tracker/src/migrations/006_profiles_uuid.up.sql",
+            ":/qt/qml/Tracker/src/migrations/007_update_heroes_properties.up.sql"
         ]
     },
     "assets_base_url": "http://jacute.pro:56031",
