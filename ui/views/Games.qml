@@ -104,10 +104,12 @@ Rectangle {
                         selectionColor: Common.accent
                         selectedTextColor: Common.primary
                         font.pixelSize: Common.defaultFontSize
-                        padding: 0
                         inputMask: ""
+                        inputMethodHints: Qt.ImhDigitsOnly | Qt.ImhNoPredictiveText
                         background: null
                         verticalAlignment: TextInput.AlignVCenter
+                        padding: 0
+                        leftPadding: 0
 
                         onActiveFocusChanged: {
                             if (activeFocus) {
