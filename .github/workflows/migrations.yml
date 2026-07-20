@@ -1,0 +1,81 @@
+name: SQLite migrations
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-migrations:
+    name: Apply migrations to a clean database
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install SQLite tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes jq sqlite3
+
+      - name: Check migration list
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          find src/migrations \
+            -maxdepth 1 \
+            -type f \
+            -name '*.up.sql' \
+            -print \
+            | sort > "$RUNNER_TEMP/migration-files.txt"
+
+          jq -r '.db.migrations[]' src/config.json \
+            | sed 's#^:/qt/qml/Tracker/##' \
+            > "$RUNNER_TEMP/configured-migrations.txt"
+
+          diff --unified \
+            "$RUNNER_TEMP/migration-files.txt" \
+            "$RUNNER_TEMP/configured-migrations.txt"
+
+      - name: Apply migrations
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          database="$RUNNER_TEMP/migrations.db"
+
+          while IFS= read -r migration; do
+            echo "Applying $migration"
+            sqlite3 -batch -bail "$database" <<SQL
+          PRAGMA foreign_keys = ON;
+          BEGIN IMMEDIATE;
+          .read $migration
+          COMMIT;
+          SQL
+          done < "$RUNNER_TEMP/configured-migrations.txt"
+
+      - name: Verify database integrity
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          database="$RUNNER_TEMP/migrations.db"
+          foreign_key_errors="$(
+            sqlite3 -batch -bail "$database" \
+              'PRAGMA foreign_keys = ON; PRAGMA foreign_key_check;'
+          )"
+
+          if [[ -n "$foreign_key_errors" ]]; then
+            echo "$foreign_key_errors"
+            exit 1
+          fi
+
+          test "$(sqlite3 -batch -bail "$database" 'PRAGMA integrity_check;')" = "ok"
