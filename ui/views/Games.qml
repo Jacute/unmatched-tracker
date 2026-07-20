@@ -14,6 +14,8 @@ Rectangle {
     readonly property real controlHeight: Common.defaultFontSize * 3.8
     readonly property real fieldSpacing: height * 0.01
     property int participantRevision: 0
+    property bool formExpanded: false
+    property bool formExpansionInitialized: false
 
     ColumnLayout {
         anchors {
@@ -22,10 +24,105 @@ Rectangle {
         }
         spacing: root.fieldSpacing
 
-        ColumnLayout {
-            id: contentColumn
+        Button {
+            id: formToggle
+
             Layout.fillWidth: true
-            Layout.preferredHeight: contentColumn.implicitHeight
+            Layout.preferredHeight: Common.defaultFontSize * 2.8
+            leftPadding: 14
+            rightPadding: 14
+            topPadding: 0
+            bottomPadding: 0
+            hoverEnabled: true
+            Accessible.name: root.formExpanded
+                             ? qsTr("Collapse game form")
+                             : qsTr("Expand game form")
+
+            background: Rectangle {
+                color: formToggle.down
+                       ? Qt.lighter(Common.secondary, 1.1)
+                       : Common.secondary
+                radius: Common.defaultRadius
+                border.width: 1
+                border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
+
+                Behavior on color {
+                    ColorAnimation { duration: 120 }
+                }
+            }
+
+            contentItem: RowLayout {
+                spacing: 10
+
+                Text {
+                    Layout.fillWidth: true
+                    text: qsTr("Add game")
+                    color: Common.textColor
+                    font.pixelSize: Common.defaultFontSize
+                    font.bold: true
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                Text {
+                    text: root.selectedModeValue("name", "")
+                    color: Common.textSecondary
+                    font.pixelSize: Common.defaultFontSize * 0.86
+                    verticalAlignment: Text.AlignVCenter
+                }
+
+                Item {
+                    Layout.preferredWidth: 18
+                    Layout.preferredHeight: 18
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 12
+                        height: 2
+                        radius: 1
+                        color: Common.accent
+                    }
+
+                    Rectangle {
+                        anchors.centerIn: parent
+                        width: 2
+                        height: 12
+                        radius: 1
+                        color: Common.accent
+                        opacity: root.formExpanded ? 0 : 1
+
+                        Behavior on opacity {
+                            NumberAnimation { duration: 120 }
+                        }
+                    }
+                }
+            }
+
+            onClicked: root.formExpanded = !root.formExpanded
+        }
+
+        Item {
+            id: formContainer
+
+            Layout.fillWidth: true
+            implicitHeight: root.formExpanded ? contentColumn.implicitHeight : 0
+            opacity: root.formExpanded ? 1 : 0
+            enabled: root.formExpanded
+            clip: true
+
+            Behavior on implicitHeight {
+                NumberAnimation {
+                    duration: 180
+                    easing.type: Easing.OutCubic
+                }
+            }
+
+            Behavior on opacity {
+                NumberAnimation { duration: 120 }
+            }
+
+            ColumnLayout {
+            id: contentColumn
+            width: parent.width
             spacing: root.fieldSpacing
 
             FieldBox {
@@ -135,16 +232,17 @@ Rectangle {
                     onClicked: root.createGame()
                 }
             }
-        }
 
-        Text {
-            id: statusText
-            Layout.fillWidth: true
-            visible: text.length > 0
-            color: Common.warning
-            font.pixelSize: Common.defaultFontSize
-            horizontalAlignment: Text.AlignHCenter
-            wrapMode: Text.WordWrap
+                Text {
+                    id: statusText
+                    Layout.fillWidth: true
+                    visible: text.length > 0
+                    color: Common.warning
+                    font.pixelSize: Common.defaultFontSize
+                    horizontalAlignment: Text.AlignHCenter
+                    wrapMode: Text.WordWrap
+                }
+            }
         }
 
         GameHistory {
@@ -183,6 +281,10 @@ Rectangle {
         loadHeroes()
         loadMaps()
         gameHistory.reload()
+        if (!root.formExpansionInitialized) {
+            root.formExpanded = !gameHistory.hasGames
+            root.formExpansionInitialized = true
+        }
     }
 
     function sortAfterLoad(a, b) {
@@ -341,6 +443,7 @@ Rectangle {
     }
 
     function prefillFromRandomizer(hero1Id, hero2Id, mapId) {
+        root.formExpanded = true
         modeSelect.currentIndex = 0
         statusText.text = ""
         playedAtInput.text = ""
@@ -459,7 +562,9 @@ Rectangle {
         }
 
         clearFields()
+        root.formExpanded = false
         gameHistory.reload()
+        Qt.callLater(gameHistory.scrollToBeginning)
     }
 
     function clearFields() {

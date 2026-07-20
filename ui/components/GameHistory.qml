@@ -15,6 +15,7 @@ Item {
     property int pageOffset: 0
     property bool hasMore: false
     property bool loading: false
+    readonly property bool hasGames: historyModel.count > 0
 
     ColumnLayout {
         anchors.fill: parent
@@ -230,6 +231,12 @@ Item {
         root.pageOffset = 0
         root.hasMore = true
         root.loadNextPage()
+    }
+
+    function scrollToBeginning() {
+        if (historyModel.count > 0) {
+            historyList.positionViewAtBeginning()
+        }
     }
 
     function loadNextPage() {
