@@ -51,7 +51,7 @@ ApplicationWindow {
             case Common.pageHome:
                 return qsTr("Overview")
             case Common.pageSet:
-                return qsTr("Character Sets")
+                return setPage.headerText
             case Common.pageRandom:
                 return qsTr("Randomizer")
             case Common.pageProfiles:

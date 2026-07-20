@@ -40,7 +40,11 @@ The project is in an early stage of development.
 
 ## Screenshots
 
-![Unmatched Tracker profile overview and statistics](docs/overview.png)
+
+<p align="center">
+  <img src="docs/overview.png" width="45%" alt="Первое изображение">
+  <img src="docs/hero.png" width="45%" alt="Второе изображение">
+</p>
 
 ## Installation
 

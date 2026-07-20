@@ -11,6 +11,11 @@ Rectangle {
     required property int setId
     property int heroInd: 0
     property int activeTabInd: 0
+    readonly property string headerText: heroesModel.count > 0
+                                         && heroInd >= 0
+                                         && heroInd < heroesModel.count
+                                         ? heroesModel.get(heroInd).name
+                                         : ""
 
     id: root
     color: "transparent"
