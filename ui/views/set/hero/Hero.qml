@@ -82,7 +82,7 @@ Rectangle {
 
                             onLoaded: {
                                 console.debug("Hero tab loaded: ", item)
-                                root.setLoadedSectionCtx(item, heroPage.modelData.id)
+                                root.setLoadedSectionCtx(item, heroPage.modelData)
                             }
                         }
                     }
@@ -113,6 +113,7 @@ Rectangle {
 
     ListModel {
         id: heroesModel
+        dynamicRoles: true
     }
 
     onSetIdChanged: {
@@ -124,17 +125,27 @@ Rectangle {
             heroesModel.append({
                 id: backHeroes[i].id,
                 name: backHeroes[i].name,
-                img_path: backHeroes[i].img_path
+                hp: backHeroes[i].hp,
+                move: backHeroes[i].move,
+                img_path: backHeroes[i].img_path,
+                ability: backHeroes[i].ability,
+                attack_type: backHeroes[i].attack_type,
+                assistants: backHeroes[i].assistants
             })
         }
     }
 
-    function setLoadedSectionCtx(page, heroId) {
-        if (!page || typeof page.heroId === "undefined") {
+    function setLoadedSectionCtx(page, heroData) {
+        if (!page) {
             return
         }
 
-        page.heroId = heroId
+        if (typeof page.heroId !== "undefined") {
+            page.heroId = heroData.id
+        }
+        if (typeof page.heroData !== "undefined") {
+            page.heroData = heroData
+        }
     }
 
 }

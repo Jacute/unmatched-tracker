@@ -426,7 +426,7 @@ SET
     ability = 'At the start of your turn, activate one of your gadgets.' || char(10) ||
     'Whenever Jill Trent attacks, resolve the active gadget''s effect.' || char(10) || char(10) ||
     'Hypnoray Blaster' || char(10) ||
-    'DURING COMBAT: If your card's printed value is lower than your opponent's, reveal the top card of your opponent''s deck. Increase the value of your attack by the BOOST value of the revealed card.' || char(10) || char(10) ||
+    'DURING COMBAT: If your card''s printed value is lower than your opponent''s, reveal the top card of your opponent''s deck. Increase the value of your attack by the BOOST value of the revealed card.' || char(10) || char(10) ||
     'Ultrabiotic Tonic' || char(10) ||
     'AFTER COMBAT: If your card''s printed value is higher than your opponent''s, Jill Trent Recovers 1 health.',
     attack_type = 'm'
@@ -505,7 +505,7 @@ WHERE name = 'Hamlet';
 
 UPDATE heroes
 SET
-    ability = 'While all of your Red Riders are defeated, Eredin is ENRAGED. If Eredin is ENRAGED, add +1 to the value of your combat cards, and your move value is 3.'
+    ability = 'While all of your Red Riders are defeated, Eredin is ENRAGED. If Eredin is ENRAGED, add +1 to the value of your combat cards, and your move value is 3.',
     attack_type = 'm'
 WHERE name = 'Eredin';
 
@@ -516,7 +516,7 @@ WHERE name = 'Eredin';
 
 UPDATE heroes
 SET
-    ability = 'At the end of your turn, you may draw until you have a hand of 4 cards.'
+    ability = 'At the end of your turn, you may draw until you have a hand of 4 cards.',
     attack_type = 'r'
 WHERE name = 'Philippa';
 

@@ -74,6 +74,20 @@ static QVariantList mapHeroesQml(const QVector<models::Hero>& heroes) {
         obj["move"] = h.move;
         obj["img_path"] = std::move(h.imgPath);
         obj["set_id"] = h.setId;
+        obj["ability"] = h.ability;
+        obj["attack_type"] = h.attackType;
+
+        QVariantList assistants;
+        for (const auto& assistant : h.assistants) {
+            QVariantMap assistantObj;
+            assistantObj["id"] = assistant.id;
+            assistantObj["name"] = assistant.name;
+            assistantObj["count"] = assistant.count;
+            assistantObj["hp_per_one"] = assistant.hpPerOne;
+            assistantObj["attack_type"] = assistant.attackType;
+            assistants.append(std::move(assistantObj));
+        }
+        obj["assistants"] = assistants;
 
         list.append(std::move(obj));
     }

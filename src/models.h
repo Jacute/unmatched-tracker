@@ -17,6 +17,14 @@ struct GameSetShort {
     QDate releasedAt;
 };
 
+struct Assistant {
+    quint64 id;
+    QString name;
+    quint32 count;
+    quint32 hpPerOne;
+    QString attackType;
+};
+
 struct Hero {
     quint64 id;
     QString name;
@@ -24,6 +32,9 @@ struct Hero {
     quint8 move;
     QString imgPath;
     quint64 setId;
+    QString ability;
+    QString attackType;
+    QVector<Assistant> assistants;
 };
 
 struct GameMap {

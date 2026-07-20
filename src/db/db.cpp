@@ -62,27 +62,52 @@ ScopedDatabaseClose::~ScopedDatabaseClose() {
     }
 }
 
+static void readHeroes(QSqlQuery& query, QVector<models::Hero>& heroes) {
+    while (query.next()) {
+        const quint64 heroId = query.value(0).toULongLong();
+        if (heroes.isEmpty() || heroes.constLast().id != heroId) {
+            models::Hero hero;
+            hero.id = heroId;
+            hero.name = query.value(1).toString();
+            hero.hp = query.value(2).toUInt();
+            hero.move = query.value(3).toUInt();
+            hero.setId = query.value(4).toULongLong();
+            hero.imgPath = query.value(5).toString();
+            hero.ability = query.value(6).toString();
+            hero.attackType = query.value(7).toString();
+            heroes.append(std::move(hero));
+        }
+
+        if (!query.value(8).isNull()) {
+            models::Assistant assistant;
+            assistant.id = query.value(8).toULongLong();
+            assistant.name = query.value(9).toString();
+            assistant.count = query.value(10).toUInt();
+            assistant.hpPerOne = query.value(11).toUInt();
+            assistant.attackType = query.value(12).toString();
+            heroes.last().assistants.append(std::move(assistant));
+        }
+    }
+}
+
 Rc Database::getHeroes(QVector<models::Hero>& heroes) {
     const char op[] = "Database::getHeroes";
 
     QSqlQuery query;
 
-    bool ok = query.exec("SELECT id, name, hp, move, set_id, img_path FROM heroes");
+    bool ok = query.exec(
+        "SELECT h.id, h.name, h.hp, h.move, h.set_id, h.img_path, "
+        "h.ability, h.attack_type, "
+        "a.id, a.name, a.count, a.hp_per_one, a.attack_type "
+        "FROM heroes h "
+        "LEFT JOIN assistants a ON a.hero_id = h.id "
+        "ORDER BY h.id, a.id");
     if (!ok) {
         lwarn(op) << "sql error: " << query.lastError().text();
         return Rc::ErrExecQuery;
     }
 
-    while (query.next()) {
-        models::Hero hero;
-        hero.id = query.value(0).toULongLong();
-        hero.name = query.value(1).toString();
-        hero.hp = query.value(2).toUInt();
-        hero.move = query.value(3).toUInt();
-        hero.setId = query.value(4).toUInt();
-        hero.imgPath = query.value(5).toString();
-        heroes.append(std::move(hero));
-    }
+    readHeroes(query, heroes);
     return Rc::Ok;
 }
 
@@ -92,7 +117,13 @@ Rc Database::getHeroesBySetId(quint64 setId, QVector<models::Hero>& heroes) {
     QSqlQuery query;
 
     bool ok = query.prepare(
-        "SELECT id, name, hp, move, set_id, img_path FROM heroes WHERE set_id = :setId");
+        "SELECT h.id, h.name, h.hp, h.move, h.set_id, h.img_path, "
+        "h.ability, h.attack_type, "
+        "a.id, a.name, a.count, a.hp_per_one, a.attack_type "
+        "FROM heroes h "
+        "LEFT JOIN assistants a ON a.hero_id = h.id "
+        "WHERE h.set_id = :setId "
+        "ORDER BY h.id, a.id");
     if (!ok) {
         lwarn(op) << "sql prepare error: " << query.lastError().text();
         return Rc::ErrPrepareQuery;
@@ -103,16 +134,7 @@ Rc Database::getHeroesBySetId(quint64 setId, QVector<models::Hero>& heroes) {
         return Rc::ErrExecQuery;
     }
 
-    while (query.next()) {
-        models::Hero hero;
-        hero.id = query.value(0).toULongLong();
-        hero.name = query.value(1).toString();
-        hero.hp = query.value(2).toUInt();
-        hero.move = query.value(3).toUInt();
-        hero.setId = query.value(4).toUInt();
-        hero.imgPath = query.value(5).toString();
-        heroes.append(std::move(hero));
-    }
+    readHeroes(query, heroes);
     return Rc::Ok;
 }
 
