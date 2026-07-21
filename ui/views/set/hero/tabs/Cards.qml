@@ -69,7 +69,7 @@ Item {
                                 {
                                     label: qsTr("ATTACK"),
                                     value: root.attackTypeName(root.heroData.attack_type),
-                                    color: Common.accent
+                                    color: root.heroData.attack_type == 'r' ? Common.accent : Common.team2Color
                                 },
                                 {
                                     label: qsTr("MOVE"),
