@@ -186,7 +186,8 @@ Keep signing credentials outside the repository. Export them in the same shell
 that will run the build:
 
 ```bash
-export QT_ANDROID_KEYSTORE_PATH="/path/to/upload.keystore"
+# Replace this example with the absolute path to your existing keystore.
+export QT_ANDROID_KEYSTORE_PATH="$HOME/.android-keys/unmatched-tracker-upload.jks"
 export QT_ANDROID_KEYSTORE_ALIAS="upload"
 
 read -rsp "Keystore password: " QT_ANDROID_KEYSTORE_STORE_PASS
