@@ -70,6 +70,7 @@ jobs:
           target: android
           arch: ${{ env.QT_ARCH }}
           cache: true
+          modules: qtimageformats
           extra: "--autodesktop"
 
       - name: Configure debug build

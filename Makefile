@@ -19,6 +19,15 @@ check-signing:
 			printf 'Missing exported Android signing variables:%s\n' "$$missing"; \
 			exit 1; \
 		fi; \
+		if [ ! -f "$$QT_ANDROID_KEYSTORE_PATH" ]; then \
+			printf 'Android keystore does not exist: %s\n' "$$QT_ANDROID_KEYSTORE_PATH"; \
+			printf 'Set QT_ANDROID_KEYSTORE_PATH to the real keystore file path.\n'; \
+			exit 1; \
+		fi; \
+		if [ ! -r "$$QT_ANDROID_KEYSTORE_PATH" ]; then \
+			printf 'Android keystore is not readable: %s\n' "$$QT_ANDROID_KEYSTORE_PATH"; \
+			exit 1; \
+		fi; \
 	fi
 
 install:
