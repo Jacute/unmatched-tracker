@@ -92,6 +92,11 @@ qt_add_qml_module(${TARGET}
     RESOURCES ${rsc_files}
 )
 
+qt_import_plugins(${TARGET}
+    INCLUDE
+        Qt6::QWebpPlugin
+)
+
 set_target_properties(${TARGET} PROPERTIES
     MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
