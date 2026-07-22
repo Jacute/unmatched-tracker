@@ -708,6 +708,16 @@ QVariantMap Core::exportDb(const QUrl& to) const {
     return result;
 }
 
+QVariantMap Core::getBuildInfo() const {
+    return {
+        {"ok", true},
+        {"error", err::None},
+        {"version", QStringLiteral(APP_VERSION)},
+        {"commit", QStringLiteral(APP_COMMIT_HASH)},
+        {"build_type", QStringLiteral(APP_BUILD_TYPE)},
+    };
+}
+
 QVariantMap Core::saveRandomizerConfig(const QVariantList& heroes,
                                        const QVariantList& maps) const {
     const char op[] = "Core::saveRandomizerConfig";
