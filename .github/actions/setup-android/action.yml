@@ -1,0 +1,68 @@
+name: Set up Android build environment
+description: Install Java, Android SDK packages, and Qt for Android
+
+inputs:
+  qt-version:
+    description: Qt version to install
+    required: true
+  qt-arch:
+    description: Qt Android architecture package
+    required: true
+  qt-modules:
+    description: Additional Qt modules to install
+    required: false
+    default: qtimageformats
+  ndk-version:
+    description: Android NDK version to install
+    required: true
+  android-platform:
+    description: Android SDK platform package
+    required: false
+    default: android-36
+  build-tools-version:
+    description: Android SDK Build Tools version
+    required: false
+    default: 36.0.0
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: "17"
+
+    - name: Install system dependencies
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install --yes ninja-build
+
+    - name: Install Android SDK packages
+      shell: bash
+      env:
+        NDK_VERSION: ${{ inputs.ndk-version }}
+        ANDROID_PLATFORM: ${{ inputs.android-platform }}
+        BUILD_TOOLS_VERSION: ${{ inputs.build-tools-version }}
+      run: |
+        SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+
+        yes | "$SDKMANAGER" --licenses >/dev/null || true
+
+        "$SDKMANAGER" \
+          "platform-tools" \
+          "platforms;${ANDROID_PLATFORM}" \
+          "build-tools;${BUILD_TOOLS_VERSION}" \
+          "ndk;${NDK_VERSION}"
+
+    - name: Install Qt for Android
+      uses: jurplel/install-qt-action@v4
+      with:
+        version: ${{ inputs.qt-version }}
+        host: linux
+        target: android
+        arch: ${{ inputs.qt-arch }}
+        cache: true
+        modules: ${{ inputs.qt-modules }}
+        extra: "--autodesktop"
