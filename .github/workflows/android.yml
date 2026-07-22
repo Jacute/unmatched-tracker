@@ -38,40 +38,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - name: Set up Android build environment
+        uses: ./.github/actions/setup-android
         with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes ninja-build
-
-      - name: Install Android SDK packages
-        shell: bash
-        run: |
-          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
-
-          "$SDKMANAGER" \
-            "platform-tools" \
-            "platforms;android-36" \
-            "build-tools;36.0.0" \
-            "ndk;${NDK_VERSION}"
-
-      - name: Install Qt for Android
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: linux
-          target: android
-          arch: ${{ env.QT_ARCH }}
-          cache: true
-          modules: qtimageformats
-          extra: "--autodesktop"
+          qt-version: ${{ env.QT_VERSION }}
+          qt-arch: ${{ env.QT_ARCH }}
+          ndk-version: ${{ env.NDK_VERSION }}
 
       - name: Configure debug build
         env:
@@ -128,39 +100,12 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Java
-        uses: actions/setup-java@v4
+      - name: Set up Android build environment
+        uses: ./.github/actions/setup-android
         with:
-          distribution: temurin
-          java-version: "17"
-
-      - name: Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install --yes ninja-build
-
-      - name: Install Android SDK packages
-        shell: bash
-        run: |
-          SDKMANAGER="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
-
-          yes | "$SDKMANAGER" --licenses >/dev/null || true
-
-          "$SDKMANAGER" \
-            "platform-tools" \
-            "platforms;android-36" \
-            "build-tools;36.0.0" \
-            "ndk;${NDK_VERSION}"
-
-      - name: Install Qt for Android
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: linux
-          target: android
-          arch: ${{ env.QT_ARCH }}
-          cache: true
-          extra: "--autodesktop"
+          qt-version: ${{ env.QT_VERSION }}
+          qt-arch: ${{ env.QT_ARCH }}
+          ndk-version: ${{ env.NDK_VERSION }}
 
       - name: Restore signing keystore
         env:
