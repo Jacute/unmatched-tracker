@@ -60,6 +60,7 @@ jobs:
             -DANDROID_PLATFORM="$ANDROID_NATIVE_API" \
             -DQT_ANDROID_MIN_SDK_VERSION="$ANDROID_MIN_SDK_VERSION" \
             -DPACKAGE_NAME="$PACKAGE_NAME" \
+            -DBUILD_COMMIT_HASH="$GITHUB_SHA" \
             -DAPI_URL="$API_URL"
 
       - name: Build debug APK
@@ -141,6 +142,7 @@ jobs:
             -DANDROID_PLATFORM="$ANDROID_NATIVE_API" \
             -DQT_ANDROID_MIN_SDK_VERSION="$ANDROID_MIN_SDK_VERSION" \
             -DPACKAGE_NAME="$PACKAGE_NAME" \
+            -DBUILD_COMMIT_HASH="$GITHUB_SHA" \
             -DAPI_URL="$API_URL" \
             -DQT_ANDROID_SIGN_APK=ON \
             -DQT_ANDROID_SIGN_AAB=ON

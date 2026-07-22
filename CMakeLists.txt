@@ -7,6 +7,33 @@ set(SRC_DIR src)
 set(QML_DIR ui)
 set(ASSETS_DIR ${QML_DIR}/assets)
 
+set(BUILD_COMMIT_HASH "" CACHE STRING "Git commit used for the build")
+if(BUILD_COMMIT_HASH STREQUAL "")
+    find_package(Git QUIET)
+    if(Git_FOUND)
+        execute_process(
+            COMMAND "${GIT_EXECUTABLE}" rev-parse HEAD
+            WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}"
+            RESULT_VARIABLE GIT_REV_PARSE_RESULT
+            OUTPUT_VARIABLE DETECTED_COMMIT_HASH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+        if(GIT_REV_PARSE_RESULT EQUAL 0)
+            set(BUILD_COMMIT_HASH "${DETECTED_COMMIT_HASH}")
+        endif()
+    endif()
+endif()
+
+if(BUILD_COMMIT_HASH STREQUAL "")
+    set(BUILD_COMMIT_HASH "unknown")
+endif()
+
+set(APP_BUILD_TYPE "${CMAKE_BUILD_TYPE}")
+if(APP_BUILD_TYPE STREQUAL "")
+    set(APP_BUILD_TYPE "unknown")
+endif()
+
 find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Sql Network)
 
 qt_standard_project_setup()
@@ -123,6 +150,8 @@ target_compile_definitions(${TARGET} PRIVATE
     PACKAGE_NAME="${PACKAGE_NAME}"
     API_URL="${API_URL}"
     APP_VERSION="${PROJECT_VERSION}"
+    APP_COMMIT_HASH="${BUILD_COMMIT_HASH}"
+    APP_BUILD_TYPE="${APP_BUILD_TYPE}"
 )
 
 target_link_libraries(${TARGET}

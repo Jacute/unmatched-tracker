@@ -11,6 +11,7 @@ Rectangle {
     id: root
 
     property bool exportSucceeded: false
+    readonly property var buildInfo: core.getBuildInfo()
 
     color: Common.bgColor
 
@@ -86,6 +87,35 @@ Rectangle {
 
         Item {
             Layout.fillHeight: true
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            Layout.preferredHeight: 1
+            color: Common.secondary
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 2
+
+            Text {
+                Layout.fillWidth: true
+                text: qsTr("Version %1").arg(root.buildInfo.version)
+                color: Common.textSecondary
+                font.pixelSize: Common.defaultFontSize * 0.86
+                horizontalAlignment: Text.AlignHCenter
+            }
+
+            Text {
+                Layout.fillWidth: true
+                text: qsTr("Build: %1 (%2)")
+                    .arg(root.buildInfo.build_type)
+                    .arg(String(root.buildInfo.commit).slice(0, 8))
+                color: Common.textHint
+                font.pixelSize: Common.defaultFontSize * 0.75
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
     }
 

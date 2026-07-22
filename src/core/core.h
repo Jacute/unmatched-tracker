@@ -58,6 +58,9 @@ class Core : public QObject {
                                                  const QVariantList& maps) const;
     Q_INVOKABLE QVariantMap loadRandomizerConfig() const;
 
+    // @brief Get version and source revision used to build the application.
+    Q_INVOKABLE QVariantMap getBuildInfo() const;
+
   signals:
     // @brief Signal of successfully loaded image
     // @param[out] path Http path of file in REST api

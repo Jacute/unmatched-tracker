@@ -24,6 +24,8 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Platform information:**
+ - Version and build hash. You can see it on the settings page.
+ ![alt text](static/version_build_hash.png)
  - Android version
  - Model of smartphone
  - Screen resolution

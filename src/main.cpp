@@ -50,6 +50,7 @@ int main(int argc, char* argv[]) {
     QGuiApplication app(argc, argv);
     QCoreApplication::setOrganizationName("jacute");
     QCoreApplication::setApplicationName("Unmatched Tracker");
+    QCoreApplication::setApplicationVersion(QStringLiteral(APP_VERSION));
     QQmlApplicationEngine engine;
 
     Config cfg(cfgPath);
