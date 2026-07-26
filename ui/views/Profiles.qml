@@ -52,6 +52,8 @@ Rectangle {
                     verticalAlignment: TextInput.AlignVCenter
                     clip: true
                     background: null
+                    padding: 0
+                    leftPadding: 0
 
                     onAccepted: root.createProfile()
                 }
