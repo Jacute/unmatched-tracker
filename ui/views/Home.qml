@@ -9,12 +9,18 @@ import "../components"
 
 Rectangle {
     property var stats: ({})
+    property var pendingStats: ({})
     property string selectedProfileId: ""
+    property string pendingStatsError: ""
     property bool componentReady: false
+    property bool dashboardLoading: true
+    property bool statsLoading: false
+    property double statsLoadingStartedAt: 0
     readonly property bool hasProfiles: profilesModel.count > 0
     readonly property bool hasGames: stats.ok === true && Number(stats.games_played) > 0
     readonly property var favoriteHero: stats.favorite_hero || ({})
     readonly property var favoriteMap: stats.favorite_map || ({})
+    readonly property int minimumStatsLoadingDuration: 180
 
     signal openProfilesRequested()
 
@@ -72,7 +78,7 @@ Rectangle {
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            visible: !root.hasProfiles
+            visible: !root.dashboardLoading && !root.hasProfiles
 
             Column {
                 anchors.centerIn: parent
@@ -99,11 +105,26 @@ Rectangle {
             }
         }
 
+        Item {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            visible: root.dashboardLoading
+                || (root.hasProfiles && root.statsLoading)
+
+            LoadingSpinner {
+                anchors.centerIn: parent
+                width: Common.defaultFontSize * 3.2
+                height: width
+            }
+        }
+
         ScrollView {
             id: statsScroll
             Layout.fillWidth: true
             Layout.fillHeight: true
-            visible: root.hasProfiles
+            visible: !root.dashboardLoading
+                && root.hasProfiles
+                && !root.statsLoading
             clip: true
             contentWidth: availableWidth
             ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
@@ -304,6 +325,19 @@ Rectangle {
         id: profilesModel
     }
 
+    Timer {
+        id: statsLoadTimer
+        interval: 32
+        repeat: false
+        onTriggered: root.performLoadStats()
+    }
+
+    Timer {
+        id: statsCommitTimer
+        repeat: false
+        onTriggered: root.commitLoadedStats()
+    }
+
     Component.onCompleted: {
         componentReady = true
         if (visible) {
@@ -318,6 +352,7 @@ Rectangle {
     }
 
     function loadDashboard() {
+        dashboardLoading = true
         statusText.text = ""
         profilesModel.clear()
 
@@ -327,9 +362,13 @@ Rectangle {
         }
 
         if (profilesModel.count === 0) {
+            statsLoadTimer.stop()
+            statsCommitTimer.stop()
+            statsLoading = false
             selectedProfileId = ""
             stats = ({})
             profileSelector.currentIndex = -1
+            dashboardLoading = false
             return
         }
 
@@ -344,6 +383,7 @@ Rectangle {
 
         profileSelector.currentIndex = selectedIndex
         selectProfile(selectedIndex)
+        dashboardLoading = false
     }
 
     function selectProfile(index) {
@@ -362,18 +402,42 @@ Rectangle {
 
     function loadStats() {
         statusText.text = ""
+        statsLoadTimer.stop()
+        statsCommitTimer.stop()
+
         if (selectedProfileId.length === 0) {
+            statsLoading = false
             stats = ({})
             return
         }
 
+        statsLoading = true
+        statsLoadingStartedAt = Date.now()
+        statsLoadTimer.restart()
+    }
+
+    function performLoadStats() {
         const statsResult = core.getProfileStats(selectedProfileId, selectedModeCode())
         if (!statsResult.ok) {
-            stats = ({})
-            statusText.text = qsTr("Could not load profile statistics")
-            return
+            pendingStats = ({})
+            pendingStatsError = qsTr("Could not load profile statistics")
+        } else {
+            pendingStats = statsResult
+            pendingStatsError = ""
         }
-        stats = statsResult
+
+        const elapsed = Date.now() - statsLoadingStartedAt
+        statsCommitTimer.interval = Math.max(
+            0,
+            minimumStatsLoadingDuration - elapsed
+        )
+        statsCommitTimer.restart()
+    }
+
+    function commitLoadedStats() {
+        stats = pendingStats
+        statusText.text = pendingStatsError
+        statsLoading = false
     }
 
     function selectedModeCode() {
