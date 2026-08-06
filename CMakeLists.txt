@@ -66,6 +66,9 @@ set(plain_qml_files
     ${QML_DIR}/views/set/hero/tabs/CommonStat.qml
     ${QML_DIR}/views/set/hero/tabs/ProfileStat.qml
     ${QML_DIR}/views/set/hero/tabs/Matchups.qml
+    ${QML_DIR}/views/timer/Stack.qml
+    ${QML_DIR}/views/timer/Setup.qml
+    ${QML_DIR}/views/timer/TurnTimer.qml
     ${QML_DIR}/views/Random.qml
     ${QML_DIR}/views/Profiles.qml
     ${QML_DIR}/views/Games.qml
@@ -86,6 +89,8 @@ set(plain_qml_files
     ${QML_DIR}/components/GameMap.qml
     ${QML_DIR}/components/GameHistory.qml
     ${QML_DIR}/components/GameParticipantInput.qml
+    ${QML_DIR}/components/GameParticipantInputGroup.qml
+    ${QML_DIR}/components/GameModeComboBox.qml
     ${QML_DIR}/components/Notif.qml
     ${QML_DIR}/components/Btn.qml
     ${QML_DIR}/components/ImagePlaceholder.qml

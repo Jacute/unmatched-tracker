@@ -30,23 +30,14 @@ Rectangle {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: 14
+            margins: Common.pageMargin
         }
         spacing: 12
 
-        FieldBox {
+        GameModeComboBox {
+            id: gameMode
             Layout.fillWidth: true
             Layout.preferredHeight: 68
-            label: qsTr("Game mode")
-
-            ThemedComboBox {
-                id: gameModeSelector
-                anchors.fill: parent
-                model: gameModesModel
-                textRole: "name"
-
-                onActivated: root.loadStats()
-            }
         }
 
         FieldBox {
@@ -441,11 +432,11 @@ Rectangle {
     }
 
     function selectedModeCode() {
-        if (gameModeSelector.currentIndex < 0 ||
-                gameModeSelector.currentIndex >= gameModesModel.count) {
+        if (gameMode.currentIndex < 0 ||
+                gameMode.currentIndex >= gameModesModel.count) {
             return "1v1"
         }
-        return gameModesModel.get(gameModeSelector.currentIndex).code
+        return gameModesModel.get(gameMode.currentIndex).code
     }
 
     function formatPercent(value) {

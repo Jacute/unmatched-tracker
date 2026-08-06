@@ -1,6 +1,5 @@
 import QtCore
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Dialogs
 import QtQuick.Layouts
 
@@ -18,7 +17,7 @@ Rectangle {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: root.width * 0.05
+            margins: Common.pageMargin
         }
         spacing: Common.defaultFontSize
 

@@ -55,6 +55,7 @@ QtObject {
     readonly property string pageProfiles: "profiles"
     readonly property string pageGames: "games"
     readonly property string pageSettings: "settings"
+    readonly property string pageTimer: "timer"
 
     // core profile creation errors
     readonly property string profileErrEmptyName: "empty_name"
@@ -67,4 +68,13 @@ QtObject {
     // core game history errors
     readonly property string gameErrNotFound: "not_found"
     readonly property string gameErrDbError: "db_error"
+
+    readonly property ListModel gameModesModel: ListModel {
+        ListElement { code: "1v1"; name: "1 vs 1"; playerCount: 2; teamCount: 2 }
+        ListElement { code: "1v1v1"; name: "1 vs 1 vs 1"; playerCount: 3; teamCount: 3 }
+        ListElement { code: "1v1v1v1"; name: "1 vs 1 vs 1 vs 1"; playerCount: 4; teamCount: 4 }
+        ListElement { code: "2v2"; name: "2 vs 2"; playerCount: 4; teamCount: 2 }
+    }
+
+    readonly property real pageMargin: Screen.width * 0.04
 }

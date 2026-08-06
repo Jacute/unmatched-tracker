@@ -6,6 +6,7 @@ import QtQuick.Controls 2.15
 import Tracker
 import "./views"
 import "./views/set"
+import "./views/timer" as Timer
 import "./components"
 
 ApplicationWindow {
@@ -60,6 +61,8 @@ ApplicationWindow {
                 return qsTr("Game History")
             case Common.pageSettings:
                 return qsTr("Settings")
+            case Common.pageTimer:
+                return qsTr("Timer")
             default:
                 return qsTr("Unmatched Tracker")
             }
@@ -127,6 +130,12 @@ ApplicationWindow {
             id: settingsPage
             anchors.fill: parent
             visible: root.page === Common.pageSettings
+        }
+
+        Timer.Stack {
+            id: timer
+            anchors.fill: parent
+            visible: root.page === Common.pageTimer
         }
     }
 

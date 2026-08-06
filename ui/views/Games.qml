@@ -5,12 +5,12 @@ import QtQuick.Layouts
 
 import Tracker
 import "../components"
+import "../components/GameParticipant.js" as GameParticipant
 
 Rectangle {
     id: root
     color: Common.bgColor
 
-    readonly property real pageMargin: width * 0.04
     readonly property real controlHeight: Common.defaultFontSize * 3.8
     readonly property real fieldSpacing: height * 0.01
     property int participantRevision: 0
@@ -20,7 +20,7 @@ Rectangle {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: root.pageMargin
+            margins: Common.pageMargin
         }
         spacing: root.fieldSpacing
 
@@ -121,117 +121,103 @@ Rectangle {
             }
 
             ColumnLayout {
-            id: contentColumn
-            width: parent.width
-            spacing: root.fieldSpacing
+                id: contentColumn
+                width: parent.width
+                spacing: root.fieldSpacing
 
-            FieldBox {
-                Layout.fillWidth: true
-                label: qsTr("Game mode")
-
-                ThemedComboBox {
-                    id: modeSelect
-                    anchors.fill: parent
-                    model: gameModesModel
-                    textRole: "name"
-
-                    onActivated: root.changeGameMode()
+                GameModeComboBox {
+                    id: gameMode
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 68
                 }
-            }
 
-            Repeater {
-                id: participantRepeater
-                model: root.selectedPlayerCount()
-
-                GameParticipantInput {
-                    required property int index
-
+                GameParticipantInputGroup {
+                    id: participantGroup
+                    mode: root.selectedModeCode()
+                    playerCount: root.selectedPlayerCount()
                     Layout.fillWidth: true
                     Layout.preferredHeight: implicitHeight
-                    title: root.participantTitle(index)
-                    markerColor: root.teamColor(root.teamForParticipant(index))
-                    profileOptions: profilesModel
-                    heroOptions: heroesModel
+                    profiles: profilesModel
+                    heroes: heroesModel
 
-                    onProfileSelectionChanged: root.participantRevision++
+                    onProfileSelectionChanged: root.participantRevision++                 
                 }
-            }
 
-            RowLayout {
-                Layout.fillWidth: true
-                spacing: root.fieldSpacing
-
-                FieldBox {
+                RowLayout {
                     Layout.fillWidth: true
-                    label: qsTr("Map")
-                    ThemedComboBox {
-                        id: mapSelect
-                        anchors.fill: parent
-                        model: mapsInputModel
-                        textRole: "name"
+                    spacing: root.fieldSpacing
+
+                    FieldBox {
+                        Layout.fillWidth: true
+                        label: qsTr("Map")
+                        ThemedComboBox {
+                            id: mapSelect
+                            anchors.fill: parent
+                            model: mapsInputModel
+                            textRole: "name"
+                        }
                     }
-                }
 
-                FieldBox {
-                    Layout.fillWidth: true
-                    label: qsTr("Winner")
-                    ThemedComboBox {
-                        id: winner
-                        anchors.fill: parent
-                        model: root.winnerOptions()
-                    }
-                }
-            }
-
-            // Game date
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.preferredHeight: root.controlHeight
-                spacing: root.fieldSpacing
-
-                FieldBox {
-                    Layout.fillWidth: true
-                    label: qsTr("Played at")
-                    TextField {
-                        id: playedAtInput
-                        anchors.fill: parent
-                        color: Common.textColor
-                        placeholderText: activeFocus || text != "" ? "" : qsTr("DD-MM-YYYY")
-                        placeholderTextColor: Common.textHint
-                        selectionColor: Common.accent
-                        selectedTextColor: Common.primary
-                        font.pixelSize: Common.defaultFontSize
-                        inputMask: ""
-                        inputMethodHints: Qt.ImhDigitsOnly | Qt.ImhNoPredictiveText
-                        background: null
-                        verticalAlignment: TextInput.AlignVCenter
-                        padding: 0
-                        leftPadding: 0
-
-                        onActiveFocusChanged: {
-                            if (activeFocus) {
-                                inputMask = "00-00-0000;_"
-                                return
-                            }
-
-                            if (root.isMaskedDateEmpty(text)) {
-                                inputMask = ""
-                                text = ""
-                            }
+                    FieldBox {
+                        Layout.fillWidth: true
+                        label: qsTr("Winner")
+                        ThemedComboBox {
+                            id: winner
+                            anchors.fill: parent
+                            model: root.winnerOptions()
                         }
                     }
                 }
 
-                Btn {
-                    Layout.preferredWidth: root.width * 0.3
+                // Game date
+                RowLayout {
+                    Layout.fillWidth: true
                     Layout.preferredHeight: root.controlHeight
-                    Layout.alignment: Qt.AlignVCenter
-                    radius: Common.defaultRadius
-                    text: qsTr("Add game")
-                    fontSize: Common.defaultFontSize
-                    onClicked: root.createGame()
+                    spacing: root.fieldSpacing
+
+                    FieldBox {
+                        Layout.fillWidth: true
+                        label: qsTr("Played at")
+                        TextField {
+                            id: playedAtInput
+                            anchors.fill: parent
+                            color: Common.textColor
+                            placeholderText: activeFocus || text != "" ? "" : qsTr("DD-MM-YYYY")
+                            placeholderTextColor: Common.textHint
+                            selectionColor: Common.accent
+                            selectedTextColor: Common.primary
+                            font.pixelSize: Common.defaultFontSize
+                            inputMask: ""
+                            inputMethodHints: Qt.ImhDigitsOnly | Qt.ImhNoPredictiveText
+                            background: null
+                            verticalAlignment: TextInput.AlignVCenter
+                            padding: 0
+                            leftPadding: 0
+
+                            onActiveFocusChanged: {
+                                if (activeFocus) {
+                                    inputMask = "00-00-0000;_"
+                                    return
+                                }
+
+                                if (root.isMaskedDateEmpty(text)) {
+                                    inputMask = ""
+                                    text = ""
+                                }
+                            }
+                        }
+                    }
+
+                    Btn {
+                        Layout.preferredWidth: root.width * 0.3
+                        Layout.preferredHeight: root.controlHeight
+                        Layout.alignment: Qt.AlignVCenter
+                        radius: Common.defaultRadius
+                        text: qsTr("Add game")
+                        fontSize: Common.defaultFontSize
+                        onClicked: root.createGame()
+                    }
                 }
-            }
 
                 Text {
                     id: statusText
@@ -251,16 +237,15 @@ Rectangle {
             Layout.fillHeight: true
             fieldSpacing: root.fieldSpacing
             controlHeight: root.controlHeight
+            onLoadingChanged: {
+                if (!loading && !root.formExpansionInitialized) {
+                    root.formExpanded = !hasGames
+                    root.formExpansionInitialized = true
+                }
+            }
         }
     }
 
-    ListModel {
-        id: gameModesModel
-        ListElement { code: "1v1"; name: "1 vs 1"; playerCount: 2; teamCount: 2 }
-        ListElement { code: "1v1v1"; name: "1 vs 1 vs 1"; playerCount: 3; teamCount: 3 }
-        ListElement { code: "1v1v1v1"; name: "1 vs 1 vs 1 vs 1"; playerCount: 4; teamCount: 4 }
-        ListElement { code: "2v2"; name: "2 vs 2"; playerCount: 4; teamCount: 2 }
-    }
     ListModel { id: profilesModel }
     ListModel { id: heroesModel }
     ListModel { id: mapsInputModel }
@@ -281,10 +266,6 @@ Rectangle {
         loadHeroes()
         loadMaps()
         gameHistory.reload()
-        if (!root.formExpansionInitialized) {
-            root.formExpanded = !gameHistory.hasGames
-            root.formExpansionInitialized = true
-        }
     }
 
     function sortAfterLoad(a, b) {
@@ -351,10 +332,10 @@ Rectangle {
     }
 
     function selectedModeValue(role, fallback) {
-        if (modeSelect.currentIndex < 0 || modeSelect.currentIndex >= gameModesModel.count) {
+        if (gameMode.currentIndex < 0 || gameMode.currentIndex >= Common.gameModesModel.count) {
             return fallback
         }
-        return gameModesModel.get(modeSelect.currentIndex)[role]
+        return Common.gameModesModel.get(gameMode.currentIndex)[role]
     }
 
     function selectedModeCode() {
@@ -369,45 +350,17 @@ Rectangle {
         return root.selectedModeValue("teamCount", 2)
     }
 
-    function teamForParticipant(index) {
-        return root.selectedModeCode() === "2v2" ? index % 2 + 1 : index + 1
-    }
-
-    function participantTitle(index) {
-        if (root.selectedModeCode() === "2v2") {
-            return qsTr("P%1\nTeam %2")
-                .arg(Math.floor(index / 2) + 1)
-                .arg(root.teamForParticipant(index))
-        }
-        return qsTr("Player %1").arg(index + 1)
-    }
-
-    function teamColor(team) {
-        switch (team) {
-        case 1: return Common.team1Color
-        case 2: return Common.team2Color
-        case 3: return Common.team3Color
-        default: return Common.team4Color
-        }
-    }
-
-    function participantInputAt(index) {
-        return index >= 0 && index < participantRepeater.count
-            ? participantRepeater.itemAt(index)
-            : null
-    }
-
     function winnerOptions() {
         root.participantRevision
         const participants = []
         for (let i = 0; i < participantRepeater.count; i++) {
-            const input = root.participantInputAt(i)
+            const input = participantGroup.inputAt(i)
             if (!input || input.profileIndex < 0) {
                 return []
             }
             participants.push({
                 name: input.profileName,
-                team: root.teamForParticipant(i)
+                team: GameParticipant.teamForParticipant(i)
             })
         }
 
@@ -427,7 +380,7 @@ Rectangle {
 
     function clearParticipants() {
         for (let i = 0; i < participantRepeater.count; i++) {
-            const input = root.participantInputAt(i)
+            const input = participantGroup.inputAt(i)
             if (input) {
                 input.clear()
             }
@@ -444,7 +397,7 @@ Rectangle {
 
     function prefillFromRandomizer(hero1Id, hero2Id, mapId) {
         root.formExpanded = true
-        modeSelect.currentIndex = 0
+        gameMode.currentIndex = 0
         statusText.text = ""
         playedAtInput.text = ""
         winner.currentIndex = -1
@@ -452,8 +405,8 @@ Rectangle {
         Qt.callLater(function() {
             root.clearParticipants()
 
-            const player1 = root.participantInputAt(0)
-            const player2 = root.participantInputAt(1)
+            const player1 = participantGroup.inputAt(0)
+            const player2 = participantGroup.inputAt(1)
             if (player1) {
                 player1.selectHeroById(hero1Id)
             }
@@ -490,7 +443,7 @@ Rectangle {
         const winningTeam = winner.currentIndex + 1
         let winningHpSpecified = false
         for (let i = 0; i < playerCount; i++) {
-            const input = root.participantInputAt(i)
+            const input = participantGroup.inputAt(i)
             if (!input || input.profileId.length === 0) {
                 statusText.text = qsTr("Choose a profile for %1").arg(root.participantTitle(i))
                 return
@@ -511,7 +464,7 @@ Rectangle {
 
             const participant = {
                 position: i + 1,
-                team: root.teamForParticipant(i),
+                team: GameParticipant.teamForParticipant(i),
                 profile_id: input.profileId,
                 hero_id: input.heroId,
                 hero_remaining_hp: hp.specified ? hp.value : null

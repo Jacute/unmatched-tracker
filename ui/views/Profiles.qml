@@ -9,7 +9,6 @@ import "../components"
 Rectangle {
     id: root
     color: Common.bgColor
-    readonly property real pageMargin: width * 0.04
     readonly property real controlHeight: profileNameInput.font.pixelSize * 3
     readonly property real contentSpacing: height * 0.02
     readonly property real itemSpacing: controlHeight * 0.15
@@ -20,7 +19,7 @@ Rectangle {
     ColumnLayout {
         anchors {
             fill: parent
-            margins: root.pageMargin
+            margins: Common.pageMargin
         }
         spacing: root.contentSpacing
 

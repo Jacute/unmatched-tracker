@@ -68,6 +68,10 @@ Drawer {
                 {
                     text: qsTr("Settings"),
                     page: Common.pageSettings
+                },
+                {
+                    text: qsTr("Timer"),
+                    page: Common.pageTimer
                 }
             ]
 
