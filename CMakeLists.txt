@@ -98,6 +98,11 @@ set(plain_qml_files
     ${QML_DIR}/components/LoadImage.qml
     ${QML_DIR}/components/ico/MenuIco.qml
     ${QML_DIR}/components/ico/BackIco.qml
+    ${QML_DIR}/components/fields/TimeField.qml
+    ${QML_DIR}/components/timer/TimerHeroPane.qml
+    ${QML_DIR}/components/timer/TimerActionButton.qml
+    ${QML_DIR}/components/timer/TimerCenterPanel.qml
+    ${QML_DIR}/components/timer/TimerTargetPicker.qml
 )
 
 set(qml_singletons

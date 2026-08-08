@@ -77,4 +77,5 @@ QtObject {
     }
 
     readonly property real pageMargin: Screen.width * 0.04
+    readonly property real fieldSpacing: Screen.height * 0.01
 }

@@ -2,13 +2,13 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 
-import Tracker
 import "./GameParticipant.js" as GameParticipant
 
 Item {
     required property string mode
     required property int playerCount
 
+    property bool withHP: true
     property ListModel profiles: ListModel {}
     property ListModel heroes: ListModel {}
 
@@ -32,7 +32,8 @@ Item {
                 id: input
                 Layout.fillWidth: true
                 Layout.preferredHeight: implicitHeight
-                markerColor: root.teamColor(GameParticipant.teamForParticipant(index))
+                withHP: root.withHP
+                markerColor: GameParticipant.teamColor(GameParticipant.teamForParticipant(index))
                 title: GameParticipant.participantTitle(index)
                 profiles: root.profiles
                 heroes: root.heroes
@@ -45,14 +46,5 @@ Item {
         return index >= 0 && index < participantRepeater.count
             ? participantRepeater.itemAt(index)
             : null
-    }
-
-    function teamColor(team) {
-        switch (team) {
-        case 1: return Common.team1Color
-        case 2: return Common.team2Color
-        case 3: return Common.team3Color
-        default: return Common.team4Color
-        }
     }
 }

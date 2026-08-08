@@ -17,7 +17,13 @@ Rectangle {
         anchors.fill: parent
         background: null
 
-        initialItem: Setup {}
+        initialItem: Setup {
+            onStartRequested: (configuration) => {
+                stack.push(Qt.resolvedUrl("TurnTimer.qml"), {
+                    "configuration": configuration
+                })
+            }
+        }
     }
 
     function canPop() {

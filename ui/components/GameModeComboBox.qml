@@ -5,6 +5,7 @@ import Tracker
 
 FieldBox {
     property int activeGameMode: 0
+    readonly property string modeCode: Common.gameModesModel.get(activeGameMode).code
 
     id: root
     label: qsTr("Game mode")

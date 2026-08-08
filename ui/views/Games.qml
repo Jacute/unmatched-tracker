@@ -6,13 +6,13 @@ import QtQuick.Layouts
 import Tracker
 import "../components"
 import "../components/GameParticipant.js" as GameParticipant
+import "../core/client.js" as CoreClient
 
 Rectangle {
     id: root
     color: Common.bgColor
 
     readonly property real controlHeight: Common.defaultFontSize * 3.8
-    readonly property real fieldSpacing: height * 0.01
     property int participantRevision: 0
     property bool formExpanded: false
     property bool formExpansionInitialized: false
@@ -22,7 +22,7 @@ Rectangle {
             fill: parent
             margins: Common.pageMargin
         }
-        spacing: root.fieldSpacing
+        spacing: Common.fieldSpacing
 
         Button {
             id: formToggle
@@ -153,7 +153,7 @@ Rectangle {
                         ThemedComboBox {
                             id: mapSelect
                             anchors.fill: parent
-                            model: mapsInputModel
+                            model: mapsModel
                             textRole: "name"
                         }
                     }
@@ -248,7 +248,7 @@ Rectangle {
 
     ListModel { id: profilesModel }
     ListModel { id: heroesModel }
-    ListModel { id: mapsInputModel }
+    ListModel { id: mapsModel }
     Component.onCompleted: {
         if (visible) {
             loadData()
@@ -262,52 +262,10 @@ Rectangle {
     }
 
     function loadData() {
-        loadProfiles()
-        loadHeroes()
-        loadMaps()
+        CoreClient.loadProfiles(core, profilesModel)
+        CoreClient.loadHeroes(core, heroesModel)
+        CoreClient.loadMaps(core, mapsModel)
         gameHistory.reload()
-    }
-
-    function sortAfterLoad(a, b) {
-        return a.name.localeCompare(b.name)
-    }
-
-    function loadProfiles() {
-        profilesModel.clear()
-        const profiles = core.getProfiles()
-        profiles.sort(sortAfterLoad)
-        for (let i = 0; i < profiles.length; i++) {
-            profilesModel.append({
-                id: profiles[i].id,
-                name: profiles[i].name
-            })
-        }
-    }
-
-    function loadHeroes() {
-        heroesModel.clear()
-        const heroes = core.getHeroes()
-        heroes.sort(sortAfterLoad)
-        for (let i = 0; i < heroes.length; i++) {
-            heroesModel.append({
-                id: heroes[i].id,
-                name: heroes[i].name,
-                hp: heroes[i].hp
-            })
-        }
-    }
-
-    function loadMaps() {
-        mapsInputModel.clear()
-        mapsInputModel.append({ id: 0, name: qsTr("Not specified") })
-        const maps = core.getMaps()
-        maps.sort(sortAfterLoad)
-        for (let i = 0; i < maps.length; i++) {
-            mapsInputModel.append({
-                id: maps[i].id,
-                name: maps[i].name
-            })
-        }
     }
 
     function selectedId(model, index) {
@@ -413,7 +371,7 @@ Rectangle {
             if (player2) {
                 player2.selectHeroById(hero2Id)
             }
-            mapSelect.currentIndex = root.indexById(mapsInputModel, mapId)
+            mapSelect.currentIndex = root.indexById(mapsModel, mapId)
         })
     }
 
@@ -494,7 +452,7 @@ Rectangle {
             winning_team: winningTeam
         }
 
-        const mapId = root.optionalSelectedId(mapsInputModel, mapSelect.currentIndex)
+        const mapId = root.optionalSelectedId(mapsModel, mapSelect.currentIndex)
         if (mapId !== undefined) {
             payload.map_id = mapId
         }

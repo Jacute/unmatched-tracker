@@ -1,6 +1,9 @@
 BUILD_DIR := build
+APK := $(BUILD_DIR)/android-build/build/outputs/apk/debug/android-build-debug.apk
+RUNNER := $(BUILD_DIR)/tracker
+ADB ?= adb
 
-.PHONY: all build check-signing install clean
+.PHONY: all build check-signing install run clean
 
 all: build
 
@@ -30,8 +33,14 @@ check-signing:
 		fi; \
 	fi
 
-install:
-	adb install $(BUILD_DIR)/android-build/build/outputs/apk/debug/android-build-debug.apk
+install: build
+	@test -f "$(APK)" || { printf 'APK not found: %s\n' "$(APK)"; exit 1; }
+	$(ADB) install -r "$(APK)"
+
+run: build
+	@test -x "$(RUNNER)" || { printf 'Android runner not found: %s\n' "$(RUNNER)"; exit 1; }
+	@test -f "$(APK)" || { printf 'APK not found: %s\n' "$(APK)"; exit 1; }
+	"$(RUNNER)" --install --apk "$(abspath $(APK))"
 
 clean:
 	rm -rf $(BUILD_DIR)

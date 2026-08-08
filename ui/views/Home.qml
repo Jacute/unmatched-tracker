@@ -32,7 +32,7 @@ Rectangle {
             fill: parent
             margins: Common.pageMargin
         }
-        spacing: 12
+        spacing: Common.fieldSpacing
 
         GameModeComboBox {
             id: gameMode

@@ -5,12 +5,12 @@ import QtQuick.Layouts
 
 import Tracker
 import "../components"
+import "../core/client.js" as CoreClient
 
 Rectangle {
     id: root
     color: Common.bgColor
     readonly property real controlHeight: profileNameInput.font.pixelSize * 3
-    readonly property real contentSpacing: height * 0.02
     readonly property real itemSpacing: controlHeight * 0.15
     readonly property real fieldHPadding: controlHeight * 0.25
     readonly property real listHPadding: controlHeight * 0.3
@@ -21,7 +21,7 @@ Rectangle {
             fill: parent
             margins: Common.pageMargin
         }
-        spacing: root.contentSpacing
+        spacing: Common.fieldSpacing
 
         RowLayout {
             Layout.fillWidth: true
@@ -172,19 +172,7 @@ Rectangle {
         id: profilesModel
     }
 
-    Component.onCompleted: loadProfiles()
-
-    function loadProfiles() {
-        profilesModel.clear()
-        const profiles = core.getProfiles()
-        for (let i = 0; i < profiles.length; i++) {
-            profilesModel.append({
-                id: profiles[i].id,
-                name: profiles[i].name,
-                created_at: profiles[i].created_at
-            })
-        }
-    }
+    Component.onCompleted: CoreClient.loadProfiles(core, profilesModel)
 
     function createProfile() {
         const profileName = profileNameInput.text.trim()
@@ -209,7 +197,7 @@ Rectangle {
 
         profileNameInput.text = ""
         statusText.text = ""
-        loadProfiles()
+        CoreClient.loadProfiles()
     }
 
     function deleteProfile(profileId) {
@@ -226,11 +214,11 @@ Rectangle {
                 statusText.text = qsTr("Could not delete profile")
                 break
             }
-            loadProfiles()
+            CoreClient.loadProfiles()
             return
         }
 
         statusText.text = ""
-        loadProfiles()
+        CoreClient.loadProfiles()
     }
 }

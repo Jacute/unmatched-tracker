@@ -37,8 +37,10 @@ ApplicationWindow {
         onBtnClicked: {
             switch (btnIconType) {
             case "back":
-                if (setPage.canPop()) {
+                if (root.page === Common.pageSet && setPage.canPop()) {
                     setPage.pop()
+                } else if (root.page === Common.pageTimer && timer.canPop()) {
+                    timer.pop()
                 }
                 break
             case "menu":
@@ -70,6 +72,9 @@ ApplicationWindow {
 
         function getIconType() {
             if (root.page === Common.pageSet && setPage.canPop()) {
+                return "back"
+            }
+            if (root.page === Common.pageTimer && timer.canPop()) {
                 return "back"
             }
             return "menu"
@@ -161,6 +166,12 @@ ApplicationWindow {
         case Common.pageGames:
             break
         case Common.pageSettings:
+            break
+        case Common.pageTimer:
+            if (timer.canPop()) {
+                close.accepted = false
+                timer.pop()
+            }
             break
         }
     }
