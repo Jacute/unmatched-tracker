@@ -4,7 +4,8 @@ import "."
 import Tracker
 
 FieldBox {
-    property int activeGameMode: 0
+    property alias activeGameMode: modeSelect.currentIndex
+    readonly property int currentIndex: modeSelect.currentIndex
     readonly property string modeCode: Common.gameModesModel.get(activeGameMode).code
 
     id: root
@@ -15,9 +16,5 @@ FieldBox {
         anchors.fill: parent
         model: Common.gameModesModel
         textRole: "name"
-
-        onActivated: {
-            root.activeGameMode = currentIndex
-        }
     }
 }

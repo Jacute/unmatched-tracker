@@ -87,6 +87,7 @@ Rectangle {
                 popupWidth: width * 1.5
                 model: root.heroes
                 textRole: "name"
+                currentIndex: -1
 
                 onActivated: hpInput.text = ""
             }
