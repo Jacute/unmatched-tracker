@@ -65,7 +65,6 @@ Rectangle {
                 height: width
                 visible: root.phase === "turn"
                 iconSource: Common.imgPrefix + "/ui/timer/attack.webp"
-                toolTipText: qsTr("Attack")
 
                 onClicked: root.requestAttack()
             }
@@ -75,7 +74,6 @@ Rectangle {
                 height: width
                 visible: root.phase === "turn"
                 iconSource: Common.imgPrefix + "/ui/timer/turn.webp"
-                toolTipText: qsTr("End turn")
 
                 onClicked: root.endTurn()
             }
@@ -85,7 +83,6 @@ Rectangle {
                 height: width
                 visible: root.phase === "defense"
                 iconSource: Common.imgPrefix + "/ui/timer/defense.webp"
-                toolTipText: qsTr("Finish defense")
 
                 onClicked: root.finishDefense()
             }

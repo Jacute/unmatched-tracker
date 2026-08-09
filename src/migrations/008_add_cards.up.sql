@@ -2552,7 +2552,7 @@ VALUES
     '/img/set/hells_kitchen/heroes/elektra/cards/10.webp',
     (SELECT id FROM heroes WHERE name = 'Elektra'),
     4
-),
+)
 ON CONFLICT (hero_id, name) DO UPDATE SET
     count = excluded.count,
     card_type_id = excluded.card_type_id,
