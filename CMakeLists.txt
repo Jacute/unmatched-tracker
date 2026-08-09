@@ -41,7 +41,7 @@ if(APP_BUILD_TYPE STREQUAL "")
     set(APP_BUILD_TYPE "unknown")
 endif()
 
-find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Sql Network Multimedia)
+find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Sql Network)
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
@@ -184,7 +184,6 @@ target_link_libraries(${TARGET}
         Qt6::Quick
         Qt6::Sql
         Qt6::Network
-        Qt6::Multimedia
 )
 
 include(GNUInstallDirs)
