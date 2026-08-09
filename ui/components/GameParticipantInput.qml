@@ -7,17 +7,18 @@ import Tracker
 Rectangle {
     id: root
 
-    required property var profileOptions
-    required property var heroOptions
+    property ListModel profiles: ListModel {}
+    property ListModel heroes: ListModel {}
     property string title: ""
     property color markerColor: Common.accent
+    property bool withHP: true
     signal profileSelectionChanged
 
     readonly property int profileIndex: profileSelect.currentIndex
     readonly property int heroIndex: heroSelect.currentIndex
-    readonly property string profileId: root.modelStringId(profileOptions, profileIndex)
-    readonly property int heroId: root.modelId(heroOptions, heroIndex)
-    readonly property string profileName: root.modelName(profileOptions, profileIndex)
+    readonly property string profileId: root.modelStringId(profiles, profileIndex)
+    readonly property int heroId: root.modelId(heroes, heroIndex)
+    readonly property string profileName: root.modelName(profiles, profileIndex)
 
     implicitHeight: content.implicitHeight + Common.defaultFontSize * 0.8
     color: Common.secondary
@@ -62,12 +63,13 @@ Rectangle {
         FieldBox {
             Layout.fillWidth: true
             label: qsTr("Profile")
+            visible: root.profiles.count > 0
 
             ThemedComboBox {
                 id: profileSelect
                 anchors.fill: parent
                 popupWidth: width * 1.5
-                model: root.profileOptions
+                model: root.profiles
                 textRole: "name"
 
                 onCurrentIndexChanged: root.profileSelectionChanged()
@@ -77,13 +79,15 @@ Rectangle {
         FieldBox {
             Layout.fillWidth: true
             label: qsTr("Hero")
+            visible: root.heroes.count > 0
 
             ThemedComboBox {
                 id: heroSelect
                 anchors.fill: parent
                 popupWidth: width * 1.5
-                model: root.heroOptions
+                model: root.heroes
                 textRole: "name"
+                currentIndex: -1
 
                 onActivated: hpInput.text = ""
             }
@@ -92,6 +96,7 @@ Rectangle {
         FieldBox {
             Layout.preferredWidth: parent.width * 0.1
             label: qsTr("HP")
+            visible: root.withHP
 
             TextField {
                 id: hpInput
@@ -136,10 +141,10 @@ Rectangle {
     }
 
     function selectedHeroHp() {
-        if (heroIndex < 0 || heroIndex >= heroOptions.count) {
+        if (heroIndex < 0 || heroIndex >= heroes.count) {
             return 0
         }
-        return heroOptions.get(heroIndex).hp
+        return heroes.get(heroIndex).hp
     }
 
     function hpResult() {
@@ -166,8 +171,8 @@ Rectangle {
 
     function selectHeroById(heroId) {
         heroSelect.currentIndex = -1
-        for (let i = 0; i < heroOptions.count; ++i) {
-            if (heroOptions.get(i).id === heroId) {
+        for (let i = 0; i < heroes.count; ++i) {
+            if (heroes.get(i).id === heroId) {
                 heroSelect.currentIndex = i
                 break
             }

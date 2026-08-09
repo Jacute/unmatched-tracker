@@ -50,7 +50,7 @@ The project is in an early stage of development.
 
 ### System requirements
 
-- Android 13+
+- Android 9 (API 28) or newer
 
 ### Release APK
 
@@ -115,7 +115,7 @@ The versions below match the Android CI configuration:
 - Qt `6.11.0` with a desktop host installation and the Android `arm64-v8a` kit
 - CMake `3.16` or newer
 - Ninja
-- Java 17
+- Java 21
 - Android SDK command-line tools and platform tools
 - Android SDK platform 36 and build tools `36.0.0`
 - Android NDK `27.2.12479018`
@@ -149,7 +149,8 @@ Configure a clean debug build:
   -DANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
   -DANDROID_NDK_ROOT="$ANDROID_NDK_ROOT" \
   -DANDROID_ABI=arm64-v8a \
-  -DANDROID_PLATFORM=android-33 \
+  -DANDROID_PLATFORM=android-28 \
+  -DAPP_ANDROID_MIN_SDK_VERSION=28 \
   -DPACKAGE_NAME=com.jacute.unmatched_tracker \
   -DAPI_URL="${API_URL:-}"
 ```
@@ -211,7 +212,8 @@ the same CMake cache:
   -DANDROID_SDK_ROOT="$ANDROID_SDK_ROOT" \
   -DANDROID_NDK_ROOT="$ANDROID_NDK_ROOT" \
   -DANDROID_ABI=arm64-v8a \
-  -DANDROID_PLATFORM=android-33 \
+  -DANDROID_PLATFORM=android-28 \
+  -DAPP_ANDROID_MIN_SDK_VERSION=28 \
   -DPACKAGE_NAME=com.jacute.unmatched_tracker \
   -DAPI_URL="${API_URL:-}" \
   -DQT_ANDROID_SIGN_APK=ON \

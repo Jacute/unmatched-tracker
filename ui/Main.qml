@@ -6,6 +6,7 @@ import QtQuick.Controls 2.15
 import Tracker
 import "./views"
 import "./views/set"
+import "./views/timer" as Timer
 import "./components"
 
 ApplicationWindow {
@@ -22,6 +23,7 @@ ApplicationWindow {
         id: menu
         width: parent.width * 0.7
         height: parent.height
+        currentPage: root.page
 
         onChangePage: (pageName) => {
             root.page = pageName
@@ -36,8 +38,10 @@ ApplicationWindow {
         onBtnClicked: {
             switch (btnIconType) {
             case "back":
-                if (setPage.canPop()) {
+                if (root.page === Common.pageSet && setPage.canPop()) {
                     setPage.pop()
+                } else if (root.page === Common.pageTimer && timer.canPop()) {
+                    timer.pop()
                 }
                 break
             case "menu":
@@ -60,6 +64,8 @@ ApplicationWindow {
                 return qsTr("Game History")
             case Common.pageSettings:
                 return qsTr("Settings")
+            case Common.pageTimer:
+                return qsTr("Timer")
             default:
                 return qsTr("Unmatched Tracker")
             }
@@ -67,6 +73,9 @@ ApplicationWindow {
 
         function getIconType() {
             if (root.page === Common.pageSet && setPage.canPop()) {
+                return "back"
+            }
+            if (root.page === Common.pageTimer && timer.canPop()) {
                 return "back"
             }
             return "menu"
@@ -128,6 +137,12 @@ ApplicationWindow {
             anchors.fill: parent
             visible: root.page === Common.pageSettings
         }
+
+        Timer.Stack {
+            id: timer
+            anchors.fill: parent
+            visible: root.page === Common.pageTimer
+        }
     }
 
     onClosing: (close) => {
@@ -152,6 +167,12 @@ ApplicationWindow {
         case Common.pageGames:
             break
         case Common.pageSettings:
+            break
+        case Common.pageTimer:
+            if (timer.canPop()) {
+                close.accepted = false
+                timer.pop()
+            }
             break
         }
     }

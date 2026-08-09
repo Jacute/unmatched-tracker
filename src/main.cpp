@@ -1,5 +1,4 @@
 #include "api/api.h"
-#include "components/render/imagerounded.h"
 #include "config.h"
 #include "core/core.h"
 #include "core/db_exporter.h"
@@ -40,10 +39,6 @@ void loadResources(QGuiApplication& app) {
     }
 }
 
-void loadQMLComponents() {
-    qmlRegisterType<ImageRounded>("Render", 1, 0, "ImageRounded");
-}
-
 int main(int argc, char* argv[]) {
     const char op[] = "main";
 
@@ -56,7 +51,6 @@ int main(int argc, char* argv[]) {
     Config cfg(cfgPath);
 
     loadResources(app);
-    loadQMLComponents();
 
     QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(path);

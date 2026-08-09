@@ -1,7 +1,6 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 
 import Tracker
@@ -51,153 +50,176 @@ Item {
             wrapMode: Text.WordWrap
         }
 
-        ListView {
-            id: historyList
+        Item {
+            id: historyViewport
             Layout.fillWidth: true
             Layout.fillHeight: true
-            clip: true
-            model: historyModel
-            spacing: root.fieldSpacing
-            cacheBuffer: height * 0.6
 
-            onMovementEnded: {
-                if (contentY + height >= contentHeight - height * 0.5) {
-                    root.loadNextPage()
-                }
-            }
+            ListView {
+                id: historyList
+                anchors.fill: parent
+                clip: true
+                model: historyModel
+                spacing: root.fieldSpacing
+                cacheBuffer: height * 0.6
+                footer: Item {
+                    width: historyList.width
+                    height: root.loading
+                        ? root.controlHeight
+                        : 0
+                    visible: height > 0
 
-            delegate: Rectangle {
-                required property var modelData
-
-                id: game
-                readonly property var participants: modelData.participants
-
-                width: historyList.width
-                height: historyContent.implicitHeight + root.fieldSpacing * 2
-                color: Common.secondary
-                radius: Common.defaultRadius
-                border.width: 1
-                border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
-
-                Btn {
-                    id: deleteGameBtn
-                    anchors {
-                        top: parent.top
-                        right: parent.right
-                        topMargin: root.fieldSpacing
-                        rightMargin: root.fieldSpacing
-                    }
-                    width: root.controlHeight * 0.48
-                    height: width
-                    radius: width / 2
-                    text: "×"
-                    fontSize: height * 0.55
-                    bgColor: Common.error
-                    bgColorPressed: Qt.lighter(Common.error, 1.15)
-                    borderWidth: 0
-                    txtColor: Common.textColor
-
-                    onClicked: {
-                        deleteConfirmPopup.gameId = game.modelData.id
-                        deleteConfirmPopup.gameText = root.gameTitle(game.participants)
-                        deleteConfirmPopup.open()
+                    LoadingSpinner {
+                        anchors.centerIn: parent
+                        width: root.controlHeight * 0.62
+                        height: width
+                        running: parent.visible
                     }
                 }
 
-                ColumnLayout {
-                    id: historyContent
-                    anchors {
-                        left: parent.left
-                        right: deleteGameBtn.left
-                        verticalCenter: parent.verticalCenter
-                        margins: root.fieldSpacing
-                        rightMargin: root.fieldSpacing * 1.5
+                onContentYChanged: {
+                    if (moving
+                            && contentY + height >= contentHeight - height * 0.5) {
+                        console.debug("[GameHistory] load new page")
+                        root.loadNextPage()
                     }
-                    spacing: 3
+                }
 
-                    Text {
-                        Layout.fillWidth: true
-                        text: root.valueText(game.modelData.played_at, qsTr("Date not specified"))
-                        color: Common.textHint
-                        font.pixelSize: Common.defaultFontSize * 0.82
-                        elide: Text.ElideRight
-                    }
+                delegate: Rectangle {
+                    required property var modelData
 
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        spacing: 2
+                    id: game
+                    readonly property var participants: modelData.participants
 
-                        Repeater {
-                            model: root.participantCount(game.participants)
+                    width: historyList.width
+                    height: historyContent.implicitHeight + root.fieldSpacing * 2
+                    color: Common.secondary
+                    radius: Common.defaultRadius
+                    border.width: 1
+                    border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
 
-                            RowLayout {
-                                required property int index
-                                readonly property var participant: root.participantAt(
-                                                                       game.participants,
-                                                                       index)
+                    Btn {
+                        id: deleteGameBtn
+                        anchors {
+                            top: parent.top
+                            right: parent.right
+                            topMargin: root.fieldSpacing
+                            rightMargin: root.fieldSpacing
+                        }
+                        width: root.controlHeight * 0.48
+                        height: width
+                        radius: width / 2
+                        text: "×"
+                        fontSize: height * 0.55
+                        bgColor: Common.error
+                        bgColorPressed: Qt.lighter(Common.error, 1.15)
+                        borderWidth: 0
+                        txtColor: Common.textColor
 
-                                id: participantRow
-                                Layout.fillWidth: true
-                                spacing: 8
-
-                                Rectangle {
-                                    Layout.preferredWidth: Common.defaultFontSize * 2.35
-                                    Layout.preferredHeight: Common.defaultFontSize * 2.35
-                                    radius: Common.defaultRadius * 0.5
-                                    color: Common.imagePlaceholder
-                                    clip: true
-
-                                    LoadImage {
-                                        anchors.fill: parent
-                                        imgPath: root.participantValue(
-                                            participantRow.participant,
-                                            "hero_img_path",
-                                            ""
-                                        )
-                                        fillMode: Image.PreserveAspectCrop
-                                    }
-                                }
-
-                                Text {
-                                    Layout.fillWidth: true
-                                    text: root.participantLabel(
-                                        game.modelData.mode,
-                                        index,
-                                        participantRow.participant
-                                    )
-                                    color: Number(root.participantValue(participantRow.participant,
-                                                                        "team",
-                                                                        0))
-                                           === Number(game.modelData.winning_team)
-                                        ? Common.success
-                                        : Common.error
-                                    font.pixelSize: Common.defaultFontSize
-                                    font.bold: true
-                                    wrapMode: Text.WordWrap
-                                }
-                            }
+                        onClicked: {
+                            deleteConfirmPopup.gameId = game.modelData.id
+                            deleteConfirmPopup.gameText = root.gameTitle(game.participants)
+                            deleteConfirmPopup.open()
                         }
                     }
 
-                    Text {
-                        Layout.fillWidth: true
-                        text: root.metaText(game.modelData.map_name, game.participants)
-                        color: Common.textSecondary
-                        font.pixelSize: Common.defaultFontSize * 0.86
-                        wrapMode: Text.WordWrap
+                    ColumnLayout {
+                        id: historyContent
+                        anchors {
+                            left: parent.left
+                            right: deleteGameBtn.left
+                            verticalCenter: parent.verticalCenter
+                            margins: root.fieldSpacing
+                            rightMargin: root.fieldSpacing * 1.5
+                        }
+                        spacing: 3
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: root.valueText(game.modelData.played_at,
+                                                 qsTr("Date not specified"))
+                            color: Common.textHint
+                            font.pixelSize: Common.defaultFontSize * 0.82
+                            elide: Text.ElideRight
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 2
+
+                            Repeater {
+                                model: root.participantCount(game.participants)
+
+                                RowLayout {
+                                    required property int index
+                                    readonly property var participant: root.participantAt(
+                                                                           game.participants,
+                                                                           index)
+
+                                    id: participantRow
+                                    Layout.fillWidth: true
+                                    spacing: 8
+
+                                    Rectangle {
+                                        Layout.preferredWidth: Common.defaultFontSize * 2.35
+                                        Layout.preferredHeight: Common.defaultFontSize * 2.35
+                                        radius: Common.defaultRadius * 0.5
+                                        color: Common.imagePlaceholder
+                                        clip: true
+
+                                        LoadImage {
+                                            anchors.fill: parent
+                                            imgPath: root.participantValue(
+                                                participantRow.participant,
+                                                "hero_img_path",
+                                                ""
+                                            )
+                                            fillMode: Image.PreserveAspectCrop
+                                        }
+                                    }
+
+                                    Text {
+                                        Layout.fillWidth: true
+                                        text: root.participantLabel(
+                                            game.modelData.mode,
+                                            index,
+                                            participantRow.participant
+                                        )
+                                        color: Number(root.participantValue(
+                                                          participantRow.participant,
+                                                          "team",
+                                                          0))
+                                               === Number(game.modelData.winning_team)
+                                            ? Common.success
+                                            : Common.error
+                                        font.pixelSize: Common.defaultFontSize
+                                        font.bold: true
+                                        wrapMode: Text.WordWrap
+                                    }
+                                }
+                            }
+                        }
+
+                        Text {
+                            Layout.fillWidth: true
+                            text: root.metaText(game.modelData.map_name,
+                                                game.participants)
+                            color: Common.textSecondary
+                            font.pixelSize: Common.defaultFontSize * 0.86
+                            wrapMode: Text.WordWrap
+                        }
                     }
                 }
             }
-        }
 
-        Text {
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            visible: historyModel.count === 0 && !root.loading
-            text: qsTr("No games yet")
-            color: Common.textHint
-            font.pixelSize: Common.defaultFontSize
-            horizontalAlignment: Text.AlignHCenter
+            Text {
+                anchors.centerIn: parent
+                visible: historyModel.count === 0 && !root.loading
+                text: qsTr("No games yet")
+                color: Common.textHint
+                font.pixelSize: Common.defaultFontSize
+                horizontalAlignment: Text.AlignHCenter
+            }
         }
     }
 
@@ -225,6 +247,13 @@ Item {
         dynamicRoles: true
     }
 
+    Timer {
+        id: historyLoadTimer
+        interval: 32
+        repeat: false
+        onTriggered: root.performLoadNextPage()
+    }
+
     function reload() {
         statusText.text = ""
         historyModel.clear()
@@ -245,6 +274,10 @@ Item {
         }
 
         root.loading = true
+        historyLoadTimer.start()
+    }
+
+    function performLoadNextPage() {
         const history = core.getGameHistory(
             root.selectedSort(),
             root.pageSize,

@@ -3,15 +3,16 @@ import QtQuick
 import QtQuick.Controls
 
 import Tracker
+import "./menu" as MenuUi
 
 Drawer {
-    readonly property int fontSize: parent.height * 0.02
     readonly property string menuColor: "#2c3e50"
+    property string currentPage: ""
+
     signal changePage(string pageName)
 
     id: root
     edge: Qt.LeftEdge
-
     topPadding: 0
     bottomPadding: 0
     leftPadding: 0
@@ -32,98 +33,73 @@ Drawer {
         fillMode: Image.PreserveAspectFit
     }
 
-    Column {
+    Flickable {
+        id: navigationScroll
         anchors {
             top: menuLogo.bottom
             left: parent.left
             right: parent.right
             bottom: parent.bottom
-            leftMargin: parent.height * 0.01
-            rightMargin: parent.height * 0.01
+            leftMargin: Math.max(8, parent.height * 0.01)
+            rightMargin: Math.max(8, parent.height * 0.01)
+            bottomMargin: Math.max(8, parent.height * 0.01)
         }
+        contentWidth: width
+        contentHeight: navigation.implicitHeight
+        clip: true
+        boundsBehavior: Flickable.StopAtBounds
 
-        Repeater {
-            id: repeater
-            model: [
-                {
-                    text: qsTr("Overview"),
-                    page: Common.pageHome
-                },
-                {
-                    text: qsTr("Character Sets"),
-                    page: Common.pageSet
-                },
-                {
-                    text: qsTr("Randomizer"),
-                    page: Common.pageRandom
-                },
-                {
-                    text: qsTr("Player Profiles"),
-                    page: Common.pageProfiles
-                },
-                {
-                    text: qsTr("Game History"),
-                    page: Common.pageGames
-                },
-                {
-                    text: qsTr("Settings"),
-                    page: Common.pageSettings
-                }
-            ]
+        Column {
+            id: navigation
+            width: navigationScroll.width
+            spacing: 3
 
-            delegate: Rectangle {
-                required property var modelData
-                required property int index
+            Repeater {
+                model: [
+                    { text: qsTr("Overview"), page: Common.pageHome },
+                    { text: qsTr("Character Sets"), page: Common.pageSet },
+                    { text: qsTr("Player Profiles"), page: Common.pageProfiles },
+                    { text: qsTr("Game History"), page: Common.pageGames }
+                ]
 
-                id: btnWrapper
-                color: "transparent"
-                anchors {
-                    left: parent.left
-                    right: parent.right
-                }
-                height: parent.height * 0.11
-                
-                Button {
-                    id: selectBtn
-                    width: parent.width
-                    height: parent.height * 0.9
-                    anchors {
-                        top: parent.top
-                    }
+                delegate: MenuUi.MenuItem {
+                    required property var modelData
 
-                    background: Rectangle {
-                        color: selectBtn.down ? Qt.rgba(255, 255, 255, 0.1) : "transparent"
-                        radius: 10
+                    width: navigation.width
+                    text: modelData.text
+                    pageName: modelData.page
+                    selected: root.currentPage === pageName
 
-                        Behavior on color {
-                            ColorAnimation { duration: 200 }
-                        }
-                    }
-
-                    contentItem: Text {
-                        text: btnWrapper.modelData.text
-                        font.pixelSize: root.fontSize
-                        color: Common.textSecondary
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-
-                    onClicked: {
-                        root.changePage(btnWrapper.modelData.page);
-                    }
-                }
-
-                Rectangle {
-                    anchors {
-                        top: selectBtn.bottom
-                    }
-                    width: parent.width
-                    height: parent.height * 0.05
-                    color: Common.primary
-                    radius: 5
-                    visible: repeater.count - 1 != btnWrapper.index
+                    onClicked: root.changePage(pageName)
                 }
             }
+
+            MenuUi.MenuGroup {
+                width: navigation.width
+                title: qsTr("Tools")
+                currentPage: root.currentPage
+                entries: [
+                    { text: qsTr("Randomizer"), page: Common.pageRandom },
+                    { text: qsTr("Timer"), page: Common.pageTimer }
+                ]
+
+                onPageSelected: (pageName) => root.changePage(pageName)
+            }
+
+            MenuUi.MenuItem {
+                width: navigation.width
+                text: qsTr("Settings")
+                pageName: Common.pageSettings
+                selected: root.currentPage === pageName
+
+                onClicked: root.changePage(pageName)
+            }
+        }
+
+        ScrollBar.vertical: ScrollBar {
+            policy: navigationScroll.contentHeight > navigationScroll.height
+                ? ScrollBar.AsNeeded
+                : ScrollBar.AlwaysOff
         }
     }
 

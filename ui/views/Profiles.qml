@@ -5,53 +5,42 @@ import QtQuick.Layouts
 
 import Tracker
 import "../components"
+import "../core/client.js" as CoreClient
 
 Rectangle {
     id: root
     color: Common.bgColor
-    readonly property real pageMargin: width * 0.04
-    readonly property real controlHeight: profileNameInput.font.pixelSize * 3
-    readonly property real contentSpacing: height * 0.02
+    readonly property real controlHeight: Common.defaultFontSize * 3.8
     readonly property real itemSpacing: controlHeight * 0.15
-    readonly property real fieldHPadding: controlHeight * 0.25
     readonly property real listHPadding: controlHeight * 0.3
     readonly property real deleteButtonSize: controlHeight * 0.7
 
     ColumnLayout {
         anchors {
             fill: parent
-            margins: root.pageMargin
+            margins: Common.pageMargin
         }
-        spacing: root.contentSpacing
+        spacing: Common.fieldSpacing
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.preferredHeight: root.controlHeight
             spacing: root.itemSpacing
 
-            Rectangle {
+            FieldBox {
                 Layout.fillWidth: true
-                Layout.preferredHeight: root.controlHeight
-                color: Common.primary
-                radius: Common.defaultRadius
-                border.width: 1
-                border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
-
+                label: qsTr("Player name")
                 TextField {
                     id: profileNameInput
-                    anchors {
-                        fill: parent
-                        leftMargin: root.fieldHPadding
-                        rightMargin: root.fieldHPadding
-                    }
+                    anchors.fill: parent
                     color: Common.textColor
                     selectionColor: Common.accent
                     selectedTextColor: Common.primary
-                    placeholderText: qsTr("Player name")
-                    placeholderTextColor: Common.textHint
                     font.pixelSize: Common.defaultFontSize
                     verticalAlignment: TextInput.AlignVCenter
-                    clip: true
                     background: null
+                    padding: 0
+                    leftPadding: 0
 
                     onAccepted: root.createProfile()
                 }
@@ -110,7 +99,7 @@ Rectangle {
                         leftMargin: root.listHPadding
                         rightMargin: root.itemSpacing
                     }
-                    text: name
+                    text: parent.name
                     color: Common.textColor
                     font.pixelSize: Common.defaultFontSize
                     elide: Text.ElideRight
@@ -171,19 +160,7 @@ Rectangle {
         id: profilesModel
     }
 
-    Component.onCompleted: loadProfiles()
-
-    function loadProfiles() {
-        profilesModel.clear()
-        const profiles = core.getProfiles()
-        for (let i = 0; i < profiles.length; i++) {
-            profilesModel.append({
-                id: profiles[i].id,
-                name: profiles[i].name,
-                created_at: profiles[i].created_at
-            })
-        }
-    }
+    Component.onCompleted: CoreClient.loadProfiles(core, profilesModel)
 
     function createProfile() {
         const profileName = profileNameInput.text.trim()
@@ -208,7 +185,7 @@ Rectangle {
 
         profileNameInput.text = ""
         statusText.text = ""
-        loadProfiles()
+        CoreClient.loadProfiles(core, profilesModel)
     }
 
     function deleteProfile(profileId) {
@@ -225,11 +202,11 @@ Rectangle {
                 statusText.text = qsTr("Could not delete profile")
                 break
             }
-            loadProfiles()
+            CoreClient.loadProfiles(core, profilesModel)
             return
         }
 
         statusText.text = ""
-        loadProfiles()
+        CoreClient.loadProfiles(core, profilesModel)
     }
 }
