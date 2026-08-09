@@ -23,6 +23,7 @@ Rectangle {
     property int defenseIncrementMs: 0
     property bool turnIncrementCapped: false
     property bool defenseIncrementCapped: false
+    property bool activeTimedOut: false
     readonly property int participantCount: participantsModel.count
 
     id: root
@@ -63,7 +64,7 @@ Rectangle {
             TimerUi.TimerActionButton {
                 width: root.actionButtonSize(actionLayer.width, actionLayer.height)
                 height: width
-                visible: root.phase === "turn"
+                visible: root.phase === "turn" && !root.activeTimedOut
                 iconSource: Common.imgPrefix + "/ui/timer/attack.webp"
 
                 onClicked: root.requestAttack()
@@ -169,7 +170,8 @@ Rectangle {
                 team: participant.team,
                 mainRemainingMs: startMs,
                 turnBonusRemainingMs: 0,
-                defenseBonusRemainingMs: 0
+                defenseBonusRemainingMs: 0,
+                timedOut: false
             })
         }
 
@@ -187,7 +189,7 @@ Rectangle {
     }
 
     function settleClock() {
-        if (paused || activeIndex < 0 || lastTickMs <= 0) {
+        if (paused || activeIndex < 0 || lastTickMs <= 0 || activeTimedOut) {
             return
         }
 
@@ -202,8 +204,7 @@ Rectangle {
 
         // timer end
         if (currentRemainingMs <= 0) {
-            timerFinishedSound.play()
-            paused = true
+            markParticipantTimedOut(activeIndex)
         }
     }
 
@@ -213,9 +214,6 @@ Rectangle {
         }
 
         if (paused) {
-            if (currentRemainingMs <= 0) {
-                return
-            }
             lastTickMs = Date.now()
             paused = false
             return
@@ -226,7 +224,7 @@ Rectangle {
     }
 
     function requestAttack() {
-        if (paused || phase !== "turn") {
+        if (paused || phase !== "turn" || activeTimedOut) {
             return
         }
 
@@ -241,13 +239,14 @@ Rectangle {
     }
 
     function beginDefense(participantIndex) {
-        if (paused || phase !== "turn" || participantIndex < 0
+        if (paused || phase !== "turn" || participantTimedOut(turnOwnerIndex)
+                || participantIndex < 0
                 || participantIndex >= participantsModel.count) {
             return
         }
 
         settleClock()
-        if (paused) {
+        if (paused || participantTimedOut(turnOwnerIndex)) {
             return
         }
 
@@ -301,7 +300,8 @@ Rectangle {
 
     function activateParticipant(index) {
         activeIndex = index
-        currentRemainingMs = displayedRemainingAt(index)
+        activeTimedOut = participantTimedOut(index)
+        currentRemainingMs = activeTimedOut ? 0 : displayedRemainingAt(index)
         lastTickMs = Date.now()
     }
 
@@ -337,6 +337,10 @@ Rectangle {
         }
 
         const participant = participantsModel.get(index)
+        if (participant.timedOut) {
+            return 0
+        }
+
         let remaining = participant.mainRemainingMs
         if (phase === "turn" && turnIncrementCapped) {
             remaining += participant.turnBonusRemainingMs
@@ -348,6 +352,10 @@ Rectangle {
 
     function consumeTime(index, elapsed) {
         if (index < 0 || index >= participantsModel.count) {
+            return
+        }
+        if (participantTimedOut(index)) {
+            currentRemainingMs = 0
             return
         }
 
@@ -393,6 +401,10 @@ Rectangle {
     }
 
     function applyTurnIncrement(index) {
+        if (participantTimedOut(index)) {
+            return
+        }
+
         if (turnIncrementCapped) {
             participantsModel.setProperty(
                 index,
@@ -405,6 +417,10 @@ Rectangle {
     }
 
     function applyDefenseIncrement(index) {
+        if (participantTimedOut(index)) {
+            return
+        }
+
         if (defenseIncrementCapped) {
             participantsModel.setProperty(
                 index,
@@ -417,7 +433,8 @@ Rectangle {
     }
 
     function addToMainTime(index, value) {
-        if (index < 0 || index >= participantsModel.count) {
+        if (index < 0 || index >= participantsModel.count
+                || participantTimedOut(index)) {
             return
         }
 
@@ -427,6 +444,32 @@ Rectangle {
             "mainRemainingMs",
             participant.mainRemainingMs + value
         )
+    }
+
+    function participantTimedOut(index) {
+        if (index < 0 || index >= participantsModel.count) {
+            return false
+        }
+        return participantsModel.get(index).timedOut || false
+    }
+
+    function markParticipantTimedOut(index) {
+        if (index < 0 || index >= participantsModel.count
+                || participantTimedOut(index)) {
+            return
+        }
+
+        participantsModel.setProperty(index, "timedOut", true)
+        participantsModel.setProperty(index, "mainRemainingMs", 0)
+        participantsModel.setProperty(index, "turnBonusRemainingMs", 0)
+        participantsModel.setProperty(index, "defenseBonusRemainingMs", 0)
+
+        if (index === activeIndex) {
+            activeTimedOut = true
+            currentRemainingMs = 0
+        }
+
+        timerFinishedSound.play()
     }
 
     function activeHeroName() {
