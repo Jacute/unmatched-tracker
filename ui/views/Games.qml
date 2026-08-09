@@ -312,6 +312,8 @@ Rectangle {
     }
 
     function winnerOptions() {
+        // binding for winner field variants update
+        // if root.participantRevision var updates, winnerOptions will call
         root.participantRevision
         const participants = []
         for (let i = 0; i < participantGroup.playerCount; i++) {

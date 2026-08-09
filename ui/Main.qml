@@ -23,6 +23,7 @@ ApplicationWindow {
         id: menu
         width: parent.width * 0.7
         height: parent.height
+        currentPage: root.page
 
         onChangePage: (pageName) => {
             root.page = pageName

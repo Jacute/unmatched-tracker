@@ -10,9 +10,8 @@ import "../core/client.js" as CoreClient
 Rectangle {
     id: root
     color: Common.bgColor
-    readonly property real controlHeight: profileNameInput.font.pixelSize * 3
+    readonly property real controlHeight: Common.defaultFontSize * 3.8
     readonly property real itemSpacing: controlHeight * 0.15
-    readonly property real fieldHPadding: controlHeight * 0.25
     readonly property real listHPadding: controlHeight * 0.3
     readonly property real deleteButtonSize: controlHeight * 0.7
 
@@ -25,31 +24,20 @@ Rectangle {
 
         RowLayout {
             Layout.fillWidth: true
+            Layout.preferredHeight: root.controlHeight
             spacing: root.itemSpacing
 
-            Rectangle {
+            FieldBox {
                 Layout.fillWidth: true
-                Layout.preferredHeight: root.controlHeight
-                color: Common.primary
-                radius: Common.defaultRadius
-                border.width: 1
-                border.color: Qt.lighter(Common.secondary, Common.borderLightFactor)
-
+                label: qsTr("Player name")
                 TextField {
                     id: profileNameInput
-                    anchors {
-                        fill: parent
-                        leftMargin: root.fieldHPadding
-                        rightMargin: root.fieldHPadding
-                    }
+                    anchors.fill: parent
                     color: Common.textColor
                     selectionColor: Common.accent
                     selectedTextColor: Common.primary
-                    placeholderText: qsTr("Player name")
-                    placeholderTextColor: Common.textHint
                     font.pixelSize: Common.defaultFontSize
                     verticalAlignment: TextInput.AlignVCenter
-                    clip: true
                     background: null
                     padding: 0
                     leftPadding: 0
@@ -111,7 +99,7 @@ Rectangle {
                         leftMargin: root.listHPadding
                         rightMargin: root.itemSpacing
                     }
-                    text: name
+                    text: parent.name
                     color: Common.textColor
                     font.pixelSize: Common.defaultFontSize
                     elide: Text.ElideRight
@@ -197,7 +185,7 @@ Rectangle {
 
         profileNameInput.text = ""
         statusText.text = ""
-        CoreClient.loadProfiles()
+        CoreClient.loadProfiles(core, profilesModel)
     }
 
     function deleteProfile(profileId) {
@@ -214,11 +202,11 @@ Rectangle {
                 statusText.text = qsTr("Could not delete profile")
                 break
             }
-            CoreClient.loadProfiles()
+            CoreClient.loadProfiles(core, profilesModel)
             return
         }
 
         statusText.text = ""
-        CoreClient.loadProfiles()
+        CoreClient.loadProfiles(core, profilesModel)
     }
 }
