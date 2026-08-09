@@ -58,7 +58,7 @@ Rectangle {
                     id: startTime
                     Layout.fillWidth: true
                     label: qsTr("Start time")
-                    defaultTime: gameMode.modeCode === "2v2" ? "20:00" : "10:00"
+                    defaultTime: "10:00"
                 }
 
                 Fields.AdditionalTimeField {
@@ -66,7 +66,7 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: implicitHeight
                     label: qsTr("Additional time after turn")
-                    defaultTime: gameMode.modeCode === "2v2" ? "00:20" : "00:45"
+                    defaultTime: "00:45"
                 }
 
                 Fields.AdditionalTimeField {
