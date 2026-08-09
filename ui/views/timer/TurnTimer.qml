@@ -117,19 +117,21 @@ Rectangle {
     SoundEffect {
         id: attackSound
         source: Common.audioPrefix + "/timer/attack.wav"
-        volume: 0.9
     }
 
     SoundEffect {
         id: defenseSound
         source: Common.audioPrefix + "/timer/defense.wav"
-        volume: 0.9
     }
 
     SoundEffect {
         id: turnSound
         source: Common.audioPrefix + "/timer/turn.wav"
-        volume: 0.9
+    }
+
+    SoundEffect {
+        id: timerFinishedSound
+        source: Common.audioPrefix + "/timer/timer_finished.wav"
     }
 
     Timer {
@@ -200,7 +202,10 @@ Rectangle {
         }
 
         consumeTime(activeIndex, elapsed)
+
+        // timer end
         if (currentRemainingMs <= 0) {
+            timerFinishedSound.play()
             paused = true
         }
     }
