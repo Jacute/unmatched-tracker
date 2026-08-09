@@ -3,6 +3,7 @@ import QtQuick
 import QtQuick.Controls
 
 import Tracker
+import "." as MenuUi
 
 Item {
     property string title: ""
@@ -127,7 +128,7 @@ Item {
         Repeater {
             model: root.entries
 
-            delegate: MenuItem {
+            delegate: MenuUi.Item {
                 required property var modelData
 
                 width: entriesColumn.width
