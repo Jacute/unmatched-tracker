@@ -34,6 +34,7 @@ QtObject {
     // file path
     readonly property string assetsPrefix: "qrc:/qt/qml/Tracker/ui/assets"
     readonly property string imgPrefix: assetsPrefix + "/img"
+    readonly property string audioPrefix: assetsPrefix + "/audio"
     readonly property string setPrefix: imgPrefix + "/set"
 
     // %1 - set name, %2 - hero name

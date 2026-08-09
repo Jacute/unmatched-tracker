@@ -1,6 +1,7 @@
 pragma ComponentBehavior: Bound
 
 import QtQuick
+import QtMultimedia
 
 import Tracker
 import "../../components/timer" as TimerUi
@@ -20,10 +21,11 @@ Rectangle {
     property int currentRemainingMs: 0
     property int turnIncrementMs: 0
     property int defenseIncrementMs: 0
+    property bool turnIncrementCapped: false
+    property bool defenseIncrementCapped: false
     readonly property int participantCount: participantsModel.count
 
     id: root
-    anchors.fill: parent
     color: Common.bgColor
     clip: true
 
@@ -62,7 +64,7 @@ Rectangle {
                 width: root.actionButtonSize(actionLayer.width, actionLayer.height)
                 height: width
                 visible: root.phase === "turn"
-                iconSource: Common.imgPrefix + "/ui/timer/attack.png"
+                iconSource: Common.imgPrefix + "/ui/timer/attack.webp"
                 toolTipText: qsTr("Attack")
 
                 onClicked: root.requestAttack()
@@ -72,7 +74,7 @@ Rectangle {
                 width: root.actionButtonSize(actionLayer.width, actionLayer.height)
                 height: width
                 visible: root.phase === "turn"
-                iconSource: Common.imgPrefix + "/ui/timer/turn.png"
+                iconSource: Common.imgPrefix + "/ui/timer/turn.webp"
                 toolTipText: qsTr("End turn")
 
                 onClicked: root.endTurn()
@@ -82,7 +84,7 @@ Rectangle {
                 width: root.actionButtonSize(actionLayer.width, actionLayer.height)
                 height: width
                 visible: root.phase === "defense"
-                iconSource: Common.imgPrefix + "/ui/timer/defense.png"
+                iconSource: Common.imgPrefix + "/ui/timer/defense.webp"
                 toolTipText: qsTr("Finish defense")
 
                 onClicked: root.finishDefense()
@@ -112,6 +114,24 @@ Rectangle {
         }
     }
 
+    SoundEffect {
+        id: attackSound
+        source: Common.audioPrefix + "/timer/attack.wav"
+        volume: 0.9
+    }
+
+    SoundEffect {
+        id: defenseSound
+        source: Common.audioPrefix + "/timer/defense.wav"
+        volume: 0.9
+    }
+
+    SoundEffect {
+        id: turnSound
+        source: Common.audioPrefix + "/timer/turn.wav"
+        volume: 0.9
+    }
+
     Timer {
         interval: 100
         repeat: true
@@ -137,6 +157,8 @@ Rectangle {
         mode = configuration.mode || "1v1"
         turnIncrementMs = Math.max(0, configuration.turnIncrementSeconds || 0) * 1000
         defenseIncrementMs = Math.max(0, configuration.defenseIncrementSeconds || 0) * 1000
+        turnIncrementCapped = configuration.turnIncrementCapped || false
+        defenseIncrementCapped = configuration.defenseIncrementCapped || false
         const startMs = Math.max(0, configuration.startSeconds || 0) * 1000
 
         for (let i = 0; i < configuration.participants.length; ++i) {
@@ -146,7 +168,9 @@ Rectangle {
                 heroName: participant.heroName,
                 imgPath: participant.imgPath,
                 team: participant.team,
-                remainingMs: startMs
+                mainRemainingMs: startMs,
+                turnBonusRemainingMs: 0,
+                defenseBonusRemainingMs: 0
             })
         }
 
@@ -175,9 +199,8 @@ Rectangle {
             return
         }
 
-        const nextRemaining = Math.max(0, remainingAt(activeIndex) - elapsed)
-        setRemaining(activeIndex, nextRemaining)
-        if (nextRemaining <= 0) {
+        consumeTime(activeIndex, elapsed)
+        if (currentRemainingMs <= 0) {
             paused = true
         }
     }
@@ -188,7 +211,7 @@ Rectangle {
         }
 
         if (paused) {
-            if (remainingAt(activeIndex) <= 0) {
+            if (currentRemainingMs <= 0) {
                 return
             }
             lastTickMs = Date.now()
@@ -226,10 +249,11 @@ Rectangle {
             return
         }
 
-        addRemaining(participantIndex, defenseIncrementMs)
+        applyDefenseIncrement(participantIndex)
         phase = "defense"
         defenderIndex = participantIndex
         activateParticipant(defenderIndex)
+        attackSound.play()
     }
 
     function finishDefense() {
@@ -242,9 +266,13 @@ Rectangle {
             return
         }
 
+        if (defenseIncrementCapped) {
+            participantsModel.setProperty(defenderIndex, "defenseBonusRemainingMs", 0)
+        }
         phase = "turn"
         defenderIndex = -1
         activateParticipant(turnOwnerIndex)
+        defenseSound.play()
     }
 
     function endTurn() {
@@ -257,17 +285,18 @@ Rectangle {
             return
         }
 
-        addRemaining(turnOwnerIndex, turnIncrementMs)
+        applyTurnIncrement(turnOwnerIndex)
         turnOwnerIndex = (turnOwnerIndex + 1) % participantsModel.count
         turnNumber += 1
         defenderIndex = -1
         phase = "turn"
         activateParticipant(turnOwnerIndex)
+        turnSound.play()
     }
 
     function activateParticipant(index) {
         activeIndex = index
-        currentRemainingMs = remainingAt(index)
+        currentRemainingMs = displayedRemainingAt(index)
         lastTickMs = Date.now()
     }
 
@@ -297,27 +326,102 @@ Rectangle {
         return candidates
     }
 
-    function remainingAt(index) {
+    function displayedRemainingAt(index) {
         if (index < 0 || index >= participantsModel.count) {
             return 0
         }
-        return participantsModel.get(index).remainingMs
+
+        const participant = participantsModel.get(index)
+        let remaining = participant.mainRemainingMs
+        if (phase === "turn" && turnIncrementCapped) {
+            remaining += participant.turnBonusRemainingMs
+        } else if (phase === "defense" && defenseIncrementCapped) {
+            remaining += participant.defenseBonusRemainingMs
+        }
+        return remaining
     }
 
-    function setRemaining(index, value) {
+    function consumeTime(index, elapsed) {
         if (index < 0 || index >= participantsModel.count) {
             return
         }
 
-        const normalized = Math.max(0, Math.round(value))
-        participantsModel.setProperty(index, "remainingMs", normalized)
-        if (index === activeIndex) {
-            currentRemainingMs = normalized
+        let remainingElapsed = Math.max(0, elapsed)
+        if (phase === "turn" && turnIncrementCapped) {
+            remainingElapsed = consumeBonus(
+                index,
+                "turnBonusRemainingMs",
+                remainingElapsed
+            )
+        } else if (phase === "defense" && defenseIncrementCapped) {
+            remainingElapsed = consumeBonus(
+                index,
+                "defenseBonusRemainingMs",
+                remainingElapsed
+            )
+        }
+
+        if (remainingElapsed > 0) {
+            const mainRemaining = participantsModel.get(index).mainRemainingMs
+            participantsModel.setProperty(
+                index,
+                "mainRemainingMs",
+                Math.max(0, Math.round(mainRemaining - remainingElapsed))
+            )
+        }
+
+        currentRemainingMs = displayedRemainingAt(index)
+    }
+
+    function consumeBonus(index, role, elapsed) {
+        const participant = participantsModel.get(index)
+        const bonus = role === "turnBonusRemainingMs"
+            ? participant.turnBonusRemainingMs
+            : participant.defenseBonusRemainingMs
+        const consumed = Math.min(bonus, elapsed)
+        participantsModel.setProperty(
+            index,
+            role,
+            Math.max(0, Math.round(bonus - consumed))
+        )
+        return elapsed - consumed
+    }
+
+    function applyTurnIncrement(index) {
+        if (turnIncrementCapped) {
+            participantsModel.setProperty(
+                index,
+                "turnBonusRemainingMs",
+                turnIncrementMs
+            )
+        } else {
+            addToMainTime(index, turnIncrementMs)
         }
     }
 
-    function addRemaining(index, value) {
-        setRemaining(index, remainingAt(index) + value)
+    function applyDefenseIncrement(index) {
+        if (defenseIncrementCapped) {
+            participantsModel.setProperty(
+                index,
+                "defenseBonusRemainingMs",
+                defenseIncrementMs
+            )
+        } else {
+            addToMainTime(index, defenseIncrementMs)
+        }
+    }
+
+    function addToMainTime(index, value) {
+        if (index < 0 || index >= participantsModel.count) {
+            return
+        }
+
+        const participant = participantsModel.get(index)
+        participantsModel.setProperty(
+            index,
+            "mainRemainingMs",
+            participant.mainRemainingMs + value
+        )
     }
 
     function activeHeroName() {

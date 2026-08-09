@@ -2,9 +2,10 @@ import QtQuick
 import QtQuick.Controls
 
 import Tracker
+import "../image" as Img
 
 Button {
-    property string iconSource: ""
+    property url iconSource: ""
     property string toolTipText: ""
 
     id: root
@@ -13,27 +14,26 @@ Button {
     hoverEnabled: true
     padding: 0
 
-    background: null
-
-    contentItem: Rectangle {
+    background: Rectangle {
         radius: width / 2
         color: Common.primary
         clip: true
         border.width: 2
         border.color: root.down ? Common.accent : Common.textSecondary
 
-        Image {
+        Img.Rounded {
             anchors.fill: parent
-            source: root.iconSource
-            fillMode: Image.PreserveAspectCrop
-            mipmap: true
+            src: root.iconSource
         }
 
         Rectangle {
             anchors.fill: parent
+            radius: width / 2
             color: root.down ? "#30000000" : "transparent"
         }
     }
+
+    contentItem: Item {}
 
     scale: down ? 0.94 : 1.0
 

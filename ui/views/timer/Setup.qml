@@ -61,16 +61,18 @@ Rectangle {
                     defaultTime: gameMode.modeCode === "2v2" ? "20:00" : "10:00"
                 }
 
-                Fields.TimeField {
+                Fields.AdditionalTimeField {
                     id: turnIncrement
                     Layout.fillWidth: true
+                    Layout.preferredHeight: implicitHeight
                     label: qsTr("Additional time after turn")
                     defaultTime: gameMode.modeCode === "2v2" ? "00:20" : "00:45"
                 }
 
-                Fields.TimeField {
+                Fields.AdditionalTimeField {
                     id: defenseIncrement
                     Layout.fillWidth: true
+                    Layout.preferredHeight: implicitHeight
                     label: qsTr("Additional time after attack")
                     defaultTime: "00:00"
                 }
@@ -161,7 +163,9 @@ Rectangle {
             mode: mode.code,
             startSeconds: startSeconds,
             turnIncrementSeconds: turnIncrementSeconds,
+            turnIncrementCapped: turnIncrement.capped,
             defenseIncrementSeconds: defenseIncrementSeconds,
+            defenseIncrementCapped: defenseIncrement.capped,
             participants: participants
         })
     }

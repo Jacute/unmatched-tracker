@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 3.16)
 
+set(APP_ANDROID_MIN_SDK_VERSION "28" CACHE STRING
+    "Minimum Android API level supported by the application")
+if(NOT DEFINED ANDROID_PLATFORM)
+    set(ANDROID_PLATFORM "android-${APP_ANDROID_MIN_SDK_VERSION}" CACHE STRING
+        "Android API level used to compile native code")
+endif()
+
 project(unmatched-tracker VERSION 0.1.1 LANGUAGES CXX)
 
 set(TARGET tracker)
@@ -34,10 +41,11 @@ if(APP_BUILD_TYPE STREQUAL "")
     set(APP_BUILD_TYPE "unknown")
 endif()
 
-find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Sql Network)
+find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Sql Network Multimedia)
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
+qt_policy(SET QTP0002 NEW)
 qt_policy(SET QTP0004 NEW)
 
 qt_add_executable(${TARGET}
@@ -51,7 +59,6 @@ qt_add_executable(${TARGET}
     ${SRC_DIR}/core/db_exporter.cpp
     ${SRC_DIR}/files/filecache.cpp
     ${SRC_DIR}/files/provider.cpp
-    ${SRC_DIR}/components/render/imagerounded.cpp
 )
 
 set(plain_qml_files
@@ -96,13 +103,16 @@ set(plain_qml_files
     ${QML_DIR}/components/ImagePlaceholder.qml
     ${QML_DIR}/components/LoadingSpinner.qml
     ${QML_DIR}/components/LoadImage.qml
+    ${QML_DIR}/components/ThemedCheckBox.qml
     ${QML_DIR}/components/ico/MenuIco.qml
     ${QML_DIR}/components/ico/BackIco.qml
     ${QML_DIR}/components/fields/TimeField.qml
+    ${QML_DIR}/components/fields/AdditionalTimeField.qml
     ${QML_DIR}/components/timer/TimerHeroPane.qml
     ${QML_DIR}/components/timer/TimerActionButton.qml
     ${QML_DIR}/components/timer/TimerCenterPanel.qml
     ${QML_DIR}/components/timer/TimerTargetPicker.qml
+    ${QML_DIR}/components/image/Rounded.qml
 )
 
 set(qml_singletons
@@ -114,6 +124,7 @@ file(GLOB_RECURSE rsc_files CONFIGURE_DEPENDS RELATIVE ${CMAKE_CURRENT_SOURCE_DI
     "ui/assets/img/*.png"
     "ui/assets/img/*.webp"
     "ui/assets/fonts/*.ttf"
+    "ui/assets/audio/*.wav"
     "ui/*.js"
     "src/migrations/*.up.sql"
 )
@@ -152,6 +163,7 @@ if(ANDROID)
         QT_ANDROID_APP_NAME
             "Unmatched Tracker"
 
+        QT_ANDROID_MIN_SDK_VERSION "${APP_ANDROID_MIN_SDK_VERSION}"
         QT_ANDROID_PACKAGE_NAME "com.jacute.unmatched_tracker"
         QT_ANDROID_VERSION_NAME "${PROJECT_VERSION}"
         QT_ANDROID_VERSION_CODE "${ANDROID_VERSION_CODE}"
@@ -170,6 +182,7 @@ target_link_libraries(${TARGET}
         Qt6::Quick
         Qt6::Sql
         Qt6::Network
+        Qt6::Multimedia
 )
 
 include(GNUInstallDirs)

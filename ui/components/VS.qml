@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 
 import Tracker
-import Render
+import "./image" as Img
 
 Rectangle {
     id: root
@@ -28,7 +28,7 @@ Rectangle {
         anchors.centerIn: parent
         spacing: 18
 
-        ImageRounded {
+        Img.Rounded {
             id: hero1
             src: root.resolvedHero1AvatarUrl
             Layout.preferredWidth: 120
@@ -44,7 +44,7 @@ Rectangle {
             opacity: 0.9
         }
 
-        ImageRounded {
+        Img.Rounded {
             id: hero2
             src: root.resolvedHero2AvatarUrl
             Layout.preferredWidth: 120
