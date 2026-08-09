@@ -288,8 +288,11 @@ Rectangle {
         }
 
         applyTurnIncrement(turnOwnerIndex)
-        turnOwnerIndex = (turnOwnerIndex + 1) % participantsModel.count
-        turnNumber += 1
+        const nextTurnOwnerIndex = (turnOwnerIndex + 1) % participantsModel.count
+        if (nextTurnOwnerIndex === 0) {
+            turnNumber += 1
+        }
+        turnOwnerIndex = nextTurnOwnerIndex
         defenderIndex = -1
         phase = "turn"
         activateParticipant(turnOwnerIndex)
