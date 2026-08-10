@@ -11,7 +11,7 @@ inputs:
   qt-modules:
     description: Additional Qt modules to install
     required: false
-    default: qtimageformats
+    default: qtimageformats qtmultimedia
   ndk-version:
     description: Android NDK version to install
     required: true
