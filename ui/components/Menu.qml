@@ -62,7 +62,7 @@ Drawer {
                     { text: qsTr("Game History"), page: Common.pageGames }
                 ]
 
-                delegate: MenuUi.Item {
+                delegate: MenuUi.MenuItem {
                     required property var modelData
 
                     width: navigation.width
@@ -74,7 +74,7 @@ Drawer {
                 }
             }
 
-            MenuUi.Group {
+            MenuUi.MenuGroup {
                 width: navigation.width
                 title: qsTr("Tools")
                 currentPage: root.currentPage
@@ -86,7 +86,7 @@ Drawer {
                 onPageSelected: (pageName) => root.changePage(pageName)
             }
 
-            MenuUi.Item {
+            MenuUi.MenuItem {
                 width: navigation.width
                 text: qsTr("Settings")
                 pageName: Common.pageSettings

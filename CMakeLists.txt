@@ -85,8 +85,8 @@ set(plain_qml_files
     ${QML_DIR}/components/BigImagePopup.qml
     ${QML_DIR}/components/Header.qml
     ${QML_DIR}/components/Menu.qml
-    ${QML_DIR}/components/menu/Item.qml
-    ${QML_DIR}/components/menu/Group.qml
+    ${QML_DIR}/components/menu/MenuItem.qml
+    ${QML_DIR}/components/menu/MenuGroup.qml
     ${QML_DIR}/components/RandomWheel.qml
     ${QML_DIR}/components/RandomFilter.qml
     ${QML_DIR}/components/MultiSelectDropdown.qml
