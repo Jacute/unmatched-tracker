@@ -15,8 +15,8 @@ class KeepAwakeHelper : public QObject {
     KeepAwakeHelper(KeepAwakeHelper&&) = delete;
     KeepAwakeHelper& operator=(KeepAwakeHelper&&) = delete;
 
-    void enable() const;
-    void disable() const;
+    Q_INVOKABLE void enable() const;
+    Q_INVOKABLE void disable() const;
 
   private:
     void set(bool enabled) const;
