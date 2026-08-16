@@ -71,6 +71,7 @@ Rectangle {
                 popupWidth: width * 1.5
                 model: root.profiles
                 textRole: "name"
+                currentIndex: -1
 
                 onCurrentIndexChanged: root.profileSelectionChanged()
             }

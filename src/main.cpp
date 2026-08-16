@@ -2,6 +2,7 @@
 #include "config.h"
 #include "core/core.h"
 #include "core/db_exporter.h"
+#include "core/keep_awake_helper.h"
 #include "db/db.h"
 #include "files/filecache.h"
 #include "files/provider.h"
@@ -67,13 +68,16 @@ int main(int argc, char* argv[]) {
     FileCache cache;
     File fileProvider(cache, api);
 
-    Core core(db, dbExporter, &fileProvider);
-
     QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, [&op](const QUrl& url) {
         ldebug(op) << "object creation failed:" << url;
         QCoreApplication::exit(-1);
     });
+
+    Core core(db, dbExporter, &fileProvider);
+    KeepAwakeHelper keepAwakeHelper;
     engine.rootContext()->setContextProperty("core", &core);
+    engine.rootContext()->setContextProperty("keepAwakeHelper", &keepAwakeHelper);
+
     ldebug(op) << "Loading:" << mainQmlPath;
     engine.load(mainQmlPath);
 

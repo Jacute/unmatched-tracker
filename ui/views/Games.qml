@@ -130,7 +130,7 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 68
 
-                    onActiveGameModeChanged: root.changeGameMode()
+                    onCurrentIndexChanged: root.changeGameMode()
                 }
 
                 GameParticipantInputGroup {
@@ -292,11 +292,11 @@ Rectangle {
     }
 
     function selectedModeValue(role, fallback) {
-        if (gameMode.activeGameMode < 0
-                || gameMode.activeGameMode >= Common.gameModesModel.count) {
+        if (gameMode.currentIndex < 0
+                || gameMode.currentIndex >= Common.gameModesModel.count) {
             return fallback
         }
-        return Common.gameModesModel.get(gameMode.activeGameMode)[role]
+        return Common.gameModesModel.get(gameMode.currentIndex)[role]
     }
 
     function selectedModeCode() {
@@ -360,7 +360,7 @@ Rectangle {
 
     function prefillFromRandomizer(hero1Id, hero2Id, mapId) {
         root.formExpanded = true
-        gameMode.activeGameMode = 0
+        gameMode.currentIndex = 0
         statusText.text = ""
         playedAtInput.text = ""
         winner.currentIndex = -1

@@ -9,13 +9,10 @@ import "../components"
 
 Rectangle {
     property var stats: ({})
-    property var pendingStats: ({})
     property string selectedProfileId: ""
-    property string pendingStatsError: ""
     property bool componentReady: false
     property bool dashboardLoading: true
     property bool statsLoading: false
-    property double statsLoadingStartedAt: 0
     readonly property bool hasProfiles: profilesModel.count > 0
     readonly property bool hasGames: stats.ok === true && Number(stats.games_played) > 0
     readonly property var favoriteHero: stats.favorite_hero || ({})
@@ -38,6 +35,8 @@ Rectangle {
             id: gameMode
             Layout.fillWidth: true
             Layout.preferredHeight: 68
+
+            onCurrentIndexChanged: root.loadStats()
         }
 
         FieldBox {
@@ -305,28 +304,7 @@ Rectangle {
     }
 
     ListModel {
-        id: gameModesModel
-        ListElement { code: "1v1"; name: "1 vs 1" }
-        ListElement { code: "1v1v1"; name: "1 vs 1 vs 1" }
-        ListElement { code: "1v1v1v1"; name: "1 vs 1 vs 1 vs 1" }
-        ListElement { code: "2v2"; name: "2 vs 2" }
-    }
-
-    ListModel {
         id: profilesModel
-    }
-
-    Timer {
-        id: statsLoadTimer
-        interval: 32
-        repeat: false
-        onTriggered: root.performLoadStats()
-    }
-
-    Timer {
-        id: statsCommitTimer
-        repeat: false
-        onTriggered: root.commitLoadedStats()
     }
 
     Component.onCompleted: {
@@ -353,8 +331,6 @@ Rectangle {
         }
 
         if (profilesModel.count === 0) {
-            statsLoadTimer.stop()
-            statsCommitTimer.stop()
             statsLoading = false
             selectedProfileId = ""
             stats = ({})
@@ -393,8 +369,6 @@ Rectangle {
 
     function loadStats() {
         statusText.text = ""
-        statsLoadTimer.stop()
-        statsCommitTimer.stop()
 
         if (selectedProfileId.length === 0) {
             statsLoading = false
@@ -403,40 +377,15 @@ Rectangle {
         }
 
         statsLoading = true
-        statsLoadingStartedAt = Date.now()
-        statsLoadTimer.restart()
-    }
-
-    function performLoadStats() {
-        const statsResult = core.getProfileStats(selectedProfileId, selectedModeCode())
+        const statsResult = core.getProfileStats(selectedProfileId, gameMode.modeCode())
         if (!statsResult.ok) {
-            pendingStats = ({})
-            pendingStatsError = qsTr("Could not load profile statistics")
+            stats = ({})
+            statusText.text = qsTr("Could not load profile statistics")
         } else {
-            pendingStats = statsResult
-            pendingStatsError = ""
+            stats = statsResult
+            statusText.text = ""
         }
-
-        const elapsed = Date.now() - statsLoadingStartedAt
-        statsCommitTimer.interval = Math.max(
-            0,
-            minimumStatsLoadingDuration - elapsed
-        )
-        statsCommitTimer.restart()
-    }
-
-    function commitLoadedStats() {
-        stats = pendingStats
-        statusText.text = pendingStatsError
         statsLoading = false
-    }
-
-    function selectedModeCode() {
-        if (gameMode.currentIndex < 0 ||
-                gameMode.currentIndex >= gameModesModel.count) {
-            return "1v1"
-        }
-        return gameModesModel.get(gameMode.currentIndex).code
     }
 
     function formatPercent(value) {

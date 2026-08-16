@@ -41,7 +41,7 @@ if(APP_BUILD_TYPE STREQUAL "")
     set(APP_BUILD_TYPE "unknown")
 endif()
 
-find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Sql Network Multimedia)
+find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Sql Network Multimedia Core)
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
@@ -57,6 +57,7 @@ qt_add_executable(${TARGET}
     ${SRC_DIR}/db/migrator.cpp
     ${SRC_DIR}/core/core.cpp
     ${SRC_DIR}/core/db_exporter.cpp
+    ${SRC_DIR}/core/keep_awake_helper.cpp
     ${SRC_DIR}/files/filecache.cpp
     ${SRC_DIR}/files/provider.cpp
 )
@@ -185,6 +186,7 @@ target_link_libraries(${TARGET}
         Qt6::Sql
         Qt6::Network
         Qt6::Multimedia
+        Qt6::Core
 )
 
 include(GNUInstallDirs)
