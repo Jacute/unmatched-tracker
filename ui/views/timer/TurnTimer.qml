@@ -28,7 +28,6 @@ Rectangle {
     readonly property int participantCount: participantsModel.count
     readonly property bool keepAwakeRequired: visible && StackView.status === StackView.Active
 
-    Component.onDestruction: keepAwakeHelper.disable()
     onKeepAwakeRequiredChanged: {
         if (keepAwakeRequired) {
             keepAwakeHelper.enable()
@@ -159,7 +158,6 @@ Rectangle {
     Component.onCompleted: initialize()
 
     function initialize() {
-        keepAwakeHelper.enable()
         participantsModel.clear()
         if (!configuration || !configuration.participants) {
             paused = true
