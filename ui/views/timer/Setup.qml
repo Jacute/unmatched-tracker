@@ -40,7 +40,7 @@ Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 68
 
-                    onActiveGameModeChanged: root.validationMessage = ""
+                    onCurrentIndexChanged: root.validationMessage = ""
                 }
 
                 GameParticipantInputGroup {
@@ -49,8 +49,8 @@ Rectangle {
                     Layout.preferredHeight: implicitHeight
                     withHP: false
 
-                    mode: Common.gameModesModel.get(gameMode.activeGameMode).code
-                    playerCount: Common.gameModesModel.get(gameMode.activeGameMode).playerCount
+                    mode: Common.gameModesModel.get(gameMode.currentIndex).code
+                    playerCount: Common.gameModesModel.get(gameMode.currentIndex).playerCount
                     heroes: heroesModel
                 }
 
@@ -132,7 +132,7 @@ Rectangle {
     function startTimer() {
         validationMessage = ""
 
-        const mode = Common.gameModesModel.get(gameMode.activeGameMode)
+        const mode = Common.gameModesModel.get(gameMode.currentIndex)
         const participants = []
 
         for (let i = 0; i < mode.playerCount; ++i) {
