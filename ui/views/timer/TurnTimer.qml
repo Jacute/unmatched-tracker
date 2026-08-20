@@ -122,6 +122,19 @@ Rectangle {
         }
     }
 
+    Connections {
+        target: Application
+
+        function onStateChanged() {
+            if (Application.state == Qt.ApplicationHidden ||
+                Application.state == Qt.ApplicationSuspended
+            ) {
+                console.log("App closed. Stop timer.")
+                root.pause()
+            }
+        }
+    }
+
     SoundEffect {
         id: attackSound
         source: Common.audioPrefix + "/timer/attack.wav"
@@ -229,6 +242,10 @@ Rectangle {
             return
         }
 
+        pause()
+    }
+
+    function pause() {
         settleClock()
         paused = true
     }
