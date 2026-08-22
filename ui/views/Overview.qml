@@ -334,11 +334,7 @@ Rectangle {
 
         statusText.text = ""
         selectedProfileId = profilesModel.get(index).id
-        const saveResult = core.setDefaultProfileId(selectedProfileId)
         loadStats()
-        if (!saveResult.ok && statusText.text.length === 0) {
-            statusText.text = qsTr("Could not save the default profile")
-        }
     }
 
     function loadStats() {

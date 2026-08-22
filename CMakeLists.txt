@@ -65,7 +65,7 @@ qt_add_executable(${TARGET}
 
 set(plain_qml_files
     ${QML_DIR}/Main.qml
-    ${QML_DIR}/views/Home.qml
+    ${QML_DIR}/views/Overview.qml
     ${QML_DIR}/views/set/SetStack.qml
     ${QML_DIR}/views/set/Set.qml
     ${QML_DIR}/views/set/hero/Hero.qml
