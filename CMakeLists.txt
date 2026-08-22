@@ -54,6 +54,7 @@ qt_add_executable(${TARGET}
     ${SRC_DIR}/config.cpp
     ${SRC_DIR}/api/api.cpp
     ${SRC_DIR}/db/db.cpp
+    ${SRC_DIR}/db/statistics.cpp
     ${SRC_DIR}/db/migrator.cpp
     ${SRC_DIR}/core/core.cpp
     ${SRC_DIR}/core/db_exporter.cpp
@@ -86,6 +87,7 @@ set(plain_qml_files
     ${QML_DIR}/components/BigImagePopup.qml
     ${QML_DIR}/components/Header.qml
     ${QML_DIR}/components/Menu.qml
+    ${QML_DIR}/components/info/Tooltip.qml
     ${QML_DIR}/components/menu/MenuItem.qml
     ${QML_DIR}/components/menu/MenuGroup.qml
     ${QML_DIR}/components/RandomWheel.qml
@@ -93,7 +95,6 @@ set(plain_qml_files
     ${QML_DIR}/components/MultiSelectDropdown.qml
     ${QML_DIR}/components/FieldBox.qml
     ${QML_DIR}/components/ThemedComboBox.qml
-    ${QML_DIR}/components/StatTile.qml
     ${QML_DIR}/components/DeleteConfirmPopup.qml
     ${QML_DIR}/components/VS.qml
     ${QML_DIR}/components/GameMap.qml
@@ -116,6 +117,8 @@ set(plain_qml_files
     ${QML_DIR}/components/timer/TimerCenterPanel.qml
     ${QML_DIR}/components/timer/TimerTargetPicker.qml
     ${QML_DIR}/components/image/Rounded.qml
+    ${QML_DIR}/components/statistics/Tile.qml
+    ${QML_DIR}/components/statistics/SRow.qml
 )
 
 set(qml_singletons

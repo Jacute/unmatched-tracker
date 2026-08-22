@@ -6,6 +6,8 @@ import QtQuick.Layouts
 
 import Tracker
 import "../components"
+import "../components/statistics" as Stat
+import "../components/statistics/format.js" as Format
 
 Rectangle {
     property var stats: ({})
@@ -65,6 +67,7 @@ Rectangle {
             wrapMode: Text.WordWrap
         }
 
+        // no statistic placeholder
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -123,38 +126,9 @@ Rectangle {
                 width: statsScroll.availableWidth
                 spacing: 12
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    spacing: 8
-
-                    StatTile {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: implicitHeight
-                        title: qsTr("GAMES")
-                        value: root.hasGames ? String(root.stats.games_played) : "0"
-                        detail: qsTr("played")
-                        accentColor: Common.accent
-                    }
-
-                    StatTile {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: implicitHeight
-                        title: qsTr("WIN RATE")
-                        value: root.formatPercent(root.stats.win_percentage)
-                        detail: root.hasGames
-                                ? qsTr("%1 wins").arg(root.stats.games_won)
-                                : qsTr("no games")
-                        accentColor: Common.success
-                    }
-
-                    StatTile {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: implicitHeight
-                        title: qsTr("AVG HP IN WINS")
-                        value: root.formatAverageHp(root.stats.average_winning_hp)
-                        detail: qsTr("hero health")
-                        accentColor: Common.team3Color
-                    }
+                Stat.SRow {
+                    stats: root.stats
+                    hasGames: root.hasGames
                 }
 
                 Rectangle {
@@ -222,7 +196,7 @@ Rectangle {
                             visible: root.favoriteHero.name !== undefined
                             text: qsTr("%1 games  |  %2 win rate")
                                 .arg(root.favoriteHero.games_played || 0)
-                                .arg(root.formatPercent(root.favoriteHero.win_percentage))
+                                .arg(Format.percent(root.favoriteHero.win_percentage))
                             color: Common.textSecondary
                             font.pixelSize: 14
                             wrapMode: Text.WordWrap
@@ -386,18 +360,5 @@ Rectangle {
             statusText.text = ""
         }
         statsLoading = false
-    }
-
-    function formatPercent(value) {
-        const number = Number(value)
-        return (isNaN(number) ? 0 : number).toFixed(1) + "%"
-    }
-
-    function formatAverageHp(value) {
-        if (value === undefined || value === null || value === "") {
-            return "-"
-        }
-        const number = Number(value)
-        return isNaN(number) ? "-" : number.toFixed(1)
     }
 }

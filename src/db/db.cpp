@@ -95,13 +95,12 @@ Rc Database::getHeroes(QVector<models::Hero>& heroes) {
 
     QSqlQuery query;
 
-    bool ok = query.exec(
-        "SELECT h.id, h.name, h.hp, h.move, h.set_id, h.img_path, "
-        "h.ability, h.attack_type, "
-        "a.id, a.name, a.count, a.hp_per_one, a.attack_type "
-        "FROM heroes h "
-        "LEFT JOIN assistants a ON a.hero_id = h.id "
-        "ORDER BY h.id, a.id");
+    bool ok = query.exec("SELECT h.id, h.name, h.hp, h.move, h.set_id, h.img_path, "
+                         "h.ability, h.attack_type, "
+                         "a.id, a.name, a.count, a.hp_per_one, a.attack_type "
+                         "FROM heroes h "
+                         "LEFT JOIN assistants a ON a.hero_id = h.id "
+                         "ORDER BY h.id, a.id");
     if (!ok) {
         lwarn(op) << "sql error: " << query.lastError().text();
         return Rc::ErrExecQuery;
@@ -116,14 +115,13 @@ Rc Database::getHeroesBySetId(quint64 setId, QVector<models::Hero>& heroes) {
 
     QSqlQuery query;
 
-    bool ok = query.prepare(
-        "SELECT h.id, h.name, h.hp, h.move, h.set_id, h.img_path, "
-        "h.ability, h.attack_type, "
-        "a.id, a.name, a.count, a.hp_per_one, a.attack_type "
-        "FROM heroes h "
-        "LEFT JOIN assistants a ON a.hero_id = h.id "
-        "WHERE h.set_id = :setId "
-        "ORDER BY h.id, a.id");
+    bool ok = query.prepare("SELECT h.id, h.name, h.hp, h.move, h.set_id, h.img_path, "
+                            "h.ability, h.attack_type, "
+                            "a.id, a.name, a.count, a.hp_per_one, a.attack_type "
+                            "FROM heroes h "
+                            "LEFT JOIN assistants a ON a.hero_id = h.id "
+                            "WHERE h.set_id = :setId "
+                            "ORDER BY h.id, a.id");
     if (!ok) {
         lwarn(op) << "sql prepare error: " << query.lastError().text();
         return Rc::ErrPrepareQuery;
@@ -304,104 +302,6 @@ Rc Database::getProfiles(QVector<models::PlayerProfile>& profiles) {
     return Rc::Ok;
 }
 
-Rc Database::getProfileStats(const QString& profileId,
-                             const QString& gameMode,
-                             models::ProfileStats& stats) {
-    const char op[] = "Database::getProfileStats";
-
-    QSqlQuery profileQuery(db);
-    if (!profileQuery.prepare("SELECT 1 FROM player_profiles WHERE id = :profile_id")) {
-        lwarn(op) << "profile sql prepare error: " << profileQuery.lastError().text();
-        return Rc::ErrPrepareQuery;
-    }
-    profileQuery.bindValue(":profile_id", profileId);
-    if (!profileQuery.exec()) {
-        lwarn(op) << "profile sql exec error: " << profileQuery.lastError().text();
-        return Rc::ErrExecQuery;
-    }
-    if (!profileQuery.next()) {
-        return Rc::ErrNotFound;
-    }
-
-    QSqlQuery totalsQuery(db);
-    if (!totalsQuery.prepare(
-            "SELECT COUNT(*), "
-            "COALESCE(SUM(CASE WHEN grp.team = gr.winning_team THEN 1 ELSE 0 END), 0), "
-            "AVG(CASE WHEN grp.team = gr.winning_team THEN grp.hero_remaining_hp END) "
-            "FROM game_record_participants grp "
-            "JOIN game_records gr ON gr.id = grp.game_id "
-            "WHERE grp.profile_id = :profile_id AND gr.mode = :game_mode")) {
-        lwarn(op) << "totals sql prepare error: " << totalsQuery.lastError().text();
-        return Rc::ErrPrepareQuery;
-    }
-    totalsQuery.bindValue(":profile_id", profileId);
-    totalsQuery.bindValue(":game_mode", gameMode);
-    if (!totalsQuery.exec() || !totalsQuery.next()) {
-        lwarn(op) << "totals sql exec error: " << totalsQuery.lastError().text();
-        return Rc::ErrExecQuery;
-    }
-    stats.gamesPlayed = totalsQuery.value(0).toULongLong();
-    stats.gamesWon = totalsQuery.value(1).toULongLong();
-    stats.averageWinningHp = totalsQuery.value(2);
-
-    QSqlQuery heroQuery(db);
-    if (!heroQuery.prepare(
-            "SELECT h.id, h.name, h.img_path, COUNT(*) AS games_played, "
-            "COALESCE(SUM(CASE WHEN grp.team = gr.winning_team THEN 1 ELSE 0 END), 0) "
-            "AS games_won "
-            "FROM game_record_participants grp "
-            "JOIN game_records gr ON gr.id = grp.game_id "
-            "JOIN heroes h ON h.id = grp.hero_id "
-            "WHERE grp.profile_id = :profile_id AND gr.mode = :game_mode "
-            "GROUP BY h.id, h.name, h.img_path "
-            "ORDER BY games_played DESC, games_won DESC, h.name COLLATE NOCASE "
-            "LIMIT 1")) {
-        lwarn(op) << "hero sql prepare error: " << heroQuery.lastError().text();
-        return Rc::ErrPrepareQuery;
-    }
-    heroQuery.bindValue(":profile_id", profileId);
-    heroQuery.bindValue(":game_mode", gameMode);
-    if (!heroQuery.exec()) {
-        lwarn(op) << "hero sql exec error: " << heroQuery.lastError().text();
-        return Rc::ErrExecQuery;
-    }
-    if (heroQuery.next()) {
-        stats.favoriteHeroId = heroQuery.value(0).toULongLong();
-        stats.favoriteHeroName = heroQuery.value(1).toString();
-        stats.favoriteHeroImgPath = heroQuery.value(2).toString();
-        stats.favoriteHeroGames = heroQuery.value(3).toULongLong();
-        stats.favoriteHeroWins = heroQuery.value(4).toULongLong();
-    }
-
-    QSqlQuery mapQuery(db);
-    if (!mapQuery.prepare(
-            "SELECT m.id, m.name, m.img_path, COUNT(*) AS games_played "
-            "FROM game_record_participants grp "
-            "JOIN game_records gr ON gr.id = grp.game_id "
-            "JOIN maps m ON m.id = gr.map_id "
-            "WHERE grp.profile_id = :profile_id AND gr.mode = :game_mode "
-            "GROUP BY m.id, m.name, m.img_path "
-            "ORDER BY games_played DESC, m.name COLLATE NOCASE "
-            "LIMIT 1")) {
-        lwarn(op) << "map sql prepare error: " << mapQuery.lastError().text();
-        return Rc::ErrPrepareQuery;
-    }
-    mapQuery.bindValue(":profile_id", profileId);
-    mapQuery.bindValue(":game_mode", gameMode);
-    if (!mapQuery.exec()) {
-        lwarn(op) << "map sql exec error: " << mapQuery.lastError().text();
-        return Rc::ErrExecQuery;
-    }
-    if (mapQuery.next()) {
-        stats.favoriteMapId = mapQuery.value(0).toULongLong();
-        stats.favoriteMapName = mapQuery.value(1).toString();
-        stats.favoriteMapImgPath = mapQuery.value(2).toString();
-        stats.favoriteMapGames = mapQuery.value(3).toULongLong();
-    }
-
-    return Rc::Ok;
-}
-
 Rc Database::createProfile(const QString& name) {
     const char op[] = "Database::createProfile";
     const QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
@@ -457,8 +357,7 @@ Rc Database::deleteProfile(const QString& id) {
     if (!query.exec()) {
         const QSqlError error = query.lastError();
         lwarn(op) << "sql exec error: " << error.text();
-        if (error.databaseText().contains("FOREIGN KEY constraint failed",
-                                          Qt::CaseInsensitive)) {
+        if (error.databaseText().contains("FOREIGN KEY constraint failed", Qt::CaseInsensitive)) {
             return Rc::ErrReferenced;
         }
         return Rc::ErrExecQuery;
@@ -488,18 +387,18 @@ Rc Database::getGameHistory(QVector<models::GameRecord>& games,
                                     "ORDER BY %1 DESC, id "
                                     "LIMIT :limit OFFSET :offset"
                                     ") "
-                                 "SELECT "
-                                 "hp.id, hp.mode, hp.winning_team, "
-                                 "hp.map_id, m.name, hp.played_at, hp.created_at, "
-                                 "grp.position, grp.team, "
-                                 "grp.profile_id, pp.name, "
-                                 "grp.hero_id, h.name, h.img_path, grp.hero_remaining_hp "
-                                 "FROM history_page hp "
-                                 "JOIN game_record_participants grp ON grp.game_id = hp.id "
-                                 "JOIN player_profiles pp ON pp.id = grp.profile_id "
-                                 "LEFT JOIN heroes h ON h.id = grp.hero_id "
-                                 "LEFT JOIN maps m ON m.id = hp.map_id "
-                                 "ORDER BY hp.%1 DESC, hp.id, grp.position")
+                                    "SELECT "
+                                    "hp.id, hp.mode, hp.winning_team, "
+                                    "hp.map_id, m.name, hp.played_at, hp.created_at, "
+                                    "grp.position, grp.team, "
+                                    "grp.profile_id, pp.name, "
+                                    "grp.hero_id, h.name, h.img_path, grp.hero_remaining_hp "
+                                    "FROM history_page hp "
+                                    "JOIN game_record_participants grp ON grp.game_id = hp.id "
+                                    "JOIN player_profiles pp ON pp.id = grp.profile_id "
+                                    "LEFT JOIN heroes h ON h.id = grp.hero_id "
+                                    "LEFT JOIN maps m ON m.id = hp.map_id "
+                                    "ORDER BY hp.%1 DESC, hp.id, grp.position")
                                 .arg(orderColumn));
     if (!ok) {
         lwarn(op) << "sql prepare error: " << query.lastError().text();

@@ -68,7 +68,7 @@ struct PlayerProfile {
 struct ProfileStats {
     quint64 gamesPlayed{};
     quint64 gamesWon{};
-    QVariant averageWinningHp;
+    QVariant averageWinningHp; // in percent
 
     quint64 favoriteHeroId{};
     QString favoriteHeroName;
@@ -80,6 +80,13 @@ struct ProfileStats {
     QString favoriteMapName;
     QString favoriteMapImgPath;
     quint64 favoriteMapGames{};
+};
+
+struct HeroStats {
+    quint64 games;
+    quint64 wins;
+    QVariant averageWinningHp; // in percent
+    quint64 mostPlayedEnemyId;
 };
 
 struct GameRecordParticipantInput {

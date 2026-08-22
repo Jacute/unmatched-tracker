@@ -3,14 +3,11 @@ import QtQuick 2.15
 import QtQuick.Window 2.15
 import QtQuick.Layouts 2.15
 
-import Tracker
-import "../../../components"
 import "."
 
 Rectangle {
     required property int setId
     property int heroInd: 0
-    property int activeTabInd: 0
     readonly property string headerText: heroesModel.count > 0
                                          && heroInd >= 0
                                          && heroInd < heroesModel.count
@@ -25,9 +22,10 @@ Rectangle {
         model: heroesModel
 
         Item {
+            property int activeTabInd: 0
             required property int index
             required property var modelData
-
+            
             id: heroPage
             anchors.fill: parent
             visible: index === root.heroInd
@@ -60,9 +58,9 @@ Rectangle {
                     spacing: 0
                     
                     tabs: tabsModel
-                    activeTabInd: root.activeTabInd
+                    activeTabInd: heroPage.activeTabInd
                     onChangeActiveTabInd: (tabInd) => {
-                        root.activeTabInd = tabInd
+                        heroPage.activeTabInd = tabInd
                     }
                 }                
 
@@ -72,22 +70,49 @@ Rectangle {
 
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-
                     Repeater {
                         model: tabsModel
 
                         Loader {
                             required property int index
                             required property var modelData
+                            property bool loaded: false
 
+                            id: tabLoader
                             anchors.fill: parent
-                            source: modelData.path
-                            visible: index === root.activeTabInd
-                            asynchronous: true
 
-                            onLoaded: {
-                                console.debug("Hero tab loaded: ", item)
-                                root.setLoadedSectionCtx(item, heroPage.modelData)
+                            visible: heroPage.visible && index === heroPage.activeTabInd
+                            asynchronous: false
+
+                            onVisibleChanged: {
+                                if (visible && !loaded) {
+                                    loadPage()
+                                }
+                            }
+                            Component.onCompleted: {
+                                if (visible) {
+                                    loadPage()
+                                }
+                            }
+
+                            function loadPage() {
+                                let params = {
+                                    heroId: heroPage.modelData.id
+                                }
+
+                                if (modelData.path === "tabs/Cards.qml") {
+                                    params.heroData = heroPage.modelData
+                                }
+
+                                console.debug(
+                                    "[Hero] loading tab:",
+                                    modelData.path,
+                                    "hero:",
+                                    heroPage.modelData.id
+                                )
+
+                                setSource(modelData.path, params)
+                                loaded = true
                             }
                         }
                     }
@@ -145,8 +170,8 @@ Rectangle {
             return
         }
 
-        if (typeof page.heroId !== "undefined") {
-            page.heroId = heroData.id
+        if (typeof page.heroInd !== "undefined") {
+            page.heroInd = heroData.id
         }
         if (typeof page.heroData !== "undefined") {
             page.heroData = heroData

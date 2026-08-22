@@ -327,7 +327,7 @@ QVariantMap Core::getProfileStats(const QString& profileId, const QString& gameM
     models::ProfileStats stats;
     const Rc rc = db_.getProfileStats(trimmedId, gameMode, stats);
     if (rc == Rc::ErrNotFound) {
-        result["error"] = err_profile::NotFound;
+        result["error"] = err::NotFound;
         return result;
     }
     if (rc != Rc::Ok) {
@@ -365,6 +365,36 @@ QVariantMap Core::getProfileStats(const QString& profileId, const QString& gameM
         favoriteMap["games_played"] = stats.favoriteMapGames;
     }
     result["favorite_map"] = favoriteMap;
+    result["ok"] = true;
+    return result;
+}
+
+QVariantMap Core::getProfileHeroStats(const quint64& id, const QString& gameMode) const {
+    const char op[] = "Core::getHeroStats";
+    QVariantMap result{{"ok", false}, {"error", err::None}};
+
+    QString profileId = getDefaultProfileId();
+
+    models::HeroStats stats;
+    Rc rc = db_.getProfileHeroStats(id, profileId, gameMode, stats);
+    if (rc == Rc::ErrNotFound) {
+        result["error"] = err::NotFound;
+        return result;
+    }
+    if (rc != Rc::Ok) {
+        lerr(op) << "error getting profile stats: " << rc2str(rc);
+        result["error"] = err::DbError;
+        return result;
+    }
+
+    QVariantMap statsJson;
+    statsJson["games_played"] = stats.games;
+    statsJson["games_won"] = stats.wins;
+    statsJson["win_percentage"] = stats.games > 0 ? stats.wins * 100.0 / stats.games : 0;
+    statsJson["average_winning_hp"] = stats.averageWinningHp;
+    statsJson["most_played_enemy_id"] = stats.mostPlayedEnemyId;
+    
+    result["stats"] = statsJson;
     result["ok"] = true;
     return result;
 }
@@ -447,7 +477,7 @@ QVariantMap Core::deleteProfile(const QString& id) const {
         break;
     case Rc::ErrNotFound:
         lerr(op) << "error profile not found: " << id;
-        result["error"] = err_profile::NotFound;
+        result["error"] = err::NotFound;
         break;
     case Rc::ErrReferenced:
         lwarn(op) << "profile is used in game records: " << id;
@@ -627,7 +657,7 @@ QVariantMap Core::deleteGameRecord(const QString& id) const {
         break;
     case Rc::ErrNotFound:
         lerr(op) << "game record not found: " << trimmedId;
-        result["error"] = err_game::NotFound;
+        result["error"] = err::NotFound;
         break;
     default:
         result["error"] = err::DbError;
