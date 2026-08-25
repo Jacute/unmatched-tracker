@@ -58,7 +58,12 @@ int main(int argc, char* argv[]) {
     const QString dbPath = path + "/app.db";
     Database db(dbPath, cfg.db.dbName_);
     DbExporter dbExporter;
-    db.open();
+    Rc rc = db.open();
+    if (rc != Rc::Ok) {
+        lerr(op) << "database open error: " << rc2str(rc);
+        return static_cast<int>(rc);
+    }
+
     db.migrate(cfg.db.migrationFiles);
 
     const QString apiBaseUrl =
@@ -88,9 +93,9 @@ int main(int argc, char* argv[]) {
 
     ldebug(op) << "Application running successfully with config: " << cfg;
 
-    int rc = app.exec();
-    if (rc != 0) {
-        lwarn(op) << "Application closed with error code: " << rc;
+    int appRc = app.exec();
+    if (appRc != 0) {
+        lerr(op) << "Application closed with error code: " << appRc;
     }
     db.close();
 }
