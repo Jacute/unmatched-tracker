@@ -1,8 +1,11 @@
 #pragma once
 
-#include <QString>
-
 #include "../rc.h"
+
+#include <QString>
+#include <functional>
+
+using FileCallback = std::function<void(const QString&, Rc)>;
 
 class FileProvider {
   public:
@@ -12,5 +15,8 @@ class FileProvider {
     // @param[in] path Http path of file in REST api
     // @param[out] sourceUrl Local url of file which starts with file://
     // @return Return code
-    virtual Rc get(const QString& path, QString& sourceUrl) = 0;
+    virtual void get(
+        const QString& path,
+        FileCallback onFile
+    )  = 0;
 };

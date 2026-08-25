@@ -16,7 +16,6 @@
 #include <QThread>
 #include <QUuid>
 
-const int imgThreadCount = QThread::idealThreadCount() / 2;
 constexpr const char* dbDateFormat = "yyyy-MM-dd";
 constexpr const char* displayDateFormat = "dd-MM-yyyy";
 constexpr const char* randomizerConfigFileName = "randomizer.json";
@@ -59,10 +58,7 @@ Core::Core(Database& db, DbExporter& dbExporter, FileProvider* fp)
     : db_(db),
       dbExporter_(dbExporter),
       provider_(fp),
-      QObject(nullptr) {
-    linfo("Core::Core") << "initialize core with " << imgThreadCount << " img threads";
-    imageThreadPool_.setMaxThreadCount(imgThreadCount);
-};
+      QObject(nullptr) {};
 
 static QVariantList mapHeroesQml(const QVector<models::Hero>& heroes) {
     QVariantList list;
@@ -667,61 +663,35 @@ QVariantMap Core::deleteGameRecord(const QString& id) const {
     return result;
 }
 
-QString Core::getImage(const QString& path) const {
-    const char op[] = "Core::getImage";
-    QString sourceUrl;
-    Rc rc = provider_->get(path, sourceUrl);
-    if (rc != Rc::Ok) {
-        lerr("Core::requestImage") << "error getting image: " << path << " rc=" << rc2str(rc);
-        // TODO: throw error event to fronted using signal
-        return ""; // TODO: add placeholder image
-    }
-    linfo(op) << "image got successfully url=" << sourceUrl;
-    return sourceUrl;
-}
-
 void Core::requestImage(const QString& path) {
+    const char* op = "Core::requestImage";
+    
     if (path.isEmpty()) {
         return;
     }
-
     if (pendingImages_.contains(path)) {
         return;
     }
     pendingImages_.insert(path);
 
     QPointer<Core> self(this);
-    FileProvider* provider = provider_;
+    provider_->get(
+        path,
+        [op, path, self](const QString& sourceUrl, Rc rc) {
+            if (!self) {
+                return;
+            }
+            self->pendingImages_.remove(path);
+            if (rc != Rc::Ok) {
+                lerr(op) << "error getting image with path " << path;
+                emit self->imageFailed(path);
+                return;
+            }
 
-    imageThreadPool_.start([self, provider, path]() {
-        QString sourceUrl;
-        Rc rc = provider->get(path, sourceUrl);
-
-        if (!self) {
-            return;
+            linfo("Core::requestImage") << "image got successfully url=" << sourceUrl;
+            emit self->imageReady(path, sourceUrl);
         }
-
-        QMetaObject::invokeMethod(
-            self,
-            [self, path, sourceUrl, rc]() {
-                if (!self) {
-                    return;
-                }
-
-                self->pendingImages_.remove(path);
-
-                if (rc != Rc::Ok) {
-                    lerr("Core::requestImage")
-                        << "error getting image: " << path << " rc=" << rc2str(rc);
-                    emit self->imageFailed(path);
-                    return;
-                }
-
-                linfo("Core::requestImage") << "image got successfully url=" << sourceUrl;
-                emit self->imageReady(path, sourceUrl);
-            },
-            Qt::QueuedConnection);
-    });
+    );
 }
 
 QVariantMap Core::exportDb(const QUrl& to) const {
