@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QObject>
 #include <QString>
 #include <QVariantMap>
 
@@ -10,16 +11,18 @@ enum LogLevel {
     ERROR
 };
 
-class Logger {
+class Logger : public QObject {
+    Q_OBJECT
+
   public:
     Logger(LogLevel level);
     ~Logger() = default;
 
-    void debug(const char* tag, const QString& msg, const QVariantMap& args = {}) const;
-    void info(const char* tag, const QString& msg, const QVariantMap& args = {}) const;
-    void warning(const char* tag, const QString& msg, const QVariantMap& args = {}) const;
-    void error(const char* tag, const QString& msg, const QVariantMap& args = {}) const;
-    void error(const char* tag,
+    Q_INVOKABLE void debug(const QString& tag, const QString& msg, const QVariantMap& args = {}) const;
+    Q_INVOKABLE void info(const QString& tag, const QString& msg, const QVariantMap& args = {}) const;
+    Q_INVOKABLE void warning(const QString& tag, const QString& msg, const QVariantMap& args = {}) const;
+    Q_INVOKABLE void error(const QString& tag, const QString& msg, const QVariantMap& args = {}) const;
+    void error(const QString& tag,
                const QString& msg,
                const QString& error,
                const QVariantMap& args = {}) const;
@@ -28,7 +31,7 @@ class Logger {
     LogLevel level_;
 
     void log(
-        const char* tag,
+        const QString& tag,
         const QString& msg,
         LogLevel level = LogLevel::INFO,
         const QVariantMap& args = {}

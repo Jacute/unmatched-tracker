@@ -33,11 +33,26 @@ Item {
     function loadData() {
         let res = core.getProfileHeroStats(heroId, mode)
         if (!res.ok) {
-            console.error("[ProfileStat] " + res.error)
+            logger.warn(
+                "ProfileStat",
+                "error getting profile hero stats",
+                {
+                    "source": "ui",
+                    "hero_id": heroId,
+                    "error": res.error,
+                },
+            )
             return
         }
         root.stats = res.stats
-        console.debug("[ProfileStat] stats:", JSON.stringify(stats))
+        logger.debug(
+            "ProfileStat",
+            "got profile stats",
+            {
+                "source": "ui",
+                "stats": stats,
+            },
+        )
         if (root.stats.games_played > 0) {
             root.hasGames = true
         }

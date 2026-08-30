@@ -73,7 +73,6 @@ Rectangle {
                 onReleased: {
                     if (longPressTimer.running) {
                         longPressTimer.stop()
-                        console.debug("[Card] Short tap")
                         root.imgClicked()
                         if (root.clickedPopup) {
                             root.clickedPopup.open()

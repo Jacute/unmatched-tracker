@@ -104,11 +104,14 @@ Rectangle {
                                     params.heroData = heroPage.modelData
                                 }
 
-                                console.debug(
-                                    "[Hero] loading tab:",
-                                    modelData.path,
-                                    "hero:",
-                                    heroPage.modelData.id
+                                logger.debug(
+                                    "Hero",
+                                    "loading tab",
+                                    {
+                                        "source": "ui",
+                                        "path": modelData.path,
+                                        "hero_id": heroPage.modelData.id,
+                                    },
                                 )
 
                                 setSource(modelData.path, params)
@@ -147,7 +150,6 @@ Rectangle {
     }
 
     onSetIdChanged: {
-        console.debug("getting heroes for set id " + setId)
         heroesModel.clear()
         let backHeroes = core.getHeroesBySetId(setId)   
         root.heroInd = 0
@@ -163,6 +165,15 @@ Rectangle {
                 assistants: backHeroes[i].assistants
             })
         }
+        logger.info(
+            "Hero",
+            "got heroes for set",
+            {
+                "source": "ui",
+                "set_id": setId,
+                "heroes_count": heroesModel.count,
+            },
+        )
     }
 
     function setLoadedSectionCtx(page, heroData) {

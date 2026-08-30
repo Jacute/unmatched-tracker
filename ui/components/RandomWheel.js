@@ -1,7 +1,6 @@
 const cursorAngle = -Math.PI / 2
 
 function draw(canvas, root) {
-    console.debug("[RandomWheel] redraw")
     var ctx = canvas.getContext("2d")
 
     const size = Math.min(canvas.width, canvas.height);

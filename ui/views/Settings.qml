@@ -86,10 +86,26 @@ Rectangle {
 
                 onActivated: (index) => {
                     let profile = profilesModel.get(index)
-                    console.debug("[Settings] Profile '" + profile.name + "' selected")
+                    logger.debug(
+                        "Settings",
+                        "profile selected",
+                        {
+                            "source": "ui",
+                            "profile_name": profile.name,
+                        },
+                    )
                     let res = core.setDefaultProfileId(profile.id)
                     if (!res.ok) {
-                        console.error("[Settings] error", res.error)
+                        logger.error(
+                        "Settings",
+                            "error setting default profile",
+                            {
+                                "source": "ui",
+                                "profile_id": profile.id,
+                                "profile_name": profile.name,
+                                "error": res.error
+                            },
+                        )
                     }
                 }
             }

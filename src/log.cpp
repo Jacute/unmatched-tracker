@@ -28,7 +28,7 @@ Logger::Logger(LogLevel level)
 }
 
 void Logger::log(
-    const char* tag,
+    const QString& tag,
     const QString& msg,
     LogLevel level,
     const QVariantMap& args
@@ -38,31 +38,31 @@ void Logger::log(
     }
     QVariantMap logMap = args;
     logMap.insert("message", msg);
-    logMap.insert("op", QString::fromUtf8(tag));
+    logMap.insert("op", tag);
 
     const QByteArray json =
         QJsonDocument(QJsonObject::fromVariantMap(logMap)).toJson(QJsonDocument::Compact);
     writeLog(level, QString::fromUtf8(json));
 }
 
-void Logger::debug(const char* tag, const QString& msg, const QVariantMap& args) const {
+void Logger::debug(const QString& tag, const QString& msg, const QVariantMap& args) const {
     log(tag, msg, LogLevel::DEBUG, args);
 }
 
-void Logger::info(const char* tag, const QString& msg, const QVariantMap& args) const {
+void Logger::info(const QString& tag, const QString& msg, const QVariantMap& args) const {
     log(tag, msg, LogLevel::INFO, args);
 }
 
-void Logger::warning(const char* tag, const QString& msg, const QVariantMap& args) const {
+void Logger::warning(const QString& tag, const QString& msg, const QVariantMap& args) const {
     log(tag, msg, LogLevel::WARNING, args);
 }
 
-void Logger::error(const char* tag, const QString& msg, const QVariantMap& args) const {
+void Logger::error(const QString& tag, const QString& msg, const QVariantMap& args) const {
     log(tag, msg, LogLevel::ERROR, args);
 }
 
 void Logger::error(
-    const char* tag,
+    const QString& tag,
     const QString& msg,
     const QString& error,
     const QVariantMap& args

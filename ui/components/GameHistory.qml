@@ -80,7 +80,7 @@ Item {
                 onContentYChanged: {
                     if (moving
                             && contentY + height >= contentHeight - height * 0.5) {
-                        console.debug("[GameHistory] load new page")
+                        logger.debug("GameHistory", "load new page", {"source": "ui"})
                         root.loadNextPage()
                     }
                 }

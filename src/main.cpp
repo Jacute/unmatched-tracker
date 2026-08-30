@@ -46,9 +46,9 @@ int main(int argc, char* argv[]) {
 
     QGuiApplication app(argc, argv);
 #ifdef NDEBUG
-    const Logger logger(LogLevel::INFO);
+    Logger logger(LogLevel::INFO);
 #else
-    const Logger logger(LogLevel::DEBUG);
+    Logger logger(LogLevel::DEBUG);
 #endif
     QCoreApplication::setOrganizationName("jacute");
     QCoreApplication::setApplicationName("Unmatched Tracker");
@@ -87,6 +87,7 @@ int main(int argc, char* argv[]) {
     Core core(logger, db, dbExporter, &fileProvider);
     KeepAwakeHelper keepAwakeHelper(logger);
     engine.rootContext()->setContextProperty("core", &core);
+    engine.rootContext()->setContextProperty("logger", &logger);
     engine.rootContext()->setContextProperty("keepAwakeHelper", &keepAwakeHelper);
 
     logger.debug(
