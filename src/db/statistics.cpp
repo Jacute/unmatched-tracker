@@ -83,6 +83,44 @@ Rc Database::getHeroAverageWinningHp(quint64 heroId, QVariant& averageHp) {
     return Rc::Ok;
 }
 
+Rc Database::getHeroMatchups(quint64 heroId, QVector<models::HeroMatchup>& matchups) {
+    const char op[] = "Database::getHeroMatchups";
+    QSqlQuery query(db);
+    if (!query.prepare(
+            "SELECT opponent_hero.id, opponent_hero.name, opponent_hero.img_path, "
+            "COUNT(*) AS games, "
+            "100.0 * COALESCE(SUM(CASE WHEN hero.team = gr.winning_team THEN 1.0 ELSE 0.0 END), 0) "
+            "/ COUNT(*) AS win_rate "
+            "FROM game_record_participants hero "
+            "JOIN game_record_participants opponent "
+            "ON opponent.game_id = hero.game_id AND opponent.team != hero.team "
+            "JOIN game_records gr ON gr.id = hero.game_id "
+            "JOIN heroes opponent_hero ON opponent_hero.id = opponent.hero_id "
+            "WHERE hero.hero_id = :hero_id AND gr.mode = '1v1' "
+            "GROUP BY opponent_hero.id, opponent_hero.name, opponent_hero.img_path "
+            "ORDER BY win_rate DESC, games DESC, opponent_hero.name COLLATE NOCASE")) {
+        logger_.error(op, "matchups sql prepare error", {{"error", query.lastError().text()}});
+        return Rc::ErrPrepareQuery;
+    }
+
+    query.bindValue(":hero_id", heroId);
+    if (!query.exec()) {
+        logger_.error(op, "matchups sql exec error", {{"error", query.lastError().text()}});
+        return Rc::ErrExecQuery;
+    }
+
+    while (query.next()) {
+        models::HeroMatchup matchup;
+        matchup.opponentHeroId = query.value(0).toULongLong();
+        matchup.opponentHeroName = query.value(1).toString();
+        matchup.opponentHeroImgPath = query.value(2).toString();
+        matchup.games = query.value(3).toULongLong();
+        matchup.winRate = query.value(4).toDouble();
+        matchups.push_back(std::move(matchup));
+    }
+    return Rc::Ok;
+}
+
 Rc Database::getProfileStats(const QString& profileId,
                              const QString& gameMode,
                              models::ProfileStats& stats) {

@@ -412,6 +412,35 @@ QVariantMap Core::getHeroCommonStats(quint64 heroId) const {
     return result;
 }
 
+QVariantMap Core::getHeroMatchups(quint64 heroId) const {
+    const char op[] = "Core::getHeroMatchups";
+    QVariantMap result{{"ok", false}, {"error", err::None}};
+    QVector<models::HeroMatchup> matchups;
+
+    const Rc rc = db_.getHeroMatchups(heroId, matchups);
+    if (rc != Rc::Ok) {
+        logger_.error(op, "error getting hero matchups", rc2str(rc), {{"hero_id", heroId}});
+        result["error"] = err::DbError;
+        return result;
+    }
+
+    QVariantList items;
+    items.reserve(matchups.size());
+    for (const auto& matchup : matchups) {
+        items.push_back(QVariantMap{
+            {"hero_id", matchup.opponentHeroId},
+            {"hero_name", matchup.opponentHeroName},
+            {"hero_img_path", matchup.opponentHeroImgPath},
+            {"games_played", matchup.games},
+            {"win_percentage", matchup.winRate},
+        });
+    }
+
+    result["matchups"] = items;
+    result["ok"] = true;
+    return result;
+}
+
 QVariantMap Core::getProfileHeroStats(const quint64& id, const QString& gameMode) const {
     const char op[] = "Core::getHeroStats";
     QVariantMap result{{"ok", false}, {"error", err::None}};
