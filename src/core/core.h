@@ -39,6 +39,7 @@ class Core : public QObject {
       const quint64& id,
       const QString& gameMode
     ) const;
+    Q_INVOKABLE QVariantMap getHeroCommonStats(quint64 heroId) const;
     Q_INVOKABLE QString getDefaultProfileId() const;
     Q_INVOKABLE QVariantMap setDefaultProfileId(const QString& profileId) const;
     Q_INVOKABLE QVariantMap createProfile(const QString& name) const;

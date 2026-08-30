@@ -49,6 +49,9 @@ class Database : public QObject {
         models::ProfileStats& stats
     );
     Rc getProfileHeroStats(const quint64& id, const QString& profileId, const QString& gameMode, models::HeroStats& stats);
+    Rc getHeroGamesAndWins(quint64 heroId, quint64& games, quint64& wins);
+    Rc getHeroWinRate(quint64 heroId, double& winRate);
+    Rc getHeroAverageWinningHp(quint64 heroId, QVariant& averageHp);
     Rc createProfile(const QString& name);
     Rc deleteProfile(const QString& id);
     Rc getGameHistory(

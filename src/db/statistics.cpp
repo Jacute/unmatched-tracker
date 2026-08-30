@@ -4,6 +4,85 @@
 #include <QSqlError>
 #include <QSqlQuery>
 
+Rc Database::getHeroGamesAndWins(quint64 heroId, quint64& games, quint64& wins) {
+    const char op[] = "Database::getHeroGamesAndWins";
+    QSqlQuery query(db);
+    if (!query.prepare(
+            "SELECT COUNT(*), "
+            "COALESCE(SUM(CASE WHEN grp.team = gr.winning_team THEN 1 ELSE 0 END), 0) "
+            "FROM game_record_participants grp "
+            "JOIN game_records gr ON gr.id = grp.game_id "
+            "WHERE grp.hero_id = :hero_id")) {
+        logger_.error(op, "SQL prepare error", query.lastError().text());
+        return Rc::ErrPrepareQuery;
+    }
+
+    query.bindValue(":hero_id", heroId);
+    if (!query.exec()) {
+        logger_.error(op, "SQL execute error", query.lastError().text());
+        return Rc::ErrExecQuery;
+    }
+
+    if (query.next()) {
+        games = query.value(0).toULongLong();
+        wins = query.value(1).toULongLong();
+    }
+    return Rc::Ok;
+}
+
+Rc Database::getHeroWinRate(quint64 heroId, double& winRate) {
+    const char op[] = "Database::getHeroWinRate";
+    QSqlQuery query(db);
+    if (!query.prepare(
+            "SELECT CASE WHEN COUNT(*) = 0 THEN 0.0 "
+            "ELSE SUM(CASE WHEN grp.team = gr.winning_team THEN 1.0 ELSE 0.0 END) "
+            "* 100.0 / COUNT(*) END "
+            "FROM game_record_participants grp "
+            "JOIN game_records gr ON gr.id = grp.game_id "
+            "WHERE grp.hero_id = :hero_id")) {
+        logger_.error(op, "SQL prepare error", query.lastError().text());
+        return Rc::ErrPrepareQuery;
+    }
+
+    query.bindValue(":hero_id", heroId);
+    if (!query.exec()) {
+        logger_.error(op, "SQL execute error", query.lastError().text());
+        return Rc::ErrExecQuery;
+    }
+
+    if (query.next()) {
+        winRate = query.value(0).toDouble();
+    }
+    return Rc::Ok;
+}
+
+Rc Database::getHeroAverageWinningHp(quint64 heroId, QVariant& averageHp) {
+    const char op[] = "Database::getHeroAverageWinningHp";
+    QSqlQuery query(db);
+    if (!query.prepare(
+            "SELECT AVG(ROUND(grp.hero_remaining_hp * 100.0 / h.hp, 1)) "
+            "FROM game_record_participants grp "
+            "JOIN game_records gr ON gr.id = grp.game_id "
+            "JOIN heroes h ON h.id = grp.hero_id "
+            "WHERE grp.hero_id = :hero_id "
+            "AND grp.team = gr.winning_team "
+            "AND grp.hero_remaining_hp IS NOT NULL")) {
+        logger_.error(op, "SQL prepare error", query.lastError().text());
+        return Rc::ErrPrepareQuery;
+    }
+
+    query.bindValue(":hero_id", heroId);
+    if (!query.exec()) {
+        logger_.error(op, "SQL execute error", query.lastError().text());
+        return Rc::ErrExecQuery;
+    }
+
+    if (query.next()) {
+        averageHp = query.value(0);
+    }
+    return Rc::Ok;
+}
+
 Rc Database::getProfileStats(const QString& profileId,
                              const QString& gameMode,
                              models::ProfileStats& stats) {

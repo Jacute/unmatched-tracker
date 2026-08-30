@@ -380,6 +380,38 @@ QVariantMap Core::getProfileStats(const QString& profileId, const QString& gameM
     return result;
 }
 
+QVariantMap Core::getHeroCommonStats(quint64 heroId) const {
+    const char op[] = "Core::getHeroCommonStats";
+    QVariantMap result{{"ok", false}, {"error", err::None}};
+
+    quint64 games = 0;
+    quint64 wins = 0;
+    double winRate = 0.0;
+    QVariant averageWinningHp;
+
+    Rc rc = db_.getHeroGamesAndWins(heroId, games, wins);
+    if (rc == Rc::Ok) {
+        rc = db_.getHeroWinRate(heroId, winRate);
+    }
+    if (rc == Rc::Ok) {
+        rc = db_.getHeroAverageWinningHp(heroId, averageWinningHp);
+    }
+    if (rc != Rc::Ok) {
+        logger_.error(op, "error getting common hero stats", rc2str(rc), {{"hero_id", heroId}});
+        result["error"] = err::DbError;
+        return result;
+    }
+
+    result["stats"] = QVariantMap{
+        {"games_played", games},
+        {"games_won", wins},
+        {"win_percentage", winRate},
+        {"average_winning_hp", averageWinningHp},
+    };
+    result["ok"] = true;
+    return result;
+}
+
 QVariantMap Core::getProfileHeroStats(const quint64& id, const QString& gameMode) const {
     const char op[] = "Core::getHeroStats";
     QVariantMap result{{"ok", false}, {"error", err::None}};
