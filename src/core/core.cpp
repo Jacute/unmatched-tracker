@@ -15,22 +15,23 @@
 #include <QStandardPaths>
 #include <QThread>
 #include <QUuid>
+#include <QString>
 
 constexpr const char* dbDateFormat = "yyyy-MM-dd";
 constexpr const char* displayDateFormat = "dd-MM-yyyy";
 constexpr const char* randomizerConfigFileName = "randomizer.json";
 constexpr const char* defaultProfileSettingsKey = "preferences/default_profile_id";
 
-static QString randomizerConfigPath() {
-    const QString storagePath =
-        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+namespace {
+QString randomizerConfigPath() {
+    const QString storagePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (storagePath.isEmpty()) {
         return {};
     }
     return QDir(storagePath).filePath(randomizerConfigFileName);
 }
 
-static bool enabledItemsToJson(const QVariantList& items, QJsonObject& result) {
+bool enabledItemsToJson(const QVariantList& items, QJsonObject& result) {
     for (const QVariant& item : items) {
         const QVariantMap itemMap = item.toMap();
         bool idOk = false;
@@ -43,7 +44,7 @@ static bool enabledItemsToJson(const QVariantList& items, QJsonObject& result) {
     return true;
 }
 
-static bool isEnabledItemsJson(const QJsonObject& items) {
+bool isEnabledItemsJson(const QJsonObject& items) {
     for (auto it = items.constBegin(); it != items.constEnd(); ++it) {
         bool idOk = false;
         const quint64 id = it.key().toULongLong(&idOk);
@@ -53,6 +54,19 @@ static bool isEnabledItemsJson(const QJsonObject& items) {
     }
     return true;
 }
+
+QString filesrc2str(FileSource src) {
+    switch (src)
+    {
+    case FileSource::Cache:
+        return "cache";
+    case FileSource::Http:
+        return "http";
+    default:
+        return "unknown";
+    }
+}
+} // namespace
 
 Core::Core(Database& db, DbExporter& dbExporter, FileProvider* fp)
     : db_(db),
@@ -677,18 +691,18 @@ void Core::requestImage(const QString& path) {
     QPointer<Core> self(this);
     provider_->get(
         path,
-        [op, path, self](const QString& sourceUrl, Rc rc) {
+        [op, path, self](const QString& sourceUrl, Rc rc, FileSource source) {
             if (!self) {
                 return;
             }
             self->pendingImages_.remove(path);
             if (rc != Rc::Ok) {
-                lerr(op) << "error getting image with path " << path;
+                lerr(op) << "error getting image " << rc2str(rc) << " source=" << filesrc2str(source) << " url=" << sourceUrl;
                 emit self->imageFailed(path);
                 return;
             }
 
-            linfo("Core::requestImage") << "image got successfully url=" << sourceUrl;
+            linfo("Core::requestImage") << "image got successfully source=" << filesrc2str(source) << " url=" << sourceUrl;
             emit self->imageReady(path, sourceUrl);
         }
     );

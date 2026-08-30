@@ -5,7 +5,12 @@
 #include <QString>
 #include <functional>
 
-using FileCallback = std::function<void(const QString&, Rc)>;
+enum FileSource {
+    Cache = 0,
+    Http
+};
+
+using FileCallback = std::function<void(const QString&, Rc, FileSource)>;
 
 class FileProvider {
   public:

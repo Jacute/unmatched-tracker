@@ -14,6 +14,7 @@
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
 #include <QStandardPaths>
+#include <QSslSocket>
 #include <memory>
 
 const QString rscPath = ":/qt/qml/Tracker";
@@ -91,7 +92,13 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    QVariantMap buildInfo = core.getBuildInfo();
     ldebug(op) << "Application running successfully with config: " << cfg;
+    linfo(op) << "SSL supported: " << QSslSocket::supportsSsl();
+    linfo(op) << "Build SSL: " << QSslSocket::sslLibraryBuildVersionString();
+    linfo(op) << "Runtime SSL: " << QSslSocket::sslLibraryVersionString();
+    linfo(op) << "App version: " << buildInfo["version"].toString();
+    linfo(op) << "App build hash: " << buildInfo["commit"].toString();
 
     int appRc = app.exec();
     if (appRc != 0) {

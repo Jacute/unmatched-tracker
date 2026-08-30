@@ -12,7 +12,7 @@
 class Api {
   public:
     using AssetCallback = std::function<void(QByteArray, Rc)>;
-    using ReqFinishedCallback = std::function<void(QNetworkReply*)>;
+    using ReqFinishedCallback = std::function<void(QNetworkReply*, Rc)>;
 
   private:
     QString baseUrl_;

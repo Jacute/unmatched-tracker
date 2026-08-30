@@ -36,7 +36,7 @@ void File::get(
     QString sourceUrl;
     // cache check not async
     if (getCached(path, sourceUrl) == Rc::Ok) {
-        onFile(sourceUrl, Rc::Ok);
+        onFile(sourceUrl, Rc::Ok, FileSource::Cache);
         return;
     }
 
@@ -49,17 +49,17 @@ void File::get(
             onFile = std::move(onFile)
         ](QByteArray data, Rc rc) {
             if (rc != Rc::Ok) {
-                onFile("", rc);
+                onFile("", rc, FileSource::Http);
                 return;
             }
             rc = cache_.write(path, data);
             if (rc != Rc::Ok) {
-                onFile("", rc);
+                onFile("", rc, FileSource::Http);
                 return;
             }
             QString sourceUrl = cache_.fileUrl(path).toString();
             normalizeQmlUrl(sourceUrl);
-            onFile(sourceUrl, Rc::Ok);
+            onFile(sourceUrl, Rc::Ok, FileSource::Http);
         }
     );
 }

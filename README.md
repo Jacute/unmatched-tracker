@@ -131,16 +131,73 @@ the CI environment.
 Adjust these paths for the local Qt and Android SDK installations:
 
 ```bash
-export QT_CMAKE="$HOME/Qt/6.11.0/android_arm64_v8a/bin/qt-cmake"
 export ANDROID_SDK_ROOT="$HOME/Android/Sdk"
 export ANDROID_NDK_ROOT="$ANDROID_SDK_ROOT/ndk/27.2.12479018"
+export PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
 ```
 
-### Debug Build
+#### Qt build
+
+1. Download Qt sources (minimum version 6.11)
+2. Build base Qt
+3. Download Android SDK
+4. Configure Qt for your architecture (x86_64/x86/arm64-v8a/armeabi-v7a)
+
+```sh
+mkdir -p ~/qt/build-qt-android
+cd ~/qt/build-qt-android
+<qtbasedir>/configure \
+  -prefix <install_qt_dir> \
+  -qt-host-path <qthostbuild>/qtbase \
+  -android-abis arm64-v8a \
+  -android-sdk <android_sdk_dir> \
+  -android-ndk <android_sdk_dir>/ndk/27.2.12479018 \
+  -openssl-runtime \
+  -- \
+  -DOPENSSL_ROOT_DIR=~/qt/openssl/android-arm64 \
+  -DOPENSSL_INCLUDE_DIR=~/qt/openssl/android-arm64/include
+```
+
+5. Build and install
+
+```sh
+cmake --build . --parallel
+cmake --install .
+```
+
+#### OpenSSL build
+
+```sh
+git clone https://github.com/openssl/openssl
+cd openssl
+git checkout openssl-3.5.8
+./Configure android-arm64 shared -D__ANDROID_API__=28 --prefix=~/qt/openssl/android-arm64
+make -j$(nproc)
+make install_sw
+
+find ~/qt/openssl/android-arm64 \
+    -maxdepth 3 \
+    \( -name 'libssl*' -o -name 'libcrypto*' -o -name openssl \)
+```
+
+### App Build
+
+1. Put compiled ssl into source directory
+
+```sh
+mkdir lib
+cp ~/qt/openssl/android-arm64/lib/libssl.so ./lib/libssl_3.so
+cp ~/qt/openssl/android-arm64/lib/libcrypto.so ./lib/libcrypto_3.so
+```
+
+2. Run debug or release build
+
+#### Debug build
 
 Configure a clean debug build:
 
 ```bash
+export QT_CMAKE="$HOME/Qt/6.11.0/android_arm64_v8a/bin/qt-cmake"
 "$QT_CMAKE" \
   -S . \
   -B build \
@@ -181,7 +238,7 @@ make
 make install
 ```
 
-### Signed Release Build
+#### Signed Release Build
 
 Keep signing credentials outside the repository. Export them in the same shell
 that will run the build:
@@ -216,18 +273,16 @@ the same CMake cache:
   -DAPP_ANDROID_MIN_SDK_VERSION=28 \
   -DPACKAGE_NAME=com.jacute.unmatched_tracker \
   -DAPI_URL="${API_URL:-}" \
-  -DQT_ANDROID_SIGN_APK=ON \
-  -DQT_ANDROID_SIGN_AAB=ON
+  -DQT_ANDROID_SIGN_APK=ON
 
 cmake --build build-release --target apk --parallel
-cmake --build build-release --target aab --parallel
 ```
 
 Generated packages can be found with:
 
 ```bash
 find build-release/android-build/build/outputs \
-  -type f \( -name '*.apk' -o -name '*.aab' \)
+  -type f \( -name '*.apk' \)
 ```
 
 ## Database Migrations

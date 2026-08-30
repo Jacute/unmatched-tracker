@@ -9,7 +9,7 @@
 #include <QUrl>
 
 namespace {
-constexpr int requestTimeoutMs = 30000;
+constexpr int requestTimeoutMs = 60000;
 const char* timeoutProperty = "timedOut";
 
 QUrl buildUrl(const QString& baseUrl, const QString& path) {
@@ -64,6 +64,7 @@ void Api::get(
     const QUrl& url,
     ReqFinishedCallback onFinished
 ) {
+    const char* op = "Api::get";
     // prepare request
     QNetworkRequest request(url);
     request.setAttribute(QNetworkRequest::RedirectPolicyAttribute,
@@ -81,10 +82,26 @@ void Api::get(
         [
             timer,
             reply,
-            onFinished = std::move(onFinished)
+            onFinished = std::move(onFinished),
+            url,
+            op
         ] {
             timer->stop();
-            onFinished(reply);
+            if (reply->error() != QNetworkReply::NoError) {
+                lwarn(op)
+                    << "request failed"
+                    << " url=" << url.toString()
+                    << " qtError=" << static_cast<int>(reply->error())
+                    << " message=" << reply->errorString();
+                if (reply->property(timeoutProperty).toBool()) {
+                    onFinished(reply, Rc::ErrNetworkTimeout);
+                    return;
+                }
+                onFinished(reply, Rc::ErrNetworkRequest);
+                return;
+            }
+            linfo(op) << "Request completed successfully url=" << url.toString();
+            onFinished(reply, Rc::Ok);
         }
     );
 }
@@ -104,19 +121,16 @@ void Api::getAsset(
         url,
         [
             url = std::move(url),
-            onFinished = std::move(onFinished)
-        ](QNetworkReply* reply) {
+            onFinished = std::move(onFinished),
+            op
+        ](QNetworkReply* reply, Rc rc) {
             reply->deleteLater();
-
-            const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
-            if (reply->error() != QNetworkReply::NoError) {
-                if (reply->property(timeoutProperty).toBool()) {
-                    onFinished(QByteArray(), Rc::ErrNetworkTimeout);
-                    return;
-                }
-                onFinished(QByteArray(), Rc::ErrNetworkRequest);
+            if (rc != Rc::Ok) {
+                onFinished(QByteArray(), rc);
                 return;
             }
+
+            const int statusCode = reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
             if (statusCode != 200) {
                 onFinished(QByteArray(), Rc::ErrInvalidStatusCode);
                 return;

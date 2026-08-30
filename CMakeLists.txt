@@ -41,7 +41,15 @@ if(APP_BUILD_TYPE STREQUAL "")
     set(APP_BUILD_TYPE "unknown")
 endif()
 
-find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Sql Network Multimedia Core)
+find_package(
+    Qt6 6.11
+    REQUIRED COMPONENTS
+    Quick
+    Sql
+    Network
+    Multimedia
+    Core
+)
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
@@ -198,3 +206,12 @@ install(TARGETS tracker
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+if(ANDROID)
+    set_property(
+        TARGET ${TARGET}
+        APPEND PROPERTY QT_ANDROID_EXTRA_LIBS
+        "${CMAKE_SOURCE_DIR}/lib/libcrypto_3.so"
+        "${CMAKE_SOURCE_DIR}/lib/libssl_3.so"
+    )
+endif()
