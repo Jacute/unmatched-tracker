@@ -9,6 +9,10 @@ Item {
     readonly property string mode: "1v1"
     property var stats: ({})
     property bool hasGames: false
+    readonly property bool hasDatedGames: root.stats.first_played_at !== undefined
+                                          && root.stats.first_played_at !== ""
+                                          && root.stats.last_played_at !== undefined
+                                          && root.stats.last_played_at !== ""
 
     id: root
 
@@ -26,6 +30,35 @@ Item {
             stats: root.stats
             hasGames: root.hasGames
         }
+
+        RowLayout {
+            Layout.preferredHeight: root.hasDatedGames ? 100 : 0
+            Layout.fillWidth: true
+            spacing: Common.fieldSpacing
+            visible: root.hasDatedGames
+
+            Stat.Tile {
+                Layout.fillWidth: true
+                Layout.preferredHeight: implicitHeight
+                title: qsTr("FIRST GAME")
+                value: root.stats.first_played_at || ""
+                detail: qsTr("played date")
+                accentColor: Common.accent
+            }
+
+            Stat.Tile {
+                Layout.fillWidth: true
+                Layout.preferredHeight: implicitHeight
+                title: qsTr("LAST GAME")
+                value: root.stats.last_played_at || ""
+                detail: qsTr("played date")
+                accentColor: Common.success
+            }
+        }
+
+        Item {
+            Layout.fillHeight: true
+        }
     }
 
     Component.onCompleted: loadData()
@@ -33,7 +66,7 @@ Item {
     function loadData() {
         let res = core.getProfileHeroStats(heroId, mode)
         if (!res.ok) {
-            logger.warn(
+            logger.warning(
                 "ProfileStat",
                 "error getting profile hero stats",
                 {

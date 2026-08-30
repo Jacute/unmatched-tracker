@@ -404,6 +404,8 @@ QVariantMap Core::getProfileHeroStats(const quint64& id, const QString& gameMode
     statsJson["win_percentage"] = stats.games > 0 ? stats.wins * 100.0 / stats.games : 0;
     statsJson["average_winning_hp"] = stats.averageWinningHp;
     statsJson["most_played_enemy_id"] = stats.mostPlayedEnemyId;
+    statsJson["first_played_at"] = displayDateFromDb(stats.firstPlayedAt);
+    statsJson["last_played_at"] = displayDateFromDb(stats.lastPlayedAt);
     
     result["stats"] = statsJson;
     result["ok"] = true;

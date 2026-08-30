@@ -83,10 +83,12 @@ struct ProfileStats {
 };
 
 struct HeroStats {
-    quint64 games;
-    quint64 wins;
+    quint64 games{};
+    quint64 wins{};
     QVariant averageWinningHp; // in percent
-    quint64 mostPlayedEnemyId;
+    quint64 mostPlayedEnemyId{};
+    QString firstPlayedAt;
+    QString lastPlayedAt;
 };
 
 struct GameRecordParticipantInput {

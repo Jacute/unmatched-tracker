@@ -111,7 +111,9 @@ Rc Database::getProfileHeroStats(const quint64& id, const QString& profileId, co
         "COUNT(*), "
         "COALESCE(SUM(CASE WHEN grp.team = gr.winning_team THEN 1 ELSE 0 END), 0) "
         "AS games_won, "
-        "AVG(CASE WHEN grp.team = gr.winning_team THEN ROUND(grp.hero_remaining_hp * 100.0 / h.hp, 1) END) "
+        "AVG(CASE WHEN grp.team = gr.winning_team THEN ROUND(grp.hero_remaining_hp * 100.0 / h.hp, 1) END), "
+        "MIN(gr.played_at), "
+        "MAX(gr.played_at) "
         "FROM game_record_participants grp "
         "JOIN game_records gr ON gr.id = grp.game_id "
         "JOIN heroes h ON h.id = grp.hero_id "
@@ -132,6 +134,8 @@ Rc Database::getProfileHeroStats(const quint64& id, const QString& profileId, co
         stats.games = query.value(0).toULongLong();
         stats.wins = query.value(1).toULongLong();
         stats.averageWinningHp = query.value(2).toULongLong();
+        stats.firstPlayedAt = query.value(3).toString();
+        stats.lastPlayedAt = query.value(4).toString();
     }
     query.finish();
     query.clear();
