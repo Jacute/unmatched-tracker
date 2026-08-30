@@ -5,7 +5,7 @@
 #include <QStandardPaths>
 
 Rc DbExporter::exportDb(Database& db, const QUrl& to) const {
-    ScopedDatabaseClose guard(db);
+    ScopedDatabaseClose guard(logger_, db);
 
     QFile source(db.path());
     if (!source.open(QIODevice::ReadOnly)) {

@@ -8,4 +8,4 @@ todo
 .gitignore
 .agents
 .codex
-./lib
+lib

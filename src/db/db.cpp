@@ -9,9 +9,10 @@
 #include <QStandardPaths>
 #include <QUuid>
 
-Database::Database(const QString& dbPath, const QString& dbName)
+Database::Database(const Logger& logger, const QString& dbPath, const QString& dbName)
     : dbPath_(dbPath),
-      dbName_(dbName) {
+      dbName_(dbName),
+      logger_(logger) {
 }
 
 Rc Database::open() {
@@ -25,18 +26,20 @@ Rc Database::open() {
     }
 
     if (!db.open()) {
-        qDebug() << "DB error:" << db.lastError().text();
+        logger_.error("Database::open", "database open error", db.lastError().text());
         return Rc::ErrCreateDb;
     }
 
     QSqlQuery foreignKeysQuery(db);
     if (!foreignKeysQuery.exec("PRAGMA foreign_keys = ON")) {
-        qDebug() << "Can't enable foreign keys:" << foreignKeysQuery.lastError().text();
+        logger_.error("Database::open", "can't enable foreign keys",
+                      foreignKeysQuery.lastError().text());
         db.close();
         return Rc::ErrExecQuery;
     }
 
-    qDebug() << "Database path:" << dbPath_;
+    logger_.debug("Database::open", "database opened",
+                {{"database_path", dbPath_}});
 
     return Rc::Ok;
 }
@@ -49,8 +52,9 @@ QString Database::path() const {
     return dbPath_;
 }
 
-ScopedDatabaseClose::ScopedDatabaseClose(Database& db)
-    : db_(db) {
+ScopedDatabaseClose::ScopedDatabaseClose(const Logger& logger, Database& db)
+    : db_(db),
+      logger_(logger) {
     db_.close();
 }
 
@@ -58,7 +62,7 @@ ScopedDatabaseClose::~ScopedDatabaseClose() {
     const char op[] = "ScopedDatabaseClose::~ScopedDatabaseClose";
     const Rc rc = db_.open();
     if (rc != Rc::Ok) {
-        lerr(op) << "can't reopen database: " << rc2str(rc);
+        logger_.error(op, "can't reopen database", rc2str(rc));
     }
 }
 
@@ -102,7 +106,7 @@ Rc Database::getHeroes(QVector<models::Hero>& heroes) {
                          "LEFT JOIN assistants a ON a.hero_id = h.id "
                          "ORDER BY h.id, a.id");
     if (!ok) {
-        lwarn(op) << "sql error: " << query.lastError().text();
+        logger_.error(op, "sql error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
 
@@ -123,12 +127,12 @@ Rc Database::getHeroesBySetId(quint64 setId, QVector<models::Hero>& heroes) {
                             "WHERE h.set_id = :setId "
                             "ORDER BY h.id, a.id");
     if (!ok) {
-        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        logger_.error(op, "sql prepare error", {{"error", query.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
     query.bindValue(":setId", setId);
     if (!query.exec()) {
-        lwarn(op) << "sql execute error: " << query.lastError().text();
+        logger_.error(op, "sql execute error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
 
@@ -143,7 +147,7 @@ Rc Database::getMaps(QVector<models::GameMap>& maps) {
 
     bool ok = query.exec("SELECT id, name, set_id, img_path FROM maps");
     if (!ok) {
-        lwarn(op) << "sql error: " << query.lastError().text();
+        logger_.error(op, "sql error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
 
@@ -165,7 +169,7 @@ Rc Database::getSets(QVector<models::GameSetShort>& sets) {
 
     bool ok = query.exec("SELECT id, name, img_path, released_at FROM sets");
     if (!ok) {
-        lwarn(op) << "sql error: " << query.lastError().text();
+        logger_.error(op, "sql error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
 
@@ -187,7 +191,7 @@ Rc Database::getSHM(QVector<models::GameSet>& sets) {
 
     bool ok = query.exec("SELECT id, name, img_path, released_at FROM sets");
     if (!ok) {
-        lwarn(op) << "set sql error: " << query.lastError().text();
+        logger_.error(op, "set sql error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
 
@@ -202,12 +206,12 @@ Rc Database::getSHM(QVector<models::GameSet>& sets) {
         ok = heroQuery.prepare(
             "SELECT id, name, hp, move, set_id, img_path FROM heroes WHERE set_id = :setId");
         if (!ok) {
-            lwarn(op) << "hero sql prepare error: " << heroQuery.lastError().text();
+            logger_.error(op, "hero sql prepare error", {{"error", heroQuery.lastError().text()}});
             return Rc::ErrPrepareQuery;
         }
         heroQuery.bindValue(":setId", set.id);
         if (!heroQuery.exec()) {
-            lwarn(op) << "hero sql exec error: " << heroQuery.lastError().text();
+            logger_.error(op, "hero sql exec error", {{"error", heroQuery.lastError().text()}});
             return Rc::ErrExecQuery;
         }
         QVector<models::Hero> heroes;
@@ -221,18 +225,19 @@ Rc Database::getSHM(QVector<models::GameSet>& sets) {
             hero.imgPath = heroQuery.value(5).toString();
             heroes.append(std::move(hero));
         }
-        ldebug(op) << "set " << set.name << "heroes length " << heroes.size();
+        logger_.debug(op, "set heroes loaded",
+                    {{"set_name", set.name}, {"heroes_count", heroes.size()}});
         set.heroes = std::move(heroes);
 
         QSqlQuery mapQuery;
         ok = mapQuery.prepare("SELECT id, name, img_path FROM maps WHERE set_id = :setId");
         if (!ok) {
-            lwarn(op) << "map sql prepare error: " << mapQuery.lastError().text();
+            logger_.error(op, "map sql prepare error", {{"error", mapQuery.lastError().text()}});
             return Rc::ErrPrepareQuery;
         }
         mapQuery.bindValue(":setId", set.id);
         if (!mapQuery.exec()) {
-            lwarn(op) << "map sql exec error: " << mapQuery.lastError().text();
+            logger_.error(op, "map sql exec error", {{"error", mapQuery.lastError().text()}});
             return Rc::ErrExecQuery;
         }
         QVector<models::GameMap> maps;
@@ -259,12 +264,12 @@ Rc Database::getCardsByHeroId(quint64 heroId, QVector<models::Card>& cards) {
         "SELECT id, name, description, count, img_path, hero_id, card_type_id "
         "FROM cards WHERE hero_id = :heroId ORDER BY card_type_id ASC, value DESC, name ASC");
     if (!ok) {
-        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        logger_.error(op, "sql prepare error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
     query.bindValue(":heroId", heroId);
     if (!query.exec()) {
-        lwarn(op) << "sql exec error: " << query.lastError().text();
+        logger_.error(op, "sql exec error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
 
@@ -288,7 +293,7 @@ Rc Database::getProfiles(QVector<models::PlayerProfile>& profiles) {
     QSqlQuery query;
     bool ok = query.exec("SELECT id, name, created_at FROM player_profiles ORDER BY name");
     if (!ok) {
-        lwarn(op) << "sql error: " << query.lastError().text();
+        logger_.error(op, "sql error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
 
@@ -309,7 +314,7 @@ Rc Database::createProfile(const QString& name) {
     QSqlQuery query;
     bool ok = query.prepare("INSERT INTO player_profiles (id, name) VALUES (:id, :name)");
     if (!ok) {
-        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        logger_.error(op, "sql prepare error", {{"error", query.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
 
@@ -317,7 +322,7 @@ Rc Database::createProfile(const QString& name) {
     query.bindValue(":name", name.trimmed());
     if (!query.exec()) {
         const QSqlError error = query.lastError();
-        lwarn(op) << "sql exec error: " << error.text();
+        logger_.error(op, "sql exec error", {{"error", error.text()}});
         if (error.databaseText().contains("UNIQUE constraint failed")) {
             return Rc::ErrDuplicate;
         }
@@ -333,13 +338,13 @@ Rc Database::deleteProfile(const QString& id) {
     bool ok = referenceQuery.prepare(
         "SELECT 1 FROM game_record_participants WHERE profile_id = :id LIMIT 1");
     if (!ok) {
-        lwarn(op) << "reference sql prepare error: " << referenceQuery.lastError().text();
+        logger_.error(op, "reference sql prepare error", {{"error", referenceQuery.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
 
     referenceQuery.bindValue(":id", id);
     if (!referenceQuery.exec()) {
-        lwarn(op) << "reference sql exec error: " << referenceQuery.lastError().text();
+        logger_.error(op, "reference sql exec error", {{"error", referenceQuery.lastError().text()}});
         return Rc::ErrExecQuery;
     }
     if (referenceQuery.next()) {
@@ -349,21 +354,21 @@ Rc Database::deleteProfile(const QString& id) {
     QSqlQuery query(db);
     ok = query.prepare("DELETE FROM player_profiles WHERE id = :id");
     if (!ok) {
-        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        logger_.error(op, "sql prepare error", {{"error", query.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
 
     query.bindValue(":id", id);
     if (!query.exec()) {
         const QSqlError error = query.lastError();
-        lwarn(op) << "sql exec error: " << error.text();
+        logger_.error(op, "sql exec error", {{"error", error.text()}});
         if (error.databaseText().contains("FOREIGN KEY constraint failed", Qt::CaseInsensitive)) {
             return Rc::ErrReferenced;
         }
         return Rc::ErrExecQuery;
     }
     if (query.numRowsAffected() == 0) {
-        lwarn(op) << "profile not found: " << id;
+        logger_.warning(op, "profile not found", {{"profile_id", id}});
         return Rc::ErrNotFound;
     }
     return Rc::Ok;
@@ -401,14 +406,14 @@ Rc Database::getGameHistory(QVector<models::GameRecord>& games,
                                     "ORDER BY hp.%1 DESC, hp.id, grp.position")
                                 .arg(orderColumn));
     if (!ok) {
-        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        logger_.error(op, "sql prepare error", {{"error", query.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
 
     query.bindValue(":limit", limit);
     query.bindValue(":offset", offset);
     if (!query.exec()) {
-        lwarn(op) << "sql exec error: " << query.lastError().text();
+        logger_.error(op, "sql exec error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
 
@@ -446,7 +451,7 @@ Rc Database::createGameRecord(const models::GameRecordInput& game) {
     const QString gameId = QUuid::createUuid().toString(QUuid::WithoutBraces);
 
     if (!db.transaction()) {
-        lwarn(op) << "can't start transaction: " << db.lastError().text();
+        logger_.error(op, "can't start transaction", {{"error", db.lastError().text()}});
         return Rc::ErrExecQuery;
     }
 
@@ -457,7 +462,7 @@ Rc Database::createGameRecord(const models::GameRecordInput& game) {
                             ":id, :mode, :map_id, :winning_team, :played_at"
                             ")");
     if (!ok) {
-        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        logger_.error(op, "sql prepare error", {{"error", query.lastError().text()}});
         db.rollback();
         return Rc::ErrPrepareQuery;
     }
@@ -469,7 +474,7 @@ Rc Database::createGameRecord(const models::GameRecordInput& game) {
     query.bindValue(":played_at", game.playedAt.isEmpty() ? QVariant() : QVariant(game.playedAt));
 
     if (!query.exec()) {
-        lwarn(op) << "sql exec error: " << query.lastError().text();
+        logger_.error(op, "sql exec error", {{"error", query.lastError().text()}});
         db.rollback();
         return Rc::ErrExecQuery;
     }
@@ -482,7 +487,7 @@ Rc Database::createGameRecord(const models::GameRecordInput& game) {
         ":game_id, :position, :team, :profile_id, :hero_id, :hero_remaining_hp"
         ")");
     if (!ok) {
-        lwarn(op) << "participant sql prepare error: " << participantQuery.lastError().text();
+        logger_.error(op, "participant sql prepare error", {{"error", participantQuery.lastError().text()}});
         db.rollback();
         return Rc::ErrPrepareQuery;
     }
@@ -499,14 +504,14 @@ Rc Database::createGameRecord(const models::GameRecordInput& game) {
         }
         participantQuery.bindValue(":hero_remaining_hp", participant.heroRemainingHp);
         if (!participantQuery.exec()) {
-            lwarn(op) << "participant sql exec error: " << participantQuery.lastError().text();
+            logger_.error(op, "participant sql exec error", {{"error", participantQuery.lastError().text()}});
             db.rollback();
             return Rc::ErrExecQuery;
         }
     }
 
     if (!db.commit()) {
-        lwarn(op) << "can't commit game record: " << db.lastError().text();
+        logger_.error(op, "can't commit game record", {{"error", db.lastError().text()}});
         db.rollback();
         return Rc::ErrExecQuery;
     }
@@ -520,17 +525,17 @@ Rc Database::deleteGameRecord(const QString& id) {
     QSqlQuery query;
     bool ok = query.prepare("DELETE FROM game_records WHERE id = :id");
     if (!ok) {
-        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        logger_.error(op, "sql prepare error", {{"error", query.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
 
     query.bindValue(":id", id);
     if (!query.exec()) {
-        lwarn(op) << "sql exec error: " << query.lastError().text();
+        logger_.error(op, "sql exec error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
     if (query.numRowsAffected() == 0) {
-        lwarn(op) << "game record not found: " << id;
+        logger_.warning(op, "game record not found", {{"game_id", id}});
         return Rc::ErrNotFound;
     }
     return Rc::Ok;

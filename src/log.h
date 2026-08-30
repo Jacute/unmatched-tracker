@@ -1,15 +1,36 @@
 #pragma once
 
-#include <QDebug>
+#include <QString>
+#include <QVariantMap>
 
-/// @brief Creates a debug log stream prefixed with the provided tag.
-QDebug ldebug(const char* tag);
+enum LogLevel {
+    DEBUG,
+    INFO,
+    WARNING,
+    ERROR
+};
 
-/// @brief Creates a warning log stream prefixed with the provided tag.
-QDebug lwarn(const char* tag);
+class Logger {
+  public:
+    Logger(LogLevel level);
+    ~Logger() = default;
 
-/// @brief Creates an info log stream prefixed with the provided tag.
-QDebug linfo(const char* tag);
+    void debug(const char* tag, const QString& msg, const QVariantMap& args = {}) const;
+    void info(const char* tag, const QString& msg, const QVariantMap& args = {}) const;
+    void warning(const char* tag, const QString& msg, const QVariantMap& args = {}) const;
+    void error(const char* tag, const QString& msg, const QVariantMap& args = {}) const;
+    void error(const char* tag,
+               const QString& msg,
+               const QString& error,
+               const QVariantMap& args = {}) const;
 
-/// @brief Creates a critical error log stream prefixed with the provided tag.
-QDebug lerr(const char* tag);
+  private:
+    LogLevel level_;
+
+    void log(
+        const char* tag,
+        const QString& msg,
+        LogLevel level = LogLevel::INFO,
+        const QVariantMap& args = {}
+    ) const;
+};

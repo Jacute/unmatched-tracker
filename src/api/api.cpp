@@ -54,8 +54,8 @@ QTimer* replyWithTimeout(QNetworkReply* reply) {
 }
 } // namespace
 
-Api::Api(const QString& baseUrl)
-    : baseUrl_(baseUrl), manager_() {
+Api::Api(const Logger& logger, const QString& baseUrl)
+    : baseUrl_(baseUrl), manager_(), logger_(logger) {
 }
 
 Api::~Api() = default;
@@ -82,17 +82,17 @@ void Api::get(
         [
             timer,
             reply,
+            this,
             onFinished = std::move(onFinished),
             url,
             op
         ] {
             timer->stop();
             if (reply->error() != QNetworkReply::NoError) {
-                lwarn(op)
-                    << "request failed"
-                    << " url=" << url.toString()
-                    << " qtError=" << static_cast<int>(reply->error())
-                    << " message=" << reply->errorString();
+                logger_.warning(op, "request failed",
+                            {{"url", url.toString()},
+                             {"qt_error", static_cast<int>(reply->error())},
+                             {"error", reply->errorString()}});
                 if (reply->property(timeoutProperty).toBool()) {
                     onFinished(reply, Rc::ErrNetworkTimeout);
                     return;
@@ -100,7 +100,7 @@ void Api::get(
                 onFinished(reply, Rc::ErrNetworkRequest);
                 return;
             }
-            linfo(op) << "Request completed successfully url=" << url.toString();
+            logger_.info(op, "request completed", {{"url", url.toString()}});
             onFinished(reply, Rc::Ok);
         }
     );

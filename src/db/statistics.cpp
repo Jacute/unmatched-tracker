@@ -11,12 +11,12 @@ Rc Database::getProfileStats(const QString& profileId,
 
     QSqlQuery profileQuery(db);
     if (!profileQuery.prepare("SELECT 1 FROM player_profiles WHERE id = :profile_id")) {
-        lwarn(op) << "profile sql prepare error: " << profileQuery.lastError().text();
+        logger_.error(op, "profile sql prepare error", {{"error", profileQuery.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
     profileQuery.bindValue(":profile_id", profileId);
     if (!profileQuery.exec()) {
-        lwarn(op) << "profile sql exec error: " << profileQuery.lastError().text();
+        logger_.error(op, "profile sql exec error", {{"error", profileQuery.lastError().text()}});
         return Rc::ErrExecQuery;
     }
     if (!profileQuery.next()) {
@@ -32,13 +32,13 @@ Rc Database::getProfileStats(const QString& profileId,
             "JOIN game_records gr ON gr.id = grp.game_id "
             "JOIN heroes h ON h.id = grp.hero_id "
             "WHERE grp.profile_id = :profile_id AND gr.mode = :game_mode")) {
-        lwarn(op) << "totals sql prepare error: " << totalsQuery.lastError().text();
+        logger_.error(op, "totals sql prepare error", {{"error", totalsQuery.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
     totalsQuery.bindValue(":profile_id", profileId);
     totalsQuery.bindValue(":game_mode", gameMode);
     if (!totalsQuery.exec() || !totalsQuery.next()) {
-        lwarn(op) << "totals sql exec error: " << totalsQuery.lastError().text();
+        logger_.error(op, "totals sql exec error", {{"error", totalsQuery.lastError().text()}});
         return Rc::ErrExecQuery;
     }
     stats.gamesPlayed = totalsQuery.value(0).toULongLong();
@@ -57,13 +57,13 @@ Rc Database::getProfileStats(const QString& profileId,
             "GROUP BY h.id, h.name, h.img_path "
             "ORDER BY games_played DESC, games_won DESC, h.name COLLATE NOCASE "
             "LIMIT 1")) {
-        lwarn(op) << "hero sql prepare error: " << heroQuery.lastError().text();
+        logger_.error(op, "hero sql prepare error", {{"error", heroQuery.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
     heroQuery.bindValue(":profile_id", profileId);
     heroQuery.bindValue(":game_mode", gameMode);
     if (!heroQuery.exec()) {
-        lwarn(op) << "hero sql exec error: " << heroQuery.lastError().text();
+        logger_.error(op, "hero sql exec error", {{"error", heroQuery.lastError().text()}});
         return Rc::ErrExecQuery;
     }
     if (heroQuery.next()) {
@@ -83,13 +83,13 @@ Rc Database::getProfileStats(const QString& profileId,
                           "GROUP BY m.id, m.name, m.img_path "
                           "ORDER BY games_played DESC, m.name COLLATE NOCASE "
                           "LIMIT 1")) {
-        lwarn(op) << "map sql prepare error: " << mapQuery.lastError().text();
+        logger_.error(op, "map sql prepare error", {{"error", mapQuery.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
     mapQuery.bindValue(":profile_id", profileId);
     mapQuery.bindValue(":game_mode", gameMode);
     if (!mapQuery.exec()) {
-        lwarn(op) << "map sql exec error: " << mapQuery.lastError().text();
+        logger_.error(op, "map sql exec error", {{"error", mapQuery.lastError().text()}});
         return Rc::ErrExecQuery;
     }
     if (mapQuery.next()) {
@@ -118,14 +118,14 @@ Rc Database::getProfileHeroStats(const quint64& id, const QString& profileId, co
         "WHERE grp.hero_id = :hero_id AND grp.profile_id = :profile_id "
         "AND gr.mode = :mode"
     )) {
-        lwarn(op) << "statistic sql prepare error: " << query.lastError().text();
+        logger_.error(op, "statistic sql prepare error", {{"error", query.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
     query.bindValue(":hero_id", id);
     query.bindValue(":profile_id", profileId);
     query.bindValue(":mode", gameMode);
     if (!query.exec()) {
-        lwarn(op) << "hero found sql exec error: " << query.lastError().text();
+        logger_.error(op, "hero found sql exec error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
     if (query.next()) {
@@ -144,14 +144,14 @@ Rc Database::getProfileHeroStats(const quint64& id, const QString& profileId, co
                        "JOIN game_records gr ON grp.game_id = gr.id "
                        "WHERE grp.hero_id = :hero_id AND grp.profile_id = :profile_id "
                        "AND gr.mode = :mode")) {
-        lwarn(op) << "sql prepare error: " << query.lastError().text();
+        logger_.error(op, "sql prepare error", {{"error", query.lastError().text()}});
         return Rc::ErrPrepareQuery;
     }
     query.bindValue(":hero_id", id);
     query.bindValue(":profile_id", profileId);
     query.bindValue(":mode", gameMode);
     if (!query.exec()) {
-        lwarn(op) << "hero found sql exec error: " << query.lastError().text();
+        logger_.error(op, "hero found sql exec error", {{"error", query.lastError().text()}});
         return Rc::ErrExecQuery;
     }
     if (query.next()) {

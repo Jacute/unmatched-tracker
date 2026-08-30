@@ -10,7 +10,7 @@ Rc Database::executeSqlFile(const QString &path) {
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "Cannot open SQL file:" << path;
+        logger_.error(op, "cannot open SQL file", {{"path", path}});
         return Rc::ErrOpenFile;
     }
 
@@ -25,9 +25,10 @@ Rc Database::executeSqlFile(const QString &path) {
         q = q.trimmed();
         if (q.isEmpty())
             continue;
-        ldebug(op) << "Executing sql query " << q;
+        logger_.debug(op, "executing SQL query", {{"query", q}});
         if (!query.exec(q)) {
-            qWarning() << "sql error: " << query.lastError().text();
+            logger_.error(op, "SQL query failed",
+                        {{"error", query.lastError().text()}});
             return Rc::ErrExecQuery;
         }
     }
@@ -43,66 +44,74 @@ void Database::migrate(const QVector<QString> &migrationFiles) {
                              "path TEXT PRIMARY KEY,"
                              "applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP"
                              ")")) {
-        lwarn(op) << "can't initialize schema_migrations: " << migrationQuery.lastError().text();
+        logger_.error(op, "can't initialize schema migrations",
+                    {{"error", migrationQuery.lastError().text()}});
         return;
     }
 
     int fails = 0;
     for (const auto &mf : migrationFiles) {
         if (!migrationQuery.prepare("SELECT 1 FROM schema_migrations WHERE path = :path")) {
-            lwarn(op) << "can't prepare migration check: " << migrationQuery.lastError().text();
+            logger_.error(op, "can't prepare migration check",
+                        {{"error", migrationQuery.lastError().text()}, {"path", mf}});
             fails++;
             continue;
         }
         migrationQuery.bindValue(":path", mf);
         if (!migrationQuery.exec()) {
-            lwarn(op) << "can't check migration: " << migrationQuery.lastError().text();
+            logger_.error(op, "can't check migration",
+                        {{"error", migrationQuery.lastError().text()}, {"path", mf}});
             fails++;
             continue;
         }
         if (migrationQuery.next()) {
-            ldebug(op) << "Skipping already applied sql file " << mf;
+            logger_.debug(op, "migration already applied", {{"path", mf}});
             migrationQuery.finish();
             continue;
         }
         migrationQuery.finish();
 
         // Transaction for commands in one file
-        ldebug(op) << "Executing sql file " << mf;
+        logger_.debug(op, "applying migration", {{"path", mf}});
         if (!db.transaction()) {
-            lwarn(op) << "can't start migration transaction: " << db.lastError().text();
+            logger_.error(op, "can't start migration transaction",
+                        {{"error", db.lastError().text()}, {"path", mf}});
             fails++;
             continue;
         }
         if (executeSqlFile(mf) != Rc::Ok) {
             db.rollback();
-            lwarn(op) << "can't execute sql file: " << mf;
+            logger_.error(op, "can't execute migration", {{"path", mf}});
             fails++;
             continue;
         }
 
         if (!migrationQuery.prepare("INSERT INTO schema_migrations (path) VALUES (:path)")) {
             db.rollback();
-            lwarn(op) << "can't prepare migration record: " << migrationQuery.lastError().text();
+            logger_.error(op, "can't prepare migration record",
+                        {{"error", migrationQuery.lastError().text()}, {"path", mf}});
             fails++;
             continue;
         }
         migrationQuery.bindValue(":path", mf);
         if (!migrationQuery.exec()) {
             db.rollback();
-            lwarn(op) << "can't record migration: " << migrationQuery.lastError().text();
+            logger_.error(op, "can't record migration",
+                        {{"error", migrationQuery.lastError().text()}, {"path", mf}});
             fails++;
             continue;
         }
         if (!db.commit()) {
-            lwarn(op) << "can't commit migration: " << db.lastError().text();
+            logger_.error(op, "can't commit migration",
+                        {{"error", db.lastError().text()}, {"path", mf}});
             fails++;
         }
     }
 
     if (fails != 0) {
-        ldebug(op) << "migrations applied with " << fails << " fails";
+        logger_.error(op, "migrations completed with failures",
+                      QVariantMap{{"failures", fails}});
         return;
     }
-    ldebug(op) << "migrations successfully applied";
+    logger_.debug(op, "migrations successfully applied");
 };

@@ -23,16 +23,16 @@ const QString defaultFontPath = uiPath + "/assets/fonts/BebasNeue-Regular.ttf";
 const QString mainQmlPath = uiPath + "/Main.qml";
 const QString cfgPath = rscPath + "/src/config.json";
 
-void loadResources(QGuiApplication& app) {
+void loadResources(const Logger& logger, QGuiApplication& app) {
     const char op[] = "loadResources";
 
     int fontId = QFontDatabase::addApplicationFont(defaultFontPath);
     if (fontId == -1) {
-        lwarn(op) << "Font " << defaultFontPath << " not loaded, error code: " << fontId;
+        logger.warning(op, "font not loaded", {{"font_ret", fontId}});
         return;
     }
 
-    ldebug(op) << "Font " << defaultFontPath << " added";
+    logger.debug(op, "font loaded", {{"font_path", defaultFontPath}});
     QStringList fontFamilies = QFontDatabase::applicationFontFamilies(fontId);
     if (!fontFamilies.isEmpty()) {
         QFont defaultFont(fontFamilies.first());
@@ -45,23 +45,28 @@ int main(int argc, char* argv[]) {
     const char op[] = "main";
 
     QGuiApplication app(argc, argv);
+#ifdef NDEBUG
+    const Logger logger(LogLevel::INFO);
+#else
+    const Logger logger(LogLevel::DEBUG);
+#endif
     QCoreApplication::setOrganizationName("jacute");
     QCoreApplication::setApplicationName("Unmatched Tracker");
     QCoreApplication::setApplicationVersion(QStringLiteral(APP_VERSION));
     QQmlApplicationEngine engine;
 
-    Config cfg(cfgPath);
+    Config cfg(logger, cfgPath);
 
-    loadResources(app);
+    loadResources(logger, app);
 
     QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     QDir().mkpath(path);
     const QString dbPath = path + "/app.db";
-    Database db(dbPath, cfg.db.dbName_);
-    DbExporter dbExporter;
+    Database db(logger, dbPath, cfg.db.dbName_);
+    DbExporter dbExporter(logger);
     Rc rc = db.open();
     if (rc != Rc::Ok) {
-        lerr(op) << "database open error: " << rc2str(rc);
+        logger.error(op, "database open error", rc2str(rc));
         return static_cast<int>(rc);
     }
 
@@ -70,39 +75,45 @@ int main(int argc, char* argv[]) {
     const QString apiBaseUrl =
         cfg.assetsBaseUrl.isEmpty() ? QStringLiteral(API_URL) : cfg.assetsBaseUrl;
 
-    Api api(apiBaseUrl);
+    Api api(logger, apiBaseUrl);
     FileCache cache;
     File fileProvider(cache, api);
 
-    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, [&op](const QUrl& url) {
-        ldebug(op) << "object creation failed:" << url;
+    QObject::connect(&engine, &QQmlApplicationEngine::objectCreationFailed, [&logger, &op](const QUrl& url) {
+        logger.warning(op, "object creation failed", {{"url", url}});
         QCoreApplication::exit(-1);
     });
 
-    Core core(db, dbExporter, &fileProvider);
-    KeepAwakeHelper keepAwakeHelper;
+    Core core(logger, db, dbExporter, &fileProvider);
+    KeepAwakeHelper keepAwakeHelper(logger);
     engine.rootContext()->setContextProperty("core", &core);
     engine.rootContext()->setContextProperty("keepAwakeHelper", &keepAwakeHelper);
 
-    ldebug(op) << "Loading:" << mainQmlPath;
+    logger.debug(
+        op, "Loading main qml", {
+            {"main_qml_path", mainQmlPath}
+        }
+    );
     engine.load(mainQmlPath);
 
     if (engine.rootObjects().isEmpty()) {
-        ldebug(op) << "=== No root objects loaded ===";
+        logger.warning(op, "=== No root objects loaded ===");
         return -1;
     }
 
     QVariantMap buildInfo = core.getBuildInfo();
-    ldebug(op) << "Application running successfully with config: " << cfg;
-    linfo(op) << "SSL supported: " << QSslSocket::supportsSsl();
-    linfo(op) << "Build SSL: " << QSslSocket::sslLibraryBuildVersionString();
-    linfo(op) << "Runtime SSL: " << QSslSocket::sslLibraryVersionString();
-    linfo(op) << "App version: " << buildInfo["version"].toString();
-    linfo(op) << "App build hash: " << buildInfo["commit"].toString();
+    logger.debug(op, "application running",
+               {{"assets_base_url", cfg.assetsBaseUrl}, {"db_name", cfg.db.dbName_}});
+    logger.info(op, "SSL support checked",
+               {{"supported", QSslSocket::supportsSsl()},
+                {"build_version", QSslSocket::sslLibraryBuildVersionString()},
+                {"runtime_version", QSslSocket::sslLibraryVersionString()}});
+    logger.info(op, "build info",
+               {{"version", buildInfo["version"]}, {"commit", buildInfo["commit"]}});
 
     int appRc = app.exec();
     if (appRc != 0) {
-        lerr(op) << "Application closed with error code: " << appRc;
+        logger.error(op, "application closed with error", QString::number(appRc));
     }
     db.close();
 }

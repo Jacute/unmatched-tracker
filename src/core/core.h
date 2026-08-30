@@ -2,6 +2,7 @@
 
 #include "../db/db.h"
 #include "../models.h"
+#include "../log.h"
 #include "db_exporter.h"
 #include "fileprovider.h"
 
@@ -16,7 +17,7 @@ class Core : public QObject {
     Q_OBJECT
 
   public:
-    explicit Core(Database&, DbExporter&, FileProvider*);
+    explicit Core(const Logger&, Database&, DbExporter&, FileProvider*);
     ~Core() = default;
     Core(Core&) = delete;
     Core& operator=(Core&) = delete;
@@ -76,5 +77,6 @@ class Core : public QObject {
     Database& db_;
     DbExporter& dbExporter_;
     FileProvider* provider_;
+    const Logger& logger_;
     QSet<QString> pendingImages_; // set of images is loading now
 };

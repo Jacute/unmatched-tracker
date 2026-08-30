@@ -7,16 +7,17 @@
 #include <QJsonObject>
 #include <QJsonValue>
 
-Config::Config(const QString& path) {
+Config::Config(const Logger& logger, const QString& path)
+    : logger_(logger) {
     const char op[] = "Config::Config";
 
     QFile file(path);
     if (!file.open(QIODevice::ReadOnly)) {
-        lwarn(op) << "Can't open file " << path;
+        logger_.warning(op, "can't open config file", {{"path", path}});
         return;
     }
     QByteArray data = file.readAll();
-    ldebug(op) << "config data " << data;
+    logger_.debug(op, "config loaded", {{"path", path}});
     file.close();
     QJsonDocument doc = QJsonDocument::fromJson(data);
 

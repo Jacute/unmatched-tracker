@@ -5,10 +5,12 @@
 #include <QCoreApplication>
 #include <QJniObject>
 
+#include "../log.h"
+
 class KeepAwakeHelper : public QObject {
     Q_OBJECT
   public:
-    KeepAwakeHelper() = default;
+    explicit KeepAwakeHelper(const Logger& logger) : logger_(logger) {}
     ~KeepAwakeHelper() = default;
     KeepAwakeHelper(KeepAwakeHelper&) = delete;
     KeepAwakeHelper& operator=(KeepAwakeHelper&) = delete;
@@ -21,6 +23,7 @@ class KeepAwakeHelper : public QObject {
   private:
     void set(bool enabled) const;
     bool isKeepScreenOn() const;
+    const Logger& logger_;
 };
 
 #endif // KEEPAWAKEHELPER_H

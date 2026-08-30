@@ -2,6 +2,7 @@
 #define API_H
 
 #include "../rc.h"
+#include "../log.h"
 
 #include <QByteArray>
 #include <QString>
@@ -17,6 +18,7 @@ class Api {
   private:
     QString baseUrl_;
     QNetworkAccessManager manager_;
+    const Logger& logger_;
 
     void get(
         const QUrl& url,
@@ -24,7 +26,7 @@ class Api {
     );
 
   public:
-    Api(const QString& baseUrl);
+    Api(const Logger& logger, const QString& baseUrl);
     ~Api();
 
     Api(const Api&) = delete;
