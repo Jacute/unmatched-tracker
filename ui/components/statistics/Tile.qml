@@ -1,13 +1,17 @@
 import QtQuick
+import QtQuick.Layouts
 
 import Tracker
+import "../info" as Info
 
 Rectangle {
     property string title: ""
+    property string description: ""
     property string value: ""
     property string detail: ""
     property color accentColor: Common.accent
 
+    id: root
     implicitHeight: 106
     color: Common.primary
     radius: 8
@@ -33,22 +37,36 @@ Rectangle {
             topMargin: 9
             bottomMargin: 8
         }
-        spacing: 2
+        spacing: Common.fieldSpacing
 
-        Text {
+        RowLayout {
             width: parent.width
-            text: parent.parent.title
-            color: Common.textSecondary
-            font.pixelSize: 12
-            font.bold: true
-            wrapMode: Text.WordWrap
-            maximumLineCount: 2
-            elide: Text.ElideRight
+            Text {
+                Layout.alignment: Qt.AlignTop
+                text: root.title
+                color: Common.textSecondary
+                font.pixelSize: 12
+                font.bold: true
+                wrapMode: Text.WordWrap
+                maximumLineCount: 2
+                elide: Text.ElideRight
+            }
+            Item {
+                Layout.preferredWidth: 20
+                Layout.preferredHeight: 20
+                Layout.alignment: Qt.AlignTop
+
+                Info.Tooltip {
+                    anchors.fill: parent
+                    visible: root.description !== ""
+                    description: root.description
+                }
+            }
         }
 
         Text {
             width: parent.width
-            text: parent.parent.value
+            text: root.value
             color: Common.textColor
             font.pixelSize: 26
             font.bold: true
@@ -58,7 +76,7 @@ Rectangle {
         Text {
             width: parent.width
             visible: text.length > 0
-            text: parent.parent.detail
+            text: root.detail
             color: Common.textHint
             font.pixelSize: 11
             elide: Text.ElideRight

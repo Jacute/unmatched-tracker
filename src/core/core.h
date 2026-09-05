@@ -2,6 +2,7 @@
 
 #include "../db/db.h"
 #include "../models.h"
+#include "../log.h"
 #include "db_exporter.h"
 #include "fileprovider.h"
 
@@ -16,7 +17,7 @@ class Core : public QObject {
     Q_OBJECT
 
   public:
-    explicit Core(Database&, DbExporter&, FileProvider*);
+    explicit Core(const Logger&, Database&, DbExporter&, FileProvider*);
     ~Core() = default;
     Core(Core&) = delete;
     Core& operator=(Core&) = delete;
@@ -30,8 +31,17 @@ class Core : public QObject {
     Q_INVOKABLE QVariantList getSHM() const;
     Q_INVOKABLE QVariantList getCardsByHeroId(quint64 heroId) const;
     Q_INVOKABLE QVariantList getProfiles() const;
-    Q_INVOKABLE QVariantMap getProfileStats(const QString& profileId,
-                                            const QString& gameMode) const;
+    Q_INVOKABLE QVariantMap getProfileStats(
+        const QString& profileId,
+        const QString& gameMode
+    ) const;
+    Q_INVOKABLE QVariantMap getProfileHeroStats(
+      const quint64& id,
+      const QString& gameMode
+    ) const;
+    Q_INVOKABLE QVariantMap getHeroCommonStats(quint64 heroId) const;
+    Q_INVOKABLE QVariantMap getHeroMatchups(quint64 heroId) const;
+    Q_INVOKABLE QVariantMap getUnplayedHeroMatchups(quint64 heroId) const;
     Q_INVOKABLE QString getDefaultProfileId() const;
     Q_INVOKABLE QVariantMap setDefaultProfileId(const QString& profileId) const;
     Q_INVOKABLE QVariantMap createProfile(const QString& name) const;
@@ -42,10 +52,6 @@ class Core : public QObject {
     Q_INVOKABLE QVariantMap createGameRecord(const QVariantMap& game) const;
     Q_INVOKABLE QVariantMap deleteGameRecord(const QString& id) const;
 
-    // @brief Get image from storage/api (sync)
-    // @param[in] path Http path of file in REST api
-    // @return Return url - Local url of file which starts with file://
-    Q_INVOKABLE QString getImage(const QString& path) const;
     // @brief Get image from storage/api (async). Url of file returns in signal.
     // @param[in] path Http path of file in REST api
     Q_INVOKABLE void requestImage(const QString& path);
@@ -74,6 +80,6 @@ class Core : public QObject {
     Database& db_;
     DbExporter& dbExporter_;
     FileProvider* provider_;
-    QThreadPool imageThreadPool_; // threads for loading images
+    const Logger& logger_;
     QSet<QString> pendingImages_; // set of images is loading now
 };

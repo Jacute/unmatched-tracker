@@ -5,6 +5,8 @@ import QtQuick.Layouts
 
 import Tracker
 import "../components"
+import "../core/client.js" as CoreClient
+import "../core/model.js" as Model
 
 Rectangle {
     id: root
@@ -73,6 +75,42 @@ Rectangle {
             }
         }
 
+        FieldBox {
+            Layout.fillWidth: true
+            label: qsTr("Default profile")
+            ThemedComboBox {
+                id: profileSelect
+                anchors.fill: parent
+                model: profilesModel
+                textRole: "name"
+
+                onActivated: (index) => {
+                    let profile = profilesModel.get(index)
+                    logger.debug(
+                        "Settings",
+                        "profile selected",
+                        {
+                            "source": "ui",
+                            "profile_name": profile.name,
+                        },
+                    )
+                    let res = core.setDefaultProfileId(profile.id)
+                    if (!res.ok) {
+                        logger.error(
+                        "Settings",
+                            "error setting default profile",
+                            {
+                                "source": "ui",
+                                "profile_id": profile.id,
+                                "profile_name": profile.name,
+                                "error": res.error
+                            },
+                        )
+                    }
+                }
+            }
+        }
+
         Text {
             id: statusText
 
@@ -136,4 +174,24 @@ Rectangle {
                 : qsTr("Database export failed: %1").arg(result.error)
         }
     }
+
+    ListModel { id: profilesModel }
+
+    Component.onCompleted: {
+        if (visible) {
+            loadData()
+            profileSelect.currentIndex = Model.findProfileById(profilesModel, core.getDefaultProfileId())
+        }
+    }
+
+    onVisibleChanged: {
+        if (visible) {
+            loadData()
+            profileSelect.currentIndex = Model.findProfileById(profilesModel, core.getDefaultProfileId())
+        }
+    }
+
+    function loadData() {
+        CoreClient.loadProfiles(core, profilesModel)
+    }    
 }

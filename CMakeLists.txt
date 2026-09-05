@@ -41,7 +41,15 @@ if(APP_BUILD_TYPE STREQUAL "")
     set(APP_BUILD_TYPE "unknown")
 endif()
 
-find_package(Qt6 6.11 REQUIRED COMPONENTS Quick Sql Network Multimedia Core)
+find_package(
+    Qt6 6.11
+    REQUIRED COMPONENTS
+    Quick
+    Sql
+    Network
+    Multimedia
+    Core
+)
 
 qt_standard_project_setup()
 qt_policy(SET QTP0001 NEW)
@@ -54,6 +62,7 @@ qt_add_executable(${TARGET}
     ${SRC_DIR}/config.cpp
     ${SRC_DIR}/api/api.cpp
     ${SRC_DIR}/db/db.cpp
+    ${SRC_DIR}/db/statistics.cpp
     ${SRC_DIR}/db/migrator.cpp
     ${SRC_DIR}/core/core.cpp
     ${SRC_DIR}/core/db_exporter.cpp
@@ -64,7 +73,7 @@ qt_add_executable(${TARGET}
 
 set(plain_qml_files
     ${QML_DIR}/Main.qml
-    ${QML_DIR}/views/Home.qml
+    ${QML_DIR}/views/Overview.qml
     ${QML_DIR}/views/set/SetStack.qml
     ${QML_DIR}/views/set/Set.qml
     ${QML_DIR}/views/set/hero/Hero.qml
@@ -86,6 +95,7 @@ set(plain_qml_files
     ${QML_DIR}/components/BigImagePopup.qml
     ${QML_DIR}/components/Header.qml
     ${QML_DIR}/components/Menu.qml
+    ${QML_DIR}/components/info/Tooltip.qml
     ${QML_DIR}/components/menu/MenuItem.qml
     ${QML_DIR}/components/menu/MenuGroup.qml
     ${QML_DIR}/components/RandomWheel.qml
@@ -93,7 +103,6 @@ set(plain_qml_files
     ${QML_DIR}/components/MultiSelectDropdown.qml
     ${QML_DIR}/components/FieldBox.qml
     ${QML_DIR}/components/ThemedComboBox.qml
-    ${QML_DIR}/components/StatTile.qml
     ${QML_DIR}/components/DeleteConfirmPopup.qml
     ${QML_DIR}/components/VS.qml
     ${QML_DIR}/components/GameMap.qml
@@ -116,6 +125,8 @@ set(plain_qml_files
     ${QML_DIR}/components/timer/TimerCenterPanel.qml
     ${QML_DIR}/components/timer/TimerTargetPicker.qml
     ${QML_DIR}/components/image/Rounded.qml
+    ${QML_DIR}/components/statistics/Tile.qml
+    ${QML_DIR}/components/statistics/SRow.qml
 )
 
 set(qml_singletons
@@ -195,3 +206,12 @@ install(TARGETS tracker
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+if(ANDROID)
+    set_property(
+        TARGET ${TARGET}
+        APPEND PROPERTY QT_ANDROID_EXTRA_LIBS
+        "${CMAKE_SOURCE_DIR}/lib/libcrypto_3.so"
+        "${CMAKE_SOURCE_DIR}/lib/libssl_3.so"
+    )
+endif()

@@ -66,20 +66,43 @@ struct PlayerProfile {
 };
 
 struct ProfileStats {
-    quint64 gamesPlayed{};
-    quint64 gamesWon{};
-    QVariant averageWinningHp;
+    quint64 gamesPlayed;
+    quint64 gamesWon;
+    QVariant averageWinningHp; // in percent
 
-    quint64 favoriteHeroId{};
+    quint64 favoriteHeroId;
     QString favoriteHeroName;
     QString favoriteHeroImgPath;
-    quint64 favoriteHeroGames{};
-    quint64 favoriteHeroWins{};
+    quint64 favoriteHeroGames;
+    quint64 favoriteHeroWins;
 
-    quint64 favoriteMapId{};
+    quint64 favoriteMapId;
     QString favoriteMapName;
     QString favoriteMapImgPath;
-    quint64 favoriteMapGames{};
+    quint64 favoriteMapGames;
+};
+
+struct HeroStats {
+    quint64 games;
+    quint64 wins;
+    QVariant averageWinningHp; // in percent
+    quint64 mostPlayedEnemyId;
+    QString firstPlayedAt;
+    QString lastPlayedAt;
+};
+
+struct HeroMatchup {
+    quint64 opponentHeroId;
+    QString opponentHeroName;
+    QString opponentHeroImgPath;
+    quint64 games;
+    double winRate{};
+};
+
+struct UnplayedHeroMatchup {
+    quint64 opponentHeroId;
+    QString opponentHeroName;
+    QString opponentHeroImgPath;
 };
 
 struct GameRecordParticipantInput {
@@ -89,16 +112,6 @@ struct GameRecordParticipantInput {
     quint64 heroId;
     QVariant heroRemainingHp;
 };
-
-inline QDebug operator<<(QDebug debug, const GameRecordParticipantInput& participant) {
-    QDebugStateSaver saver(debug);
-    debug.nospace() << "GameRecordParticipantInput(position="
-                    << static_cast<quint32>(participant.position)
-                    << ", team=" << static_cast<quint32>(participant.team)
-                    << ", profileId=" << participant.profileId << ", heroId=" << participant.heroId
-                    << ", heroRemainingHp=" << participant.heroRemainingHp << ')';
-    return debug;
-}
 
 struct GameRecordParticipant {
     quint8 position;

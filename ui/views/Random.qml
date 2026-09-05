@@ -242,7 +242,6 @@ Rectangle {
             }
 
             root.requestedMapImagePaths[path] = false
-            console.error("[Random] map image " + path + " not loaded")
         }
     }
 
@@ -262,7 +261,14 @@ Rectangle {
     function loadData() {
         const config = core.loadRandomizerConfig()
         if (!config.ok) {
-            console.error("[Random] can't load config: " + config.error)
+            logger.error(
+                "Random",
+                "can't load config",
+                {
+                    "source": "ui",
+                    "error": config.error,
+                },
+            )
         }
         const heroStates = config.ok && config.exists ? config.heroes : ({})
         const mapStates = config.ok && config.exists ? config.maps : ({})
@@ -279,7 +285,14 @@ Rectangle {
                 enabled: root.savedEnabled(heroStates, heroes[i].id)
             })
         }
-        console.debug("heroes loaded " + heroesModel)
+        logger.info(
+            "Random",
+            "heroes loaded",
+            {
+                "source": "ui",
+                "count": heroesModel.count,
+            },
+        )
 
         mapsModel.clear()
         let maps = core.getMaps()
@@ -293,7 +306,14 @@ Rectangle {
                 enabled: root.savedEnabled(mapStates, maps[i].id)
             })
         }
-        console.debug("maps loaded " + mapsModel)
+        logger.info(
+            "Random",
+            "maps loaded",
+            {
+                "source": "ui",
+                "count": mapsModel.count,
+            },
+        )
         root.requestMapImages()
 
         setModel.clear()
@@ -308,7 +328,14 @@ Rectangle {
             })
         }
         randomFilter.syncSetStates()
-        console.debug("sets loaded " + setModel)
+        logger.info(
+            "Random",
+            "sets loaded",
+            {
+                "source": "ui",
+                "count": setModel.count,
+            },
+        )
     }
 
     function savedEnabled(states, id) {
@@ -331,7 +358,14 @@ Rectangle {
             root.configItems(mapsModel)
         )
         if (!result.ok) {
-            console.error("[Random] can't save config: " + result.error)
+            logger.error(
+                "Random",
+                "can't save randomizer config",
+                {
+                    "source": "ui",
+                    "error": result.error
+                },
+            )
         }
     }
 

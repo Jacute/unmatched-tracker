@@ -5,17 +5,22 @@
 #include "../rc.h"
 #include "filecache.h"
 
+#include <functional>
+
 class File : public FileProvider {
   private:
     const FileCache& cache_;
-    const Api& api_;
+    Api& api_;
 
   public:
-    File(const FileCache&, const Api&);
+    File(const FileCache&, Api&);
     ~File() = default;
 
     //
-    Rc get(const QString& path, QString& sourceUrl) override;
+    void get(
+        const QString& path,
+        FileCallback onFile
+    ) override;
 
   private:
     Rc getCached(const QString& path, QString& sourceUrl) const;

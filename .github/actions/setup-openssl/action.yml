@@ -1,0 +1,112 @@
+name: Set up OpenSSL for Android
+description: Build and cache Qt-compatible OpenSSL shared libraries for Android
+
+inputs:
+  openssl-version:
+    description: OpenSSL Git tag to build
+    required: false
+    default: openssl-3.5.8
+  android-target:
+    description: OpenSSL Android Configure target
+    required: false
+    default: android-arm64
+  android-api:
+    description: Minimum Android API level
+    required: false
+    default: "28"
+  android-abi:
+    description: Android ABI used in the cache key
+    required: false
+    default: arm64-v8a
+  ndk-version:
+    description: Android NDK version installed under ANDROID_SDK_ROOT
+    required: true
+
+outputs:
+  crypto_library:
+    description: Absolute path to libcrypto_3.so
+    value: ${{ steps.paths.outputs.crypto_library }}
+  ssl_library:
+    description: Absolute path to libssl_3.so
+    value: ${{ steps.paths.outputs.ssl_library }}
+
+runs:
+  using: composite
+  steps:
+    - name: Resolve library paths
+      id: paths
+      shell: bash
+      run: |
+        set -euo pipefail
+        printf 'crypto_library=%s/lib/libcrypto_3.so\n' "$GITHUB_WORKSPACE" >> "$GITHUB_OUTPUT"
+        printf 'ssl_library=%s/lib/libssl_3.so\n' "$GITHUB_WORKSPACE" >> "$GITHUB_OUTPUT"
+
+    - name: Restore OpenSSL cache
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/lib
+        key: openssl3-${{ inputs.openssl-version }}-${{ inputs.android-target }}-${{ inputs.android-abi }}-api${{ inputs.android-api }}-ndk${{ inputs.ndk-version }}-v1
+
+    - name: Install OpenSSL build dependencies
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        sudo apt-get update
+        sudo apt-get install --yes make patchelf perl
+
+    - name: Build OpenSSL
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        OPENSSL_VERSION: ${{ inputs.openssl-version }}
+        OPENSSL_ANDROID_TARGET: ${{ inputs.android-target }}
+        OPENSSL_ANDROID_API: ${{ inputs.android-api }}
+        OPENSSL_NDK_VERSION: ${{ inputs.ndk-version }}
+      run: |
+        set -euo pipefail
+
+        openssl_source="$RUNNER_TEMP/openssl-$OPENSSL_VERSION"
+        openssl_output="$GITHUB_WORKSPACE/openssl"
+        task_ndk_root="$ANDROID_SDK_ROOT/ndk/$OPENSSL_NDK_VERSION"
+
+        test -d "$task_ndk_root"
+        rm -rf "$openssl_source"
+        mkdir -p "$openssl_output"
+
+        git clone \
+          --depth 1 \
+          --branch "$OPENSSL_VERSION" \
+          https://github.com/openssl/openssl.git \
+          "$openssl_source"
+
+        export ANDROID_NDK_ROOT="$task_ndk_root"
+        export PATH="$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64/bin:$PATH"
+
+        cd "$openssl_source"
+
+        ./Configure \
+          "$OPENSSL_ANDROID_TARGET" \
+          shared \
+          no-tests \
+          -D__ANDROID_API__="$OPENSSL_ANDROID_API" \
+          --prefix="$openssl_output"
+
+        make -j$(nproc)
+        make install_sw
+
+        mkdir "$GITHUB_WORKSPACE/lib"
+        mv "$openssl_output"/lib/libcrypto.so "$GITHUB_WORKSPACE/lib/libcrypto_3.so"
+        mv "$openssl_output"/lib/libssl.so "$GITHUB_WORKSPACE/lib/libssl_3.so"
+
+    - name: Verify OpenSSL libraries
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        crypto_library="$GITHUB_WORKSPACE/lib/libcrypto_3.so"
+        ssl_library="$GITHUB_WORKSPACE/lib/libssl_3.so"
+
+        test -s "$crypto_library"
+        test -s "$ssl_library"

@@ -2,18 +2,31 @@
 #define API_H
 
 #include "../rc.h"
+#include "../log.h"
 
 #include <QByteArray>
 #include <QString>
+#include <QNetworkAccessManager>
+
+#include <functional>
 
 class Api {
+  public:
+    using AssetCallback = std::function<void(QByteArray, Rc)>;
+    using ReqFinishedCallback = std::function<void(QNetworkReply*, Rc)>;
+
   private:
     QString baseUrl_;
+    QNetworkAccessManager manager_;
+    const Logger& logger_;
 
-    Rc get(const QString& path, QByteArray& out, QString& contentType, int& statusCode) const;
+    void get(
+        const QUrl& url,
+        ReqFinishedCallback onFinished
+    );
 
   public:
-    Api(const QString& baseUrl);
+    Api(const Logger& logger, const QString& baseUrl);
     ~Api();
 
     Api(const Api&) = delete;
@@ -21,7 +34,10 @@ class Api {
     Api(Api&&) = delete;
     Api& operator=(Api&&) = delete;
 
-    Rc getAsset(const QString& path, QByteArray& out) const;
+    void getAsset(
+        const QString& path,
+        AssetCallback onFinished
+    );
 };
 
 #endif

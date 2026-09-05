@@ -96,8 +96,8 @@ ApplicationWindow {
             visible: root.page === Common.pageSet
         }
 
-        Home {
-            id: homePage
+        Overview {
+            id: overviewPage
             anchors.fill: parent
             visible: root.page === Common.pageHome
 

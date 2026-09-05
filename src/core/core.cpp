@@ -15,23 +15,23 @@
 #include <QStandardPaths>
 #include <QThread>
 #include <QUuid>
+#include <QString>
 
-const int imgThreadCount = QThread::idealThreadCount() / 2;
 constexpr const char* dbDateFormat = "yyyy-MM-dd";
 constexpr const char* displayDateFormat = "dd-MM-yyyy";
 constexpr const char* randomizerConfigFileName = "randomizer.json";
 constexpr const char* defaultProfileSettingsKey = "preferences/default_profile_id";
 
-static QString randomizerConfigPath() {
-    const QString storagePath =
-        QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+namespace {
+QString randomizerConfigPath() {
+    const QString storagePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (storagePath.isEmpty()) {
         return {};
     }
     return QDir(storagePath).filePath(randomizerConfigFileName);
 }
 
-static bool enabledItemsToJson(const QVariantList& items, QJsonObject& result) {
+bool enabledItemsToJson(const QVariantList& items, QJsonObject& result) {
     for (const QVariant& item : items) {
         const QVariantMap itemMap = item.toMap();
         bool idOk = false;
@@ -44,7 +44,7 @@ static bool enabledItemsToJson(const QVariantList& items, QJsonObject& result) {
     return true;
 }
 
-static bool isEnabledItemsJson(const QJsonObject& items) {
+bool isEnabledItemsJson(const QJsonObject& items) {
     for (auto it = items.constBegin(); it != items.constEnd(); ++it) {
         bool idOk = false;
         const quint64 id = it.key().toULongLong(&idOk);
@@ -55,14 +55,25 @@ static bool isEnabledItemsJson(const QJsonObject& items) {
     return true;
 }
 
-Core::Core(Database& db, DbExporter& dbExporter, FileProvider* fp)
+QString filesrc2str(FileSource src) {
+    switch (src)
+    {
+    case FileSource::Cache:
+        return "cache";
+    case FileSource::Http:
+        return "http";
+    default:
+        return "unknown";
+    }
+}
+} // namespace
+
+Core::Core(const Logger& logger, Database& db, DbExporter& dbExporter, FileProvider* fp)
     : db_(db),
       dbExporter_(dbExporter),
       provider_(fp),
-      QObject(nullptr) {
-    linfo("Core::Core") << "initialize core with " << imgThreadCount << " img threads";
-    imageThreadPool_.setMaxThreadCount(imgThreadCount);
-};
+      logger_(logger),
+      QObject(nullptr) {};
 
 static QVariantList mapHeroesQml(const QVector<models::Hero>& heroes) {
     QVariantList list;
@@ -150,7 +161,7 @@ QVariantList Core::getHeroes() const {
     if (rc != Rc::Ok) {
         return QVariantList{};
     }
-    ldebug(op) << "heroes got from db";
+    logger_.debug(op, "heroes got from db");
 
     return mapHeroesQml(heroes);
 }
@@ -158,13 +169,13 @@ QVariantList Core::getHeroes() const {
 QVariantList Core::getHeroesBySetId(quint64 setId) const {
     const char op[] = "Core::getHeroesBySetId";
 
-    linfo(op) << "getting heroes by set id";
+    logger_.info(op, "getting heroes by set id");
     QVector<models::Hero> heroes;
     Rc rc = db_.getHeroesBySetId(setId, heroes);
     if (rc != Rc::Ok) {
         return QVariantList{};
     }
-    linfo(op) << "heroes by set id got successfully";
+    logger_.info(op, "heroes by set id got successfully");
 
     return mapHeroesQml(heroes);
 }
@@ -177,7 +188,7 @@ QVariantList Core::getMaps() const {
     if (rc != Rc::Ok) {
         return QVariantList{};
     }
-    ldebug(op) << "heroes got from db";
+    logger_.debug(op, "heroes got from db");
 
     QVariantList list;
     for (const auto& m : maps) {
@@ -200,7 +211,7 @@ QVariantList Core::getSets() const {
     if (rc != Rc::Ok) {
         return QVariantList{};
     }
-    ldebug(op) << "short sets got from db";
+    logger_.debug(op, "short sets got from db");
 
     QVariantList list;
     for (const auto& s : sets) {
@@ -222,7 +233,7 @@ QVariantList Core::getSHM() const {
     if (rc != Rc::Ok) {
         return QVariantList{};
     }
-    ldebug(op) << "sets got from db";
+    logger_.debug(op, "sets got from db");
 
     QVariantList list;
     for (const auto& s : sets) {
@@ -267,7 +278,7 @@ QVariantList Core::getCardsByHeroId(quint64 heroId) const {
     if (rc != Rc::Ok) {
         return QVariantList{};
     }
-    ldebug(op) << "cards by hero id got from db";
+    logger_.debug(op, "cards by hero id got from db");
 
     QVariantList list;
     for (const auto& c : cards) {
@@ -292,7 +303,7 @@ QVariantList Core::getProfiles() const {
     if (rc != Rc::Ok) {
         return QVariantList{};
     }
-    ldebug(op) << "profiles got from db";
+    logger_.debug(op, "profiles got from db");
 
     QVariantList list;
     for (const auto& p : profiles) {
@@ -311,7 +322,7 @@ QVariantMap Core::getProfileStats(const QString& profileId, const QString& gameM
 
     const QString trimmedId = profileId.trimmed();
     if (trimmedId.isEmpty() || QUuid(trimmedId).isNull()) {
-        lwarn(op) << "invalid profile id: " << profileId;
+        logger_.warning(op, "invalid profile id", {{"profile_id", profileId}});
         result["error"] = err_profile::InvalidId;
         return result;
     }
@@ -319,7 +330,7 @@ QVariantMap Core::getProfileStats(const QString& profileId, const QString& gameM
     int playerCount = 0;
     int teamCount = 0;
     if (!gameModeSpec(gameMode, playerCount, teamCount)) {
-        lwarn(op) << "invalid game mode: " << gameMode;
+        logger_.warning(op, "invalid game mode", {{"game_mode", gameMode}});
         result["error"] = err_game::InvalidData;
         return result;
     }
@@ -327,11 +338,11 @@ QVariantMap Core::getProfileStats(const QString& profileId, const QString& gameM
     models::ProfileStats stats;
     const Rc rc = db_.getProfileStats(trimmedId, gameMode, stats);
     if (rc == Rc::ErrNotFound) {
-        result["error"] = err_profile::NotFound;
+        result["error"] = err::NotFound;
         return result;
     }
     if (rc != Rc::Ok) {
-        lerr(op) << "error getting profile stats: " << rc2str(rc);
+        logger_.error(op, "error getting profile stats", rc2str(rc));
         result["error"] = err::DbError;
         return result;
     }
@@ -369,6 +380,148 @@ QVariantMap Core::getProfileStats(const QString& profileId, const QString& gameM
     return result;
 }
 
+QVariantMap Core::getHeroCommonStats(quint64 heroId) const {
+    const char op[] = "Core::getHeroCommonStats";
+    QVariantMap result{{"ok", false}, {"error", err::None}};
+
+    quint64 games = 0;
+    quint64 wins = 0;
+    double winRate = 0.0;
+    QVariant averageWinningHp;
+
+    Rc rc = db_.getHeroGamesAndWins(heroId, games, wins);
+    if (rc == Rc::Ok) {
+        rc = db_.getHeroWinRate(heroId, winRate);
+    }
+    if (rc == Rc::Ok) {
+        rc = db_.getHeroAverageWinningHp(heroId, averageWinningHp);
+    }
+    if (rc != Rc::Ok) {
+        logger_.error(op, "error getting common hero stats", rc2str(rc), {{"hero_id", heroId}});
+        result["error"] = err::DbError;
+        return result;
+    }
+
+    result["stats"] = QVariantMap{
+        {"games_played", games},
+        {"games_won", wins},
+        {"win_percentage", winRate},
+        {"average_winning_hp", averageWinningHp},
+    };
+    result["ok"] = true;
+    return result;
+}
+
+QVariantMap Core::getHeroMatchups(quint64 heroId) const {
+    const char op[] = "Core::getHeroMatchups";
+    QVariantMap result{{"ok", false}, {"error", err::None}};
+    QVector<models::HeroMatchup> matchups;
+
+    const Rc rc = db_.getHeroMatchups(heroId, matchups);
+    if (rc != Rc::Ok) {
+        logger_.error(op, "error getting hero matchups", rc2str(rc), {{"hero_id", heroId}});
+        result["error"] = err::DbError;
+        return result;
+    }
+
+    QVariantList items;
+    items.reserve(matchups.size());
+    for (const auto& matchup : matchups) {
+        items.push_back(QVariantMap{
+            {"hero_id", matchup.opponentHeroId},
+            {"hero_name", matchup.opponentHeroName},
+            {"hero_img_path", matchup.opponentHeroImgPath},
+            {"games_played", matchup.games},
+            {"win_percentage", matchup.winRate},
+        });
+    }
+
+    result["matchups"] = items;
+    result["ok"] = true;
+    return result;
+}
+
+QVariantMap Core::getUnplayedHeroMatchups(quint64 heroId) const {
+    const char op[] = "Core::getUnplayedHeroMatchups";
+    QVariantMap result{
+        {"ok", false},
+        {"error", err::None},
+        {"profile_selected", false},
+    };
+
+    const QString profileId = getDefaultProfileId();
+    if (profileId.isEmpty()) {
+        result["matchups"] = QVariantList{};
+        result["ok"] = true;
+        return result;
+    }
+
+    QVector<models::UnplayedHeroMatchup> matchups;
+    const Rc rc = db_.getUnplayedHeroMatchups(heroId, profileId, matchups);
+    if (rc == Rc::ErrNotFound) {
+        result["matchups"] = QVariantList{};
+        result["ok"] = true;
+        return result;
+    }
+    if (rc != Rc::Ok) {
+        logger_.error(
+            op,
+            "error getting unplayed hero matchups",
+            rc2str(rc),
+            {{"hero_id", heroId}, {"profile_id", profileId}}
+        );
+        result["error"] = err::DbError;
+        return result;
+    }
+
+    QVariantList items;
+    items.reserve(matchups.size());
+    for (const auto& matchup : matchups) {
+        items.push_back(QVariantMap{
+            {"hero_id", matchup.opponentHeroId},
+            {"hero_name", matchup.opponentHeroName},
+            {"hero_img_path", matchup.opponentHeroImgPath},
+        });
+    }
+
+    result["matchups"] = items;
+    result["profile_selected"] = true;
+    result["ok"] = true;
+    return result;
+}
+
+QVariantMap Core::getProfileHeroStats(const quint64& id, const QString& gameMode) const {
+    const char op[] = "Core::getHeroStats";
+    QVariantMap result{{"ok", false}, {"error", err::None}};
+
+    QString profileId = getDefaultProfileId();
+
+    models::HeroStats stats;
+    Rc rc = db_.getProfileHeroStats(id, profileId, gameMode, stats);
+    if (rc == Rc::ErrNotFound) {
+        result["error"] = err::NotFound;
+        return result;
+    }
+    if (rc != Rc::Ok) {
+        logger_.error(op, "error getting profile stats", rc2str(rc));
+        result["error"] = err::DbError;
+        return result;
+    }
+
+    QVariantMap statsJson;
+    statsJson["games_played"] = stats.games;
+    statsJson["games_won"] = stats.wins;
+    statsJson["win_percentage"] = stats.games > 0 ? stats.wins * 100.0 / stats.games : 0;
+    statsJson["average_winning_hp"] = stats.averageWinningHp;
+    statsJson["most_played_enemy_id"] = stats.mostPlayedEnemyId;
+    statsJson["first_played_at"] = displayDateFromDb(stats.firstPlayedAt);
+    statsJson["last_played_at"] = displayDateFromDb(stats.lastPlayedAt);
+    
+    result["stats"] = statsJson;
+    result["ok"] = true;
+    return result;
+}
+
 QString Core::getDefaultProfileId() const {
     QSettings settings;
     return settings.value(defaultProfileSettingsKey).toString();
@@ -380,7 +533,7 @@ QVariantMap Core::setDefaultProfileId(const QString& profileId) const {
 
     const QString trimmedId = profileId.trimmed();
     if (trimmedId.isEmpty() || QUuid(trimmedId).isNull()) {
-        lwarn(op) << "invalid profile id: " << profileId;
+        logger_.warning(op, "invalid profile id", {{"profile_id", profileId}});
         result["error"] = err_profile::InvalidId;
         return result;
     }
@@ -389,7 +542,7 @@ QVariantMap Core::setDefaultProfileId(const QString& profileId) const {
     settings.setValue(defaultProfileSettingsKey, trimmedId);
     settings.sync();
     if (settings.status() != QSettings::NoError) {
-        lerr(op) << "can't save default profile";
+        logger_.error(op, "can't save default profile");
         result["error"] = err::SettingsError;
         return result;
     }
@@ -405,13 +558,13 @@ QVariantMap Core::createProfile(const QString& name) const {
 
     const QString trimmedName = name.trimmed();
     if (trimmedName.isEmpty()) {
-        lwarn(op) << "profile name is empty";
+        logger_.warning(op, "profile name is empty");
         result["error"] = err_profile::EmptyName;
         return result;
     }
 
     if (trimmedName.size() > 256) {
-        lwarn(op) << "profile name is long";
+        logger_.warning(op, "profile name is long");
         result["error"] = err_profile::NameTooLong;
         return result;
     }
@@ -441,16 +594,17 @@ QVariantMap Core::deleteProfile(const QString& id) const {
     // TODO: refactor this -> throw error events to frontend using signal
     switch (rc) {
     case Rc::Ok:
-        linfo(op) << "profile with id " << id << " successfully deleted";
+        logger_.info(op, "profile deleted", {{"profile_id", id}});
         result["ok"] = true;
         result["error"] = err::None;
         break;
     case Rc::ErrNotFound:
-        lerr(op) << "error profile not found: " << id;
-        result["error"] = err_profile::NotFound;
+        logger_.error(op, "profile not found", id);
+        result["error"] = err::NotFound;
         break;
     case Rc::ErrReferenced:
-        lwarn(op) << "profile is used in game records: " << id;
+        logger_.warning(op, "profile is used in game records",
+                    {{"profile_id", id}});
         result["error"] = err_profile::HasGameRecords;
         break;
     default:
@@ -466,14 +620,14 @@ QVariantList Core::getGameHistory(const QString& sortBy, quint32 limit, quint32 
 
     constexpr quint32 maxPageSize = 100;
     if (limit == 0 || limit > maxPageSize) {
-        lwarn(op) << "invalid history page size: " << limit;
+        logger_.warning(op, "invalid history page size", {{"limit", limit}});
         return {};
     }
 
     QVector<models::GameRecord> games;
     Rc rc = db_.getGameHistory(games, sortBy, limit, offset);
     if (rc != Rc::Ok) {
-        lerr(op) << "error getting game history: " << rc2str(rc);
+        logger_.error(op, "error getting game history", rc2str(rc));
         return QVariantList{};
     }
 
@@ -521,7 +675,7 @@ QVariantMap Core::createGameRecord(const QVariantMap& game) const {
 
     if (!gameModeSpec(mode, playerCount, teamCount) || participants.size() != playerCount ||
         winningTeam < 1 || winningTeam > teamCount) {
-        lwarn(op) << "invalid game record data";
+        logger_.warning(op, "invalid game record data");
         result["error"] = err_game::InvalidData;
         return result;
     }
@@ -545,27 +699,32 @@ QVariantMap Core::createGameRecord(const QVariantMap& game) const {
 
         // participant validation
         if (participant.position < 1 || participant.position > playerCount) {
-            lwarn(op) << "invalid position in game participant data: " << participant;
+            logger_.warning(op, "invalid participant position",
+                        {{"position", participant.position}, {"profile_id", participant.profileId}});
             result["error"] = err_game::InvalidData;
             return result;
         }
         if (participant.team < 1 || participant.team > teamCount) {
-            lwarn(op) << "invalid team in game participant data: " << participant;
+            logger_.warning(op, "invalid participant team",
+                        {{"team", participant.team}, {"profile_id", participant.profileId}});
             result["error"] = err_game::InvalidData;
             return result;
         }
         if (participant.profileId.isEmpty() || QUuid(participant.profileId).isNull()) {
-            lwarn(op) << "invalid profileId in game participant data: " << participant;
+            logger_.warning(op, "invalid participant profile id",
+                        {{"profile_id", participant.profileId}});
             result["error"] = err_game::InvalidData;
             return result;
         }
         if (positions.contains(participant.position)) {
-            lwarn(op) << "duplicate of position in game participant data: " << participant;
+            logger_.warning(op, "duplicate participant position",
+                        {{"position", participant.position}});
             result["error"] = err_game::InvalidData;
             return result;
         }
         if (profileIds.contains(participant.profileId)) {
-            lwarn(op) << "duplicate of profileId in game participant data: " << participant;
+            logger_.warning(op, "duplicate participant profile id",
+                        {{"profile_id", participant.profileId}});
             result["error"] = err_game::InvalidData;
             return result;
         }
@@ -579,7 +738,8 @@ QVariantMap Core::createGameRecord(const QVariantMap& game) const {
     const int expectedTeamSize = playerCount / teamCount;
     for (int team = 1; team <= teamCount; ++team) {
         if (teamSizes[team] != expectedTeamSize) {
-            lwarn(op) << "invalid team size for mode " << mode;
+            logger_.warning(op, "invalid team size",
+                        {{"game_mode", mode}, {"team", team}, {"team_size", teamSizes[team]}});
             result["error"] = err_game::InvalidData;
             return result;
         }
@@ -589,7 +749,7 @@ QVariantMap Core::createGameRecord(const QVariantMap& game) const {
     if (!playedAt.isEmpty()) {
         input.playedAt = dbDateFromDisplay(playedAt);
         if (input.playedAt.isEmpty()) {
-            lwarn(op) << "invalid played_at date: " << playedAt;
+            logger_.warning(op, "invalid played date", {{"played_at", playedAt}});
             result["error"] = err_game::InvalidData;
             return result;
         }
@@ -597,7 +757,7 @@ QVariantMap Core::createGameRecord(const QVariantMap& game) const {
 
     Rc rc = db_.createGameRecord(input);
     if (rc != Rc::Ok) {
-        lerr(op) << "error creating game record: " << rc2str(rc);
+        logger_.error(op, "error creating game record", rc2str(rc));
         result["error"] = err::DbError;
         return result;
     }
@@ -614,7 +774,7 @@ QVariantMap Core::deleteGameRecord(const QString& id) const {
 
     const QString trimmedId = id.trimmed();
     if (trimmedId.isEmpty()) {
-        lwarn(op) << "game record id is empty";
+        logger_.warning(op, "game record id is empty");
         result["error"] = err_game::InvalidData;
         return result;
     }
@@ -626,8 +786,8 @@ QVariantMap Core::deleteGameRecord(const QString& id) const {
         result["error"] = err::None;
         break;
     case Rc::ErrNotFound:
-        lerr(op) << "game record not found: " << trimmedId;
-        result["error"] = err_game::NotFound;
+        logger_.error(op, "game record not found", trimmedId);
+        result["error"] = err::NotFound;
         break;
     default:
         result["error"] = err::DbError;
@@ -637,61 +797,41 @@ QVariantMap Core::deleteGameRecord(const QString& id) const {
     return result;
 }
 
-QString Core::getImage(const QString& path) const {
-    const char op[] = "Core::getImage";
-    QString sourceUrl;
-    Rc rc = provider_->get(path, sourceUrl);
-    if (rc != Rc::Ok) {
-        lerr("Core::requestImage") << "error getting image: " << path << " rc=" << rc2str(rc);
-        // TODO: throw error event to fronted using signal
-        return ""; // TODO: add placeholder image
-    }
-    linfo(op) << "image got successfully url=" << sourceUrl;
-    return sourceUrl;
-}
-
 void Core::requestImage(const QString& path) {
+    const char* op = "Core::requestImage";
+    
     if (path.isEmpty()) {
         return;
     }
-
     if (pendingImages_.contains(path)) {
         return;
     }
     pendingImages_.insert(path);
 
     QPointer<Core> self(this);
-    FileProvider* provider = provider_;
+    provider_->get(
+        path,
+        [op, path, self](const QString& sourceUrl, Rc rc, FileSource source) {
+            if (!self) {
+                return;
+            }
+            self->pendingImages_.remove(path);
+            if (rc != Rc::Ok) {
+                self->logger_.error(op, "error getting image", rc2str(rc),
+                                    {{"source", filesrc2str(source)},
+                                     {"url", sourceUrl},
+                                     {"path", path}});
+                emit self->imageFailed(path);
+                return;
+            }
 
-    imageThreadPool_.start([self, provider, path]() {
-        QString sourceUrl;
-        Rc rc = provider->get(path, sourceUrl);
-
-        if (!self) {
-            return;
+            self->logger_.info(op, "image received",
+                              {{"source", filesrc2str(source)},
+                               {"url", sourceUrl},
+                               {"path", path}});
+            emit self->imageReady(path, sourceUrl);
         }
-
-        QMetaObject::invokeMethod(
-            self,
-            [self, path, sourceUrl, rc]() {
-                if (!self) {
-                    return;
-                }
-
-                self->pendingImages_.remove(path);
-
-                if (rc != Rc::Ok) {
-                    lerr("Core::requestImage")
-                        << "error getting image: " << path << " rc=" << rc2str(rc);
-                    emit self->imageFailed(path);
-                    return;
-                }
-
-                linfo("Core::requestImage") << "image got successfully url=" << sourceUrl;
-                emit self->imageReady(path, sourceUrl);
-            },
-            Qt::QueuedConnection);
-    });
+    );
 }
 
 QVariantMap Core::exportDb(const QUrl& to) const {
@@ -703,7 +843,7 @@ QVariantMap Core::exportDb(const QUrl& to) const {
     } else {
         result["ok"] = false;
         result["error"] = rc2str(rc);
-        lerr(op) << result["error"];
+        logger_.error(op, "database export failed", result["error"].toString());
     }
     return result;
 }
@@ -726,7 +866,8 @@ QVariantMap Core::saveRandomizerConfig(const QVariantList& heroes,
     const QString storagePath =
         QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
     if (storagePath.isEmpty() || !QDir().mkpath(storagePath)) {
-        lerr(op) << "can't create randomizer config directory: " << storagePath;
+        logger_.error(op, "can't create randomizer config directory",
+                    {{"path", storagePath}});
         result["error"] = err_randomizer::StorageError;
         return result;
     }
@@ -734,7 +875,7 @@ QVariantMap Core::saveRandomizerConfig(const QVariantList& heroes,
     QJsonObject heroStates;
     QJsonObject mapStates;
     if (!enabledItemsToJson(heroes, heroStates) || !enabledItemsToJson(maps, mapStates)) {
-        lwarn(op) << "invalid randomizer config data";
+        logger_.warning(op, "invalid randomizer config data");
         result["error"] = err_randomizer::InvalidData;
         return result;
     }
@@ -746,14 +887,14 @@ QVariantMap Core::saveRandomizerConfig(const QVariantList& heroes,
 
     QSaveFile file(randomizerConfigPath());
     if (!file.open(QIODevice::WriteOnly)) {
-        lerr(op) << "can't open randomizer config: " << file.errorString();
+        logger_.error(op, "can't open randomizer config", file.errorString());
         result["error"] = err_randomizer::WriteError;
         return result;
     }
 
     const QByteArray json = QJsonDocument(data).toJson(QJsonDocument::Indented);
     if (file.write(json) != json.size() || !file.commit()) {
-        lerr(op) << "can't write randomizer config: " << file.errorString();
+        logger_.error(op, "can't write randomizer config", file.errorString());
         result["error"] = err_randomizer::WriteError;
         return result;
     }
@@ -768,7 +909,7 @@ QVariantMap Core::loadRandomizerConfig() const {
 
     const QString configPath = randomizerConfigPath();
     if (configPath.isEmpty()) {
-        lerr(op) << "randomizer config directory is unavailable";
+        logger_.error(op, "randomizer config directory is unavailable");
         result["ok"] = false;
         result["error"] = err_randomizer::StorageError;
         return result;
@@ -779,7 +920,7 @@ QVariantMap Core::loadRandomizerConfig() const {
         return result;
     }
     if (!file.open(QIODevice::ReadOnly)) {
-        lerr(op) << "can't open randomizer config: " << file.errorString();
+        logger_.error(op, "can't open randomizer config", file.errorString());
         result["ok"] = false;
         result["error"] = err_randomizer::ReadError;
         return result;
@@ -788,7 +929,7 @@ QVariantMap Core::loadRandomizerConfig() const {
     QJsonParseError parseError;
     const QJsonDocument document = QJsonDocument::fromJson(file.readAll(), &parseError);
     if (parseError.error != QJsonParseError::NoError || !document.isObject()) {
-        lerr(op) << "invalid randomizer config: " << parseError.errorString();
+        logger_.error(op, "invalid randomizer config", parseError.errorString());
         result["ok"] = false;
         result["error"] = err_randomizer::InvalidConfig;
         return result;
@@ -800,7 +941,7 @@ QVariantMap Core::loadRandomizerConfig() const {
     if (data.value("version").toInt() != 1 || !data.value("heroes").isObject() ||
         !data.value("maps").isObject() || !isEnabledItemsJson(heroStates) ||
         !isEnabledItemsJson(mapStates)) {
-        lerr(op) << "unsupported randomizer config structure";
+        logger_.error(op, "unsupported randomizer config structure");
         result["ok"] = false;
         result["error"] = err_randomizer::InvalidConfig;
         return result;

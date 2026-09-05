@@ -51,19 +51,19 @@ bool KeepAwakeHelper::isKeepScreenOn() const {
 void KeepAwakeHelper::enable() const {
     const char* op = "KeepAwakeHelper::enable";
     if (isKeepScreenOn()) {
-        lwarn(op) << "KeepAwake already enabled";
+        logger_.warning(op, "KeepAwake already enabled");
         return;
     }
     set(true);
-    linfo(op) << "KeepAwake successfully enabled";
+    logger_.info(op, "KeepAwake successfully enabled");
 }
 
 void KeepAwakeHelper::disable() const {
     const char* op = "KeepAwakeHelper::disable";
     if (!isKeepScreenOn()) {
-        lwarn(op) << "KeepAwake already disabled";
+        logger_.warning(op, "KeepAwake already disabled");
         return;
     }
     set(false);
-    linfo(op) << "KeepAwake successfully disabled";
+    logger_.info(op, "KeepAwake successfully disabled");
 }

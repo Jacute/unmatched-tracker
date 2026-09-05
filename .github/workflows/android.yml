@@ -48,6 +48,13 @@ jobs:
           qt-arch: ${{ env.QT_ARCH }}
           ndk-version: ${{ env.NDK_VERSION }}
 
+      - name: Set up OpenSSL for Android
+        uses: ./.github/actions/setup-openssl
+        with:
+          android-api: ${{ env.ANDROID_MIN_SDK_VERSION }}
+          android-abi: ${{ env.ANDROID_ABI }}
+          ndk-version: ${{ env.NDK_VERSION }}
+
       - name: Configure debug build
         env:
           API_URL: ${{ vars.API_URL }}
@@ -111,6 +118,13 @@ jobs:
           qt-arch: ${{ env.QT_ARCH }}
           ndk-version: ${{ env.NDK_VERSION }}
 
+      - name: Set up OpenSSL for Android
+        uses: ./.github/actions/setup-openssl
+        with:
+          android-api: ${{ env.ANDROID_MIN_SDK_VERSION }}
+          android-abi: ${{ env.ANDROID_ABI }}
+          ndk-version: ${{ env.NDK_VERSION }}
+
       - name: Restore signing keystore
         env:
           KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -147,10 +161,9 @@ jobs:
             -DPACKAGE_NAME="$PACKAGE_NAME" \
             -DBUILD_COMMIT_HASH="$GITHUB_SHA" \
             -DAPI_URL="$API_URL" \
-            -DQT_ANDROID_SIGN_APK=ON \
-            -DQT_ANDROID_SIGN_AAB=ON
+            -DQT_ANDROID_SIGN_APK=ON
 
-      - name: Build signed APK and AAB
+      - name: Build signed APK
         env:
           QT_ANDROID_KEYSTORE_PATH: ${{ runner.temp }}/upload-key.jks
           QT_ANDROID_KEYSTORE_ALIAS: ${{ vars.ANDROID_KEYSTORE_ALIAS }}
@@ -161,17 +174,13 @@ jobs:
             --target apk \
             --parallel
 
-          cmake --build build-release \
-            --target aab \
-            --parallel
-
       - name: Collect release packages
         run: |
           mkdir -p dist
 
           find build-release/android-build/build/outputs \
             -type f \
-            \( -name "*.apk" -o -name "*.aab" \) \
+            \( -name "*.apk" \) \
             -print \
             -exec cp {} dist/ \;
 
@@ -183,7 +192,6 @@ jobs:
           name: unmatched-tracker-${{ github.ref_name }}-arm64-v8a
           path: |
             dist/*.apk
-            dist/*.aab
           if-no-files-found: error
           retention-days: 30
 
@@ -194,7 +202,6 @@ jobs:
         run: |
           gh release create "$GITHUB_REF_NAME" \
             dist/*.apk \
-            dist/*.aab \
             --title "$GITHUB_REF_NAME" \
             --generate-notes \
             --verify-tag

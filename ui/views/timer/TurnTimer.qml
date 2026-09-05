@@ -129,7 +129,7 @@ Rectangle {
             if (Application.state == Qt.ApplicationHidden ||
                 Application.state == Qt.ApplicationSuspended
             ) {
-                console.log("App closed. Stop timer.")
+                logger.debug("TurnTimer", "app closed. stop timer", {"source": "ui"})
                 root.pause()
             }
         }

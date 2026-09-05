@@ -50,6 +50,7 @@ Rectangle {
     
 
         onPaint: {
+            logger.debug("RandomWheel", "redraw", {"source": "ui"})
             Wheel.draw(canvas, root);
         }
 
@@ -111,13 +112,22 @@ Rectangle {
             if ((rotateSpeed > 0 && rotateSpeed < 50) ||
                 (rotateSpeed < 0 && rotateSpeed > -50)
             ) {
-                console.debug(`Low speed: ${rotateSpeed.toFixed(2)}`)
+                logger.debug("RandomWheel", `low speed: ${rotateSpeed.toFixed(2)}`, {"source": "ui"})
                 // check for low speed swipe
                 return    
             }
 
             root.rotateSpeed = rotateSpeed
-            console.debug(`Speed: ${root.rotateSpeed.toFixed(2)} px/s, distance: ${distance.toFixed(2)} px, time: ${(deltaTime*1000).toFixed(0)} ms`)
+            logger.debug(
+                "RandomWheel",
+                "wheel spin",
+                {
+                    "source": "ui",
+                    "speed": root.rotateSpeed.toFixed(2),
+                    "distance": distance.toFixed(2),
+                    "time": (deltaTime*1000).toFixed(0),
+                },
+            )
             wheelAnimation.running = true
         }
     }
@@ -167,7 +177,6 @@ Rectangle {
             }
 
             root.requestedImagePaths[path] = false
-            console.error("[RandomWheel] image " + path + " not loaded")
         }
     }
 

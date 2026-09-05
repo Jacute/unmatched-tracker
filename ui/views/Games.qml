@@ -123,7 +123,7 @@ Rectangle {
             ColumnLayout {
                 id: contentColumn
                 width: parent.width
-                spacing: root.fieldSpacing
+                spacing: Common.fieldSpacing
 
                 GameModeComboBox {
                     id: gameMode
@@ -147,7 +147,7 @@ Rectangle {
 
                 RowLayout {
                     Layout.fillWidth: true
-                    spacing: root.fieldSpacing
+                    spacing: Common.fieldSpacing
 
                     FieldBox {
                         Layout.fillWidth: true
@@ -175,7 +175,7 @@ Rectangle {
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.preferredHeight: root.controlHeight
-                    spacing: root.fieldSpacing
+                    spacing: Common.fieldSpacing
 
                     FieldBox {
                         Layout.fillWidth: true
@@ -237,7 +237,7 @@ Rectangle {
             id: gameHistory
             Layout.fillWidth: true
             Layout.fillHeight: true
-            fieldSpacing: root.fieldSpacing
+            fieldSpacing: Common.fieldSpacing
             controlHeight: root.controlHeight
             onLoadingChanged: {
                 if (!loading && !root.formExpansionInitialized) {

@@ -2,6 +2,7 @@
 
 #include "../models.h"
 #include "../rc.h"
+#include "../log.h"
 
 #include <QObject>
 #include <QSqlDatabase>
@@ -9,7 +10,7 @@
 
 class Database : public QObject {
   public:
-    Database(const QString& dbPath, const QString& dbName);
+    Database(const Logger& logger, const QString& dbPath, const QString& dbName);
 
     Rc open();
     void close();
@@ -42,15 +43,29 @@ class Database : public QObject {
     // @return Return code
     Rc getCardsByHeroId(quint64 heroId, QVector<models::Card>& cards);
     Rc getProfiles(QVector<models::PlayerProfile>& profiles);
-    Rc getProfileStats(const QString& profileId,
-                       const QString& gameMode,
-                       models::ProfileStats& stats);
+    Rc getProfileStats(
+        const QString& profileId,
+        const QString& gameMode,
+        models::ProfileStats& stats
+    );
+    Rc getProfileHeroStats(const quint64& id, const QString& profileId, const QString& gameMode, models::HeroStats& stats);
+    Rc getHeroGamesAndWins(quint64 heroId, quint64& games, quint64& wins);
+    Rc getHeroWinRate(quint64 heroId, double& winRate);
+    Rc getHeroAverageWinningHp(quint64 heroId, QVariant& averageHp);
+    Rc getHeroMatchups(quint64 heroId, QVector<models::HeroMatchup>& matchups);
+    Rc getUnplayedHeroMatchups(
+        quint64 heroId,
+        const QString& profileId,
+        QVector<models::UnplayedHeroMatchup>& matchups
+    );
     Rc createProfile(const QString& name);
     Rc deleteProfile(const QString& id);
-    Rc getGameHistory(QVector<models::GameRecord>& games,
-                      const QString& sortBy,
-                      quint32 limit,
-                      quint32 offset);
+    Rc getGameHistory(
+        QVector<models::GameRecord>& games,
+        const QString& sortBy,
+        quint32 limit,
+        quint32 offset
+    );
     Rc createGameRecord(const models::GameRecordInput& game);
     Rc deleteGameRecord(const QString& id);
 
@@ -62,11 +77,12 @@ class Database : public QObject {
     QSqlDatabase db;
     QString dbPath_;
     QString dbName_;
+    const Logger& logger_;
 };
 
 class ScopedDatabaseClose final {
   public:
-    explicit ScopedDatabaseClose(Database& db);
+    explicit ScopedDatabaseClose(const Logger& logger, Database& db);
     ~ScopedDatabaseClose();
 
     ScopedDatabaseClose(const ScopedDatabaseClose&) = delete;
@@ -76,4 +92,5 @@ class ScopedDatabaseClose final {
 
   private:
     Database& db_;
+    const Logger& logger_;
 };
