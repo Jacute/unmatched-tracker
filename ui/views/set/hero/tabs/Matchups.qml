@@ -4,23 +4,19 @@ import QtQuick.Layouts
 
 import Tracker
 import "../../../../components/info" as Info
+import "../../../../components" as Components
 
 Item {
     required property int heroId
     property int activeMode: 0
     property bool defaultProfileSelected: true
+    property var allMatchups: []
+    property var allUnplayedMatchups: []
 
     id: root
 
-    ListModel {
-        id: matchupsModel
-    }
-
-    ListModel {
-        id: unplayedMatchupsModel
-    }
-
     RowLayout {
+        id: modeSelector
         anchors {
             top: parent.top
             left: parent.left
@@ -28,10 +24,10 @@ Item {
             leftMargin: Common.pageMargin
         }
         width: Math.min(280, parent.width - Common.pageMargin * 2 - 34)
-        height: 30
-        spacing: 0
+        height: root.height * 0.08
+        spacing: Common.fieldSpacing
 
-        Btn {
+        Components.Btn {
             Layout.fillWidth: true
             Layout.fillHeight: true
             text: qsTr("Win rates")
@@ -43,7 +39,7 @@ Item {
             onClicked: root.activeMode = 0
         }
 
-        Btn {
+        Components.Btn {
             Layout.fillWidth: true
             Layout.fillHeight: true
             text: qsTr("Unplayed")
@@ -56,14 +52,47 @@ Item {
         }
     }
 
+    Components.FieldBox {
+        id: searchBox
+        anchors {
+            top: modeSelector.bottom
+            left: parent.left
+            right: parent.right
+            topMargin: Common.fieldSpacing
+            leftMargin: Common.pageMargin
+            rightMargin: Common.pageMargin
+        }
+        height: searchInput.font.pixelSize * 4
+        label: qsTr("Search hero")
+
+        TextField {
+            id: searchInput
+            anchors.fill: parent
+            color: Common.textColor
+            selectionColor: Common.accent
+            selectedTextColor: Common.primary
+            font.pixelSize: Common.defaultFontSize
+            verticalAlignment: TextInput.AlignVCenter
+            inputMethodHints: Qt.ImhNoPredictiveText
+            background: null
+            padding: 0
+            leftPadding: 0
+
+            onTextChanged: root.applyFilter()
+        }
+    }
+
     ListView {
         id: matchupsList
         anchors {
-            fill: parent
+            top: searchBox.bottom
+            left: parent.left
+            right: parent.right
+            bottom: parent.bottom
             leftMargin: Common.pageMargin
             rightMargin: Common.pageMargin
             bottomMargin: Common.pageMargin
-            topMargin: Common.pageMargin + 38
+            topMargin: Common.fieldSpacing
         }
         spacing: Common.fieldSpacing
         clip: true
@@ -115,7 +144,7 @@ Item {
                     color: Common.imagePlaceholder
                     clip: true
 
-                    LoadImage {
+                    Components.LoadImage {
                         anchors.fill: parent
                         imgPath: model.hero_img_path || ""
                         fillMode: Image.PreserveAspectCrop
@@ -199,6 +228,14 @@ Item {
                      : qsTr("Unplayed matchups are determined from the default profile's 1 vs 1 game history")
     }
 
+    ListModel {
+        id: matchupsModel
+    }
+
+    ListModel {
+        id: unplayedMatchupsModel
+    }
+
     Component.onCompleted: {
         loadData()
         loadUnplayedData()
@@ -219,10 +256,8 @@ Item {
             return
         }
 
-        matchupsModel.clear()
-        for (let i = 0; i < res.matchups.length; ++i) {
-            matchupsModel.append(res.matchups[i])
-        }
+        root.allMatchups = res.matchups
+        root.applyFilter()
         logger.debug(
             "Matchups",
             "got hero matchups",
@@ -250,10 +285,8 @@ Item {
         }
 
         root.defaultProfileSelected = res.profile_selected
-        unplayedMatchupsModel.clear()
-        for (let i = 0; i < res.matchups.length; ++i) {
-            unplayedMatchupsModel.append(res.matchups[i])
-        }
+        root.allUnplayedMatchups = res.matchups
+        root.applyFilter()
         logger.debug(
             "Matchups",
             "got unplayed hero matchups",
@@ -266,13 +299,33 @@ Item {
     }
 
     function emptyStateText() {
+        if (root.activeMode === 1 && !root.defaultProfileSelected) {
+            return qsTr("Select a default profile in Settings")
+        }
+        if (searchInput.text.trim().length > 0) {
+            return qsTr("No heroes found")
+        }
         if (root.activeMode === 0) {
             return qsTr("No matchup data yet")
         }
-        if (!root.defaultProfileSelected) {
-            return qsTr("Select a default profile in Settings")
-        }
         return qsTr("All matchups have been played")
+    }
+
+    function applyFilter() {
+        const query = searchInput.text.trim().toLocaleLowerCase()
+        root.filterModel(root.allMatchups, matchupsModel, query)
+        root.filterModel(root.allUnplayedMatchups, unplayedMatchupsModel, query)
+    }
+
+    function filterModel(source, target, query) {
+        target.clear()
+        for (let i = 0; i < source.length; ++i) {
+            const heroName = String(source[i].hero_name)
+            if (query.length === 0
+                    || heroName.toLocaleLowerCase().includes(query)) {
+                target.append(source[i])
+            }
+        }
     }
 
     function winRateColor(rate) {
