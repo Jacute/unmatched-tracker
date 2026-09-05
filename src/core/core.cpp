@@ -441,6 +441,55 @@ QVariantMap Core::getHeroMatchups(quint64 heroId) const {
     return result;
 }
 
+QVariantMap Core::getUnplayedHeroMatchups(quint64 heroId) const {
+    const char op[] = "Core::getUnplayedHeroMatchups";
+    QVariantMap result{
+        {"ok", false},
+        {"error", err::None},
+        {"profile_selected", false},
+    };
+
+    const QString profileId = getDefaultProfileId();
+    if (profileId.isEmpty()) {
+        result["matchups"] = QVariantList{};
+        result["ok"] = true;
+        return result;
+    }
+
+    QVector<models::UnplayedHeroMatchup> matchups;
+    const Rc rc = db_.getUnplayedHeroMatchups(heroId, profileId, matchups);
+    if (rc == Rc::ErrNotFound) {
+        result["matchups"] = QVariantList{};
+        result["ok"] = true;
+        return result;
+    }
+    if (rc != Rc::Ok) {
+        logger_.error(
+            op,
+            "error getting unplayed hero matchups",
+            rc2str(rc),
+            {{"hero_id", heroId}, {"profile_id", profileId}}
+        );
+        result["error"] = err::DbError;
+        return result;
+    }
+
+    QVariantList items;
+    items.reserve(matchups.size());
+    for (const auto& matchup : matchups) {
+        items.push_back(QVariantMap{
+            {"hero_id", matchup.opponentHeroId},
+            {"hero_name", matchup.opponentHeroName},
+            {"hero_img_path", matchup.opponentHeroImgPath},
+        });
+    }
+
+    result["matchups"] = items;
+    result["profile_selected"] = true;
+    result["ok"] = true;
+    return result;
+}
+
 QVariantMap Core::getProfileHeroStats(const quint64& id, const QString& gameMode) const {
     const char op[] = "Core::getHeroStats";
     QVariantMap result{{"ok", false}, {"error", err::None}};

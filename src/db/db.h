@@ -53,6 +53,11 @@ class Database : public QObject {
     Rc getHeroWinRate(quint64 heroId, double& winRate);
     Rc getHeroAverageWinningHp(quint64 heroId, QVariant& averageHp);
     Rc getHeroMatchups(quint64 heroId, QVector<models::HeroMatchup>& matchups);
+    Rc getUnplayedHeroMatchups(
+        quint64 heroId,
+        const QString& profileId,
+        QVector<models::UnplayedHeroMatchup>& matchups
+    );
     Rc createProfile(const QString& name);
     Rc deleteProfile(const QString& id);
     Rc getGameHistory(

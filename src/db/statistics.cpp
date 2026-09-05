@@ -121,6 +121,64 @@ Rc Database::getHeroMatchups(quint64 heroId, QVector<models::HeroMatchup>& match
     return Rc::Ok;
 }
 
+Rc Database::getUnplayedHeroMatchups(
+    quint64 heroId,
+    const QString& profileId,
+    QVector<models::UnplayedHeroMatchup>& matchups
+) {
+    const char op[] = "Database::getUnplayedHeroMatchups";
+
+    QSqlQuery profileQuery(db);
+    if (!profileQuery.prepare("SELECT 1 FROM player_profiles WHERE id = :profile_id")) {
+        logger_.error(op, "profile sql prepare error", {{"error", profileQuery.lastError().text()}});
+        return Rc::ErrPrepareQuery;
+    }
+    profileQuery.bindValue(":profile_id", profileId);
+    if (!profileQuery.exec()) {
+        logger_.error(op, "profile sql exec error", {{"error", profileQuery.lastError().text()}});
+        return Rc::ErrExecQuery;
+    }
+    if (!profileQuery.next()) {
+        return Rc::ErrNotFound;
+    }
+
+    QSqlQuery query(db);
+    if (!query.prepare(
+            "SELECT opponent_hero.id, opponent_hero.name, opponent_hero.img_path "
+            "FROM heroes opponent_hero "
+            "WHERE opponent_hero.id != :hero_id "
+            "AND NOT EXISTS ("
+            "SELECT 1 FROM game_record_participants hero "
+            "JOIN game_record_participants opponent "
+            "ON opponent.game_id = hero.game_id AND opponent.team != hero.team "
+            "JOIN game_records gr ON gr.id = hero.game_id "
+            "WHERE hero.profile_id = :profile_id "
+            "AND hero.hero_id = :hero_id "
+            "AND opponent.hero_id = opponent_hero.id "
+            "AND gr.mode = '1v1'"
+            ") "
+            "ORDER BY opponent_hero.name COLLATE NOCASE")) {
+        logger_.error(op, "unplayed matchups sql prepare error", {{"error", query.lastError().text()}});
+        return Rc::ErrPrepareQuery;
+    }
+
+    query.bindValue(":hero_id", heroId);
+    query.bindValue(":profile_id", profileId);
+    if (!query.exec()) {
+        logger_.error(op, "unplayed matchups sql exec error", {{"error", query.lastError().text()}});
+        return Rc::ErrExecQuery;
+    }
+
+    while (query.next()) {
+        models::UnplayedHeroMatchup matchup;
+        matchup.opponentHeroId = query.value(0).toULongLong();
+        matchup.opponentHeroName = query.value(1).toString();
+        matchup.opponentHeroImgPath = query.value(2).toString();
+        matchups.push_back(std::move(matchup));
+    }
+    return Rc::Ok;
+}
+
 Rc Database::getProfileStats(const QString& profileId,
                              const QString& gameMode,
                              models::ProfileStats& stats) {

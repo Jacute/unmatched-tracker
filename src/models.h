@@ -99,6 +99,12 @@ struct HeroMatchup {
     double winRate{};
 };
 
+struct UnplayedHeroMatchup {
+    quint64 opponentHeroId;
+    QString opponentHeroName;
+    QString opponentHeroImgPath;
+};
+
 struct GameRecordParticipantInput {
     quint8 position;
     quint8 team;
@@ -106,16 +112,6 @@ struct GameRecordParticipantInput {
     quint64 heroId;
     QVariant heroRemainingHp;
 };
-
-inline QDebug operator<<(QDebug debug, const GameRecordParticipantInput& participant) {
-    QDebugStateSaver saver(debug);
-    debug.nospace() << "GameRecordParticipantInput(position="
-                    << static_cast<quint32>(participant.position)
-                    << ", team=" << static_cast<quint32>(participant.team)
-                    << ", profileId=" << participant.profileId << ", heroId=" << participant.heroId
-                    << ", heroRemainingHp=" << participant.heroRemainingHp << ')';
-    return debug;
-}
 
 struct GameRecordParticipant {
     quint8 position;
