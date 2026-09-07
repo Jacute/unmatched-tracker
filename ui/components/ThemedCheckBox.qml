@@ -73,7 +73,13 @@ CheckBox {
 
         Info.Tooltip {
             id: infoIcon
+            visible: root.description.length != 0
             description: root.description
+
+            anchors {
+                right: parent.right
+                verticalCenter: parent.verticalCenter
+            }
         }
     }
 }
