@@ -30,20 +30,23 @@ The project is in an early stage of development.
 
 ## Features
 
-- Browse sets, heroes, abilities, sidekicks, and cards.
-- Randomize heroes and maps with filters for selected sets.
-- Save a randomized matchup directly to the game history form.
-- Create local player profiles and select a default profile for stats.
-- Record games in `1v1`, `1v1v1`, `1v1v1v1`, and `2v2` modes.
-- Store game records of played matchups.
-- View profile statistics filtered by game mode.
+- Sets, heroes, abilities, sidekicks, and cards
+- Create local player profiles and select a default profile for stats
+- Record games in `1v1`, `1v1v1`, `1v1v1v1`, and `2v2` modes
+- Store game records of played matchups
+- Statistics for a single profile or for all of them
+- Matchups with a probability of victory
+- Randomizer with filters
+- Tunable timer
 
 ## Screenshots
 
 
 <p align="center">
-  <img src="docs/overview.png" width="45%" alt="Первое изображение">
-  <img src="docs/hero.png" width="45%" alt="Второе изображение">
+  <img src="docs/overview.png" width="45%" alt="img1">
+  <img src="docs/hero.png" width="45%" alt="img2">
+  <img src="docs/matchups.png" width="45%" alt="img3">
+  <img src="docs/timer.png" width="45%" alt="img4">
 </p>
 
 ## Installation
