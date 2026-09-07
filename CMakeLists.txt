@@ -7,7 +7,7 @@ if(NOT DEFINED ANDROID_PLATFORM)
         "Android API level used to compile native code")
 endif()
 
-project(unmatched-tracker VERSION 0.2.0 LANGUAGES CXX)
+project(unmatched-tracker VERSION 0.3.0 LANGUAGES CXX)
 
 set(TARGET tracker)
 set(SRC_DIR src)
